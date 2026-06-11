@@ -24,8 +24,6 @@ namespace DroneConfig {
     inline constexpr float Speed = 300.f; // horizontal pixels per second
     inline constexpr float FixedY = 80.f;  // locked vertical position
     inline constexpr float StartBattery = 100.f; // battery starts full (percent)
-    inline constexpr float BatteryDrainRate = 1.f;   // battery percent lost per second
-    inline constexpr int   StartAmmo = 20;    // bombs at stage start
 }
 
 namespace EnemyConfig {

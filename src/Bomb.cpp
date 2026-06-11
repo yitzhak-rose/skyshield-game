@@ -13,7 +13,3 @@ void Bomb::update(float dt)
         destroy();
 }
 
-namespace Bullet
-{
-    inline constexpr float Speed = 250.f; // horizontal pixels per second
-}

@@ -5,7 +5,7 @@
 // «abstract» base for all enemies. Holds the shared AI; subclasses set the params.
 class Enemy : public MovingObject {
 public:
-
+    
     // Constructs an enemy with a texture and a starting position.
     Enemy(const sf::Texture& texture, sf::Vector2f position);
 

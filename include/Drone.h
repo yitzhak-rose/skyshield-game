@@ -30,6 +30,9 @@ public:
     // Sets how fast the battery drains per second.
     void setDrainRate(float rate) { m_drainRate = rate; }
 
+    // Sets the ammo count.
+    void setAmmo(int ammo) { m_ammo = ammo; }
+
     // Returns the current battery level as a percentage (0 to 100).
     float getBatteryPercent() const { return m_battery; }
 
@@ -38,6 +41,6 @@ public:
 
 private:
     float m_battery = DroneConfig::StartBattery;
-    float m_drainRate = DroneConfig::BatteryDrainRate;
-    int m_ammo = DroneConfig::StartAmmo;
+    float m_drainRate = 0.f;
+    int m_ammo = 0;
 };
