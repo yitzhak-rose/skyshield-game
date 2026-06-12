@@ -29,6 +29,9 @@ public:
     // Returns true while the object is still in play.
     bool isAlive() const { return m_alive; }
 
+	// Returns true if the object has been dead.
+    bool isDead() const { return !m_alive; }
+
     // Marks the object as dead.
     void destroy() { m_alive = false; }
 

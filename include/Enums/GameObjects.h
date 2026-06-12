@@ -2,8 +2,10 @@
 
 enum class GameObjects {
     Background,
-    BackgroundSmoke,
+    Battery,
     Bomb,
+    Bullet,
+    Coin,
     CommandCar,
     Drone,
     Enemy,
