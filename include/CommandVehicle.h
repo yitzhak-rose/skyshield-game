@@ -10,7 +10,7 @@ public:
     /// @brief Constructs the vehicle with a texture and a starting position.
     CommandVehicle(const sf::Texture& texture, sf::Vector2f position);
 
-    /// @brief Updates the vehicle for one frame (smoke and beacon animation).
+    /// @brief Updates the vehicle for one frame (loops beacon frames, or burning frames if critical).
     void update(float dt) override;
 
     /// @brief Reduces the armor by one hit's worth of damage.
@@ -20,8 +20,11 @@ public:
     float getArmorPercent() const { return m_armor; }
 
 private:
-    /// @brief Cycles the vehicle's smoke and flashing-beacon frames.
+    /// @brief Provides the frame geometry of the vehicle sheet.
     Animation m_animation;
+
+    /// @brief Time accumulated to drive the frame loop.
+    float m_frameTimer = 0.f;
 
     /// @brief Remaining armor as a percentage.
     float m_armor = VehicleConfig::StartArmor;

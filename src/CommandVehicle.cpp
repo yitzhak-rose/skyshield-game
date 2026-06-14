@@ -10,10 +10,19 @@ CommandVehicle::CommandVehicle(const sf::Texture& texture, sf::Vector2f position
     setupSprite(m_animation.getFrameRect(), VehicleConfig::Scale);
 }
 
-// Advances the smoke and beacon animation; the vehicle never moves.
+// Loops frames 0..3 (flashing beacon) while healthy, or 4..5 (burning) when critical.
 void CommandVehicle::update(float dt) {
-    m_animation.update(dt);
-    m_sprite.setTextureRect(m_animation.getFrameRect());
+    m_frameTimer += dt;
+    int step = static_cast<int>(m_frameTimer / VehicleConfig::FrameDuration);
+
+    int frame;
+    if (m_armor >= VehicleConfig::CriticalArmor)
+        frame = step % VehicleConfig::NormalFrames;
+    else {
+        int burningCount = VehicleConfig::FrameCount - VehicleConfig::NormalFrames;
+        frame = VehicleConfig::NormalFrames + step % burningCount;
+    }
+    m_sprite.setTextureRect(m_animation.frameRect(frame));
 }
 
 void CommandVehicle::takeDamage() {

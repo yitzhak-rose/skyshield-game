@@ -17,6 +17,9 @@ public:
     /// @brief Receives the vehicle's x-position from the Level.
     void setVehicleX(float vehicleX) { m_vehicleX = vehicleX; }
 
+    /// @brief Receives the vehicle's half-width so ranges respect its body, not its center.
+    void setVehicleHalfWidth(float halfWidth) { m_vehicleHalfWidth = halfWidth; }
+
     /// @brief Receives the drone's x-position from the Level.
     void setDroneX(float droneX) { m_droneX = droneX; }
 
@@ -37,10 +40,16 @@ protected:
     /// @brief Returns this enemy's base movement speed (subclasses differ).
     virtual float getSpeed() const = 0;
 
-private:
+    /// @brief Advances the sprite animation for this frame (subclasses may override).
+    virtual void updateAnimation(float dt);
+
+    /// @brief Returns true while the enemy is in its firing state.
+    bool isFiring() const { return m_state == EnemyState::Firing; }
 
     /// @brief Cycles the enemy's sprite-sheet frames.
     Animation m_animation;
+
+private:
 
     /// @brief Decides which state the enemy is in this frame.
     void decideState();
@@ -74,6 +83,9 @@ private:
 
     /// @brief The vehicle's x-position, supplied by the Level.
     float m_vehicleX = 0.f;
+
+    /// @brief The vehicle's half-width, so ranges measure from its edge not its center.
+    float m_vehicleHalfWidth = 0.f;
 
     /// @brief The drone's x-position, supplied by the Level.
     float m_droneX = 0.f;
