@@ -32,7 +32,19 @@ void Animation::update(float dt) {
 
 // Maps the current frame index to its rectangle on the horizontal strip.
 sf::IntRect Animation::getFrameRect() const {
-    return sf::IntRect({ m_currentFrame * m_frameSize.x, 0 }, m_frameSize);
+    return frameRect(m_currentFrame);
+}
+
+// Maps an arbitrary frame index to its rectangle on the horizontal strip.
+sf::IntRect Animation::frameRect(int index) const {
+    return sf::IntRect({ index * m_frameSize.x, 0 }, m_frameSize);
+}
+
+// Rewinds the animation to its first frame.
+void Animation::reset() {
+    m_currentFrame = 0;
+    m_timer = 0.f;
+    m_finished = false;
 }
 
 // Splits the texture width into equal frames; height is the full sheet height.

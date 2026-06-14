@@ -24,3 +24,11 @@ int TankEnemy::getReward() const {
 float TankEnemy::getSpeed() const {
     return TankEnemyConfig::Speed;
 }
+
+// Plays the muzzle-flash sequence only while firing; rewinds to frame 0 otherwise.
+void TankEnemy::updateAnimation(float dt) {
+    if (isFiring())
+        m_animation.update(dt);
+    else
+        m_animation.reset();
+}

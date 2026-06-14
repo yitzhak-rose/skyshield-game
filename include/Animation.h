@@ -14,6 +14,12 @@ public:
     /// @brief Returns the texture sub-rectangle of the current frame.
     sf::IntRect getFrameRect() const;
 
+    /// @brief Returns the texture sub-rectangle of a specific frame index.
+    sf::IntRect frameRect(int index) const;
+
+    /// @brief Rewinds the animation to its first frame.
+    void reset();
+
     /// @brief Returns true when a non-looping animation has shown its last frame.
     bool isFinished() const { return m_finished; }
 

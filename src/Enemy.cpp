@@ -21,8 +21,22 @@ void Enemy::update(float dt) {
     case EnemyState::Firing:     updateFiring(dt);  break;
     }
     updateFacing();
-    m_animation.update(dt);
+    updateAnimation(dt);
     m_sprite.setTextureRect(m_animation.getFrameRect());
+}
+
+// Default: animate continuously (used by the fast enemy's driving loop).
+void Enemy::updateAnimation(float dt) {
+    m_animation.update(dt);
+}
+
+// Mirrors the sprite when moving left; the art faces right by default.
+void Enemy::updateFacing() {
+    if (m_velocity.x == 0.f)
+        return;
+    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
+    float flip = (m_velocity.x < 0.f) ? -1.f : 1.f;
+    m_sprite.setScale({ flip * scale, scale });
 }
 
 void Enemy::decideState() {
@@ -63,7 +77,7 @@ void Enemy::panic(float dt) {
 
 // Computes the left/right movement bounds (screen edges + vehicle).
 std::pair<float, float> Enemy::calculateWalls(float x) const {
-    float gap = EnemyConfig::VehicleGap;
+    float gap = m_vehicleHalfWidth + EnemyConfig::VehicleGap;
     bool leftOfVehicle = (x < m_vehicleX);
     float leftWall = leftOfVehicle ? 0.f : m_vehicleX + gap;
     float rightWall = leftOfVehicle ? m_vehicleX - gap : WindowConfig::Width;
@@ -98,19 +112,12 @@ void Enemy::updateFiring(float dt) {
     }
 }
 
-// Mirrors the sprite when moving left; the art faces right by default.
-void Enemy::updateFacing() {
-    if (m_velocity.x == 0.f)
-        return;
-    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
-    float flip = (m_velocity.x < 0.f) ? -1.f : 1.f;
-    m_sprite.setScale({ flip * scale, scale });
-}
-
 bool Enemy::isDroneInRange() const {
     return std::abs(m_droneX - getPosition().x) < EnemyConfig::PanicRange;
 }
 
 bool Enemy::isInFiringRange() const {
-    return std::abs(m_vehicleX - getPosition().x) <= m_stopRange;
+    float centerDist = std::abs(m_vehicleX - getPosition().x);
+    float gap = centerDist - m_vehicleHalfWidth - getBounds().size.x / 2.f;
+    return gap <= m_stopRange;
 }
