@@ -7,7 +7,7 @@ namespace VehicleConfig {
     inline constexpr float DamagePerHit = 1.f;  // armor lost per bullet hit
     inline constexpr int   FrameCount = 6;     // beacon + smoke frames in commandCar.png
     inline constexpr float FrameDuration = 0.15f; // seconds each frame is shown
-    inline constexpr float Scale = 1.5f;       // larger than life — it's the centerpiece
+    inline constexpr float Scale = 1.8f;       // larger than life — it's the centerpiece
     inline constexpr int   NormalFrames = 4;   // frames 0..3 loop while healthy (beacon)
     inline constexpr float CriticalArmor = 25.f; // below this, show the burning frames 4..5
 }

@@ -15,17 +15,7 @@ void GameObject::setupSprite(sf::IntRect frame, float scale) {
 }
 
 void GameObject::draw(sf::RenderWindow& window) const {
-    // 1. יוצרים עותק זמני של הספרייט בגלל שהפונקציה היא const
-    sf::Sprite tempSprite = m_sprite;
-
-    // 2. שומרים את המיקום הנוכחי
-    sf::Vector2f pos = tempSprite.getPosition();
-
-    // 3. מעגלים את המיקום של העותק הזמני לפיקסלים שלמים
-    tempSprite.setPosition({ std::round(pos.x), std::round(pos.y) });
-
-    // 4. מציירים את העותק המעוגל
-    window.draw(tempSprite);
+    window.draw(m_sprite);
 }
 
 // The sprite's on-screen rect (after position/scale) is our hitbox.
