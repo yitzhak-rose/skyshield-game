@@ -2,7 +2,8 @@
 #include "Constants.h"
 
 FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position)
-    : Enemy(texture, position)
+    : Enemy(texture, position, FastEnemyConfig::FrameCount,
+        FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale)
 {
 }
 

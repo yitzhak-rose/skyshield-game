@@ -1,46 +1,55 @@
 #pragma once
 #include "MovingObject.h"
+#include "Animation.h"
 #include "Constants.h"
 
-// The player-controlled drone. Moves horizontally, drops bombs, manages resources.
+/// @brief The player-controlled drone. Moves horizontally, drops bombs, manages resources.
 class Drone : public MovingObject
 {
 public:
-    // Constructs the drone with a texture and a starting position.
-    Drone(const sf::Texture &texture, sf::Vector2f position);
+    /// @brief Constructs the drone with a texture and a starting position.
+    Drone(const sf::Texture& texture, sf::Vector2f position);
 
-    // Updates the drone for one frame (movement, battery drain).
+    /// @brief Updates the drone for one frame (movement, animation, battery drain).
     void update(float dt) override;
 
-    // Starts moving the drone left.
+    /// @brief Starts moving the drone left.
     void moveLeft();
 
-    // Starts moving the drone right.
+    /// @brief Starts moving the drone right.
     void moveRight();
 
-    // Stops the drone's horizontal movement.
+    /// @brief Stops the drone's horizontal movement.
     void stop();
 
-    // Returns true if the drone has at least one bomb left.
+    /// @brief Returns true if the drone has at least one bomb left.
     bool canDropBomb() const { return m_ammo > 0; }
 
-    // Consumes one bomb from the ammo count.
+    /// @brief Consumes one bomb from the ammo count.
     void consumeAmmo() { m_ammo--; }
 
-    // Sets how fast the battery drains per second.
+    /// @brief Sets how fast the battery drains per second.
     void setDrainRate(float rate) { m_drainRate = rate; }
 
-    // Sets the ammo count.
+    /// @brief Sets the ammo count.
     void setAmmo(int ammo) { m_ammo = ammo; }
 
-    // Returns the current battery level as a percentage (0 to 100).
+    /// @brief Returns the current battery level as a percentage (0 to 100).
     float getBatteryPercent() const { return m_battery; }
 
-    // Returns the number of bombs remaining.
+    /// @brief Returns the number of bombs remaining.
     int getRemainingAmmo() const { return m_ammo; }
 
 private:
+    /// @brief Cycles the drone's rotor frames.
+    Animation m_animation;
+
+    /// @brief Remaining battery charge as a percentage.
     float m_battery = DroneConfig::StartBattery;
+
+    /// @brief How much battery drains per second.
     float m_drainRate = 0.f;
+
+    /// @brief Number of bombs left to drop.
     int m_ammo = 0;
 };

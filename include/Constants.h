@@ -5,6 +5,9 @@
 namespace VehicleConfig {
     inline constexpr float StartArmor = 100.f; // armor starts full (percent)
     inline constexpr float DamagePerHit = 10.f;  // armor lost per bullet hit
+    inline constexpr int   FrameCount = 6;     // beacon + smoke frames in commandCar.png
+    inline constexpr float FrameDuration = 0.15f; // seconds each frame is shown
+    inline constexpr float Scale = 1.5f;       // larger than life — it's the centerpiece
 }
 
 namespace WindowConfig {
@@ -24,12 +27,15 @@ namespace DroneConfig {
     inline constexpr float Speed = 300.f; // horizontal pixels per second
     inline constexpr float FixedY = 80.f;  // locked vertical position
     inline constexpr float StartBattery = 100.f; // battery starts full (percent)
+    inline constexpr int   FrameCount = 4;     // rotor frames in drone.png
+    inline constexpr float FrameDuration = 0.08f; // seconds each frame is shown
+    inline constexpr float Scale = 2.f;        // on-screen size multiplier
 }
 
 namespace EnemyConfig {
     inline constexpr float SpawnY = 600.f; // ground level (all enemies on this line)
-    inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle
-    inline constexpr float StopRangeMax = 230.f; // max stopping distance from vehicle
+    inline constexpr float StopRangeMin = 220.f; // min stopping distance from vehicle
+    inline constexpr float StopRangeMax = 250.f; // max stopping distance from vehicle
     inline constexpr float PanicRange = 100.f; // drone within this range triggers panic
     inline constexpr float PanicMultiplier = 2.f;   // flee speed = base speed × this
     inline constexpr float TelegraphTime = 0.4f;  // red "charging" time before firing
@@ -41,9 +47,15 @@ namespace EnemyConfig {
 namespace FastEnemyConfig {
     inline constexpr float Speed = 120.f; // fast but fragile
     inline constexpr int   Reward = 10;    // coins when killed
+    inline constexpr int   FrameCount = 4;     // driving frames in smallEnemy.png
+    inline constexpr float FrameDuration = 0.12f; // seconds each frame is shown
+    inline constexpr float Scale = 1.f;        // on-screen size multiplier
 }
 
 namespace TankEnemyConfig {
     inline constexpr float Speed = 60.f;  // slow but armored
     inline constexpr int   Reward = 20;    // coins when killed
+    inline constexpr int   FrameCount = 5;     // firing frames in enemy.png
+    inline constexpr float FrameDuration = 0.12f; // seconds each frame is shown
+    inline constexpr float Scale = 0.6f;       // sheet frame is large; shrink to fit
 }

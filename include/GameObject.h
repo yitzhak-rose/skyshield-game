@@ -29,13 +29,16 @@ public:
     // Returns true while the object is still in play.
     bool isAlive() const { return m_alive; }
 
-	// Returns true if the object has been dead.
+    // Returns true if the object has been dead.
     bool isDead() const { return !m_alive; }
 
     // Marks the object as dead.
     void destroy() { m_alive = false; }
 
 protected:
+
+    // Crops the sprite to one frame, centers its origin, and applies a scale.
+    void setupSprite(sf::IntRect frame, float scale);
 
     // The object's drawable sprite.
     sf::Sprite m_sprite;

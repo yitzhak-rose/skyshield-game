@@ -59,9 +59,7 @@ void World::spawnEnemy() {
 
 void World::updateObjects(float dt) {
     m_drone.update(dt);
-
-    // We will need this when there are animations for the command vehicle.
-    // m_vehicle.update(dt);
+    m_vehicle.update(dt);
 
     float droneX = m_drone.getPosition().x;
     float vehicleX = m_vehicle.getPosition().x;

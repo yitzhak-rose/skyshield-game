@@ -2,7 +2,8 @@
 #include "Constants.h"
 
 TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position)
-    : Enemy(texture, position)
+    : Enemy(texture, position, TankEnemyConfig::FrameCount,
+        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale)
 {
 }
 

@@ -4,10 +4,13 @@
 #include <algorithm>
 #include <cmath>
 
-Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position)
+Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
+    int frameCount, float frameDuration, float scale)
     : MovingObject(texture, position, { 0.f, 0.f })
+    , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
     , m_stopRange(randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
 {
+    setupSprite(m_animation.getFrameRect(), scale);
 }
 
 void Enemy::update(float dt) {
@@ -17,6 +20,9 @@ void Enemy::update(float dt) {
     case EnemyState::Panicking:  panic(dt);         break;
     case EnemyState::Firing:     updateFiring(dt);  break;
     }
+    updateFacing();
+    m_animation.update(dt);
+    m_sprite.setTextureRect(m_animation.getFrameRect());
 }
 
 void Enemy::decideState() {
@@ -90,6 +96,15 @@ void Enemy::updateFiring(float dt) {
         m_fireRequested = true;
         m_fireTimer = 0.f;
     }
+}
+
+// Mirrors the sprite when moving left; the art faces right by default.
+void Enemy::updateFacing() {
+    if (m_velocity.x == 0.f)
+        return;
+    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
+    float flip = (m_velocity.x < 0.f) ? -1.f : 1.f;
+    m_sprite.setScale({ flip * scale, scale });
 }
 
 bool Enemy::isDroneInRange() const {

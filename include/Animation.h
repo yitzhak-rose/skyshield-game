@@ -1,0 +1,45 @@
+#pragma once
+#include <SFML/Graphics.hpp>
+
+/// @brief A reusable component that cycles through frames of a horizontal sprite sheet.
+class Animation {
+public:
+
+    /// @brief Constructs an animation from a uniform horizontal strip of frames.
+    Animation(sf::Vector2i frameSize, int frameCount, float frameDuration, bool loop = true);
+
+    /// @brief Advances the animation by one frame's worth of elapsed time.
+    void update(float dt);
+
+    /// @brief Returns the texture sub-rectangle of the current frame.
+    sf::IntRect getFrameRect() const;
+
+    /// @brief Returns true when a non-looping animation has shown its last frame.
+    bool isFinished() const { return m_finished; }
+
+    /// @brief Splits a sprite-sheet texture into equal-width frames of full height.
+    static sf::Vector2i frameSize(const sf::Texture& texture, int frameCount);
+
+private:
+
+    /// @brief The size of a single frame in texture pixels.
+    sf::Vector2i m_frameSize;
+
+    /// @brief How many frames the strip contains.
+    int m_frameCount;
+
+    /// @brief How long each frame stays on screen, in seconds.
+    float m_frameDuration;
+
+    /// @brief Whether the animation restarts after its last frame.
+    bool m_loop;
+
+    /// @brief The frame currently being shown.
+    int m_currentFrame = 0;
+
+    /// @brief Time accumulated toward the next frame switch.
+    float m_timer = 0.f;
+
+    /// @brief True once a non-looping animation reaches its last frame.
+    bool m_finished = false;
+};
