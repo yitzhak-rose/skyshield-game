@@ -63,10 +63,12 @@ void World::updateObjects(float dt) {
 
     float droneX = m_drone.getPosition().x;
     float vehicleX = m_vehicle.getPosition().x;
+    float vehicleHalfWidth = m_vehicle.getBounds().size.x / 2.f;   
 
     for (auto& enemy : m_enemies) {
         enemy->setDroneX(droneX);
         enemy->setVehicleX(vehicleX);
+        enemy->setVehicleHalfWidth(vehicleHalfWidth);              // ← והשורה הזו
         enemy->update(dt);
     }
 
