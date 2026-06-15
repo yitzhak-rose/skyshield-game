@@ -35,6 +35,13 @@ namespace DroneConfig {
     inline constexpr float Scale = 2.f;        // on-screen size multiplier
 }
 
+namespace BatteryConfig {
+    inline constexpr float FullPercent = 100.f;
+    inline constexpr int FrameCount = 5;
+    inline constexpr float FrameDuration = 1.f;
+    inline constexpr float Scale = 1.f;
+}
+
 namespace EnemyConfig {
     inline constexpr float SpawnY = 600.f; // ground level (all enemies on this line)
     inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle
