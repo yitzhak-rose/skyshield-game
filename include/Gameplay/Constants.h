@@ -10,15 +10,21 @@ namespace VehicleConfig {
     inline constexpr float Scale = 1.8f;       // larger than life — it's the centerpiece
     inline constexpr int   NormalFrames = 4;   // frames 0..3 loop while healthy (beacon)
     inline constexpr float CriticalArmor = 25.f; // below this, show the burning frames 4..5
+    inline constexpr float ShakeDuration = 0.18f;  // seconds the vehicle shakes after a hit
+    inline constexpr float ShakeMagnitude = 6.f;   // peak horizontal offset (pixels) at hit
+    inline constexpr float ShakeSpeed = 60.f;      // how fast the shake oscillates
 }
 
 namespace WindowConfig {
-    inline constexpr float Width = 1280.f; // window width in pixels
+    inline constexpr float Width = 1800.f; // window width in pixels
     inline constexpr float Height = 720.f;  // window height in pixels
 }
 
 namespace BombConfig {
-    inline constexpr float FallSpeed = 400.f; // downward pixels per second
+    inline constexpr float FallSpeed = 400.f;     // downward pixels per second
+    inline constexpr int   FrameCount = 4;        // wobble frames in bomb.png
+    inline constexpr float FrameDuration = 0.1f;  // seconds each frame is shown
+    inline constexpr float Scale = 1.f;           // on-screen size multiplier
 }
 
 namespace BulletConfig {
@@ -46,12 +52,13 @@ namespace EnemyConfig {
     inline constexpr float SpawnY = 600.f; // ground level (all enemies on this line)
     inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle
     inline constexpr float StopRangeMax = 230.f; // max stopping distance from vehicle
-    inline constexpr float PanicRange = 100.f; // drone within this range triggers panic
     inline constexpr float PanicMultiplier = 2.f;   // flee speed = base speed × this
     inline constexpr float TelegraphTime = 1.5f;  // seconds between shots (per design doc)
     inline constexpr float UTurnTrigger = 5.f;  // distance from a wall that starts a U-turn
     inline constexpr float UTurnDistance = 80.f; // distance to travel before obeying the drone again
     inline constexpr float VehicleGap = 60.f; // how close to the vehicle an enemy may get while fleeing
+    inline constexpr float PanicRange = 100.f; // drone within this range triggers panic
+    inline constexpr float PanicExitRange = 220.f; // stay panicking until the drone is past this
 }
 
 namespace FastEnemyConfig {
@@ -60,12 +67,16 @@ namespace FastEnemyConfig {
     inline constexpr int   FrameCount = 4;     // driving frames in smallEnemy.png
     inline constexpr float FrameDuration = 0.12f; // seconds each frame is shown
     inline constexpr float Scale = 1.f;        // on-screen size multiplier
+    inline constexpr float MuzzleX = 12.f;     // gun tip: slightly forward of center
+    inline constexpr float MuzzleY = -38.f;    // gun tip on the roof, raised so the flash centers on the bore
 }
 
 namespace TankEnemyConfig {
     inline constexpr float Speed = 60.f;  // slow but armored
     inline constexpr int   Reward = 20;    // coins when killed
     inline constexpr int   FrameCount = 5;     // firing frames in enemy.png
-    inline constexpr float FrameDuration = 0.12f; // seconds each frame is shown
+    inline constexpr float FrameDuration = 0.3f;  // 5 frames × 0.3s = 1.5s = TelegraphTime (frames track the fire timer)
     inline constexpr float Scale = 0.6f;       // sheet frame is large; shrink to fit
+    inline constexpr float MuzzleX = 101.f;    // cannon tip: well forward (long barrel)
+    inline constexpr float MuzzleY = -17.f;    // cannon tip height, raised so the flash centers on the bore
 }

@@ -1,5 +1,6 @@
 #include "Gameplay/Objects/Drone.h"
 #include "Gameplay/Constants.h"
+#include <algorithm>
 
 // Builds the drone, then crops the sprite to one frame and centers its origin.
 Drone::Drone(const sf::Texture& texture, sf::Vector2f position)
@@ -13,6 +14,12 @@ Drone::Drone(const sf::Texture& texture, sf::Vector2f position)
 void Drone::update(float dt)
 {
     move(dt);
+    // Keep the whole drone on screen; it only ever moves horizontally.
+    float halfWidth = getBounds().size.x * 0.5f;
+    sf::Vector2f pos = getPosition();
+    pos.x = std::clamp(pos.x, halfWidth, WindowConfig::Width - halfWidth);
+    m_sprite.setPosition(pos);
+
     m_animation.update(dt);
     m_sprite.setTextureRect(m_animation.getFrameRect());
 
@@ -20,6 +27,7 @@ void Drone::update(float dt)
     if (m_battery < 0.f)
         m_battery = 0.f;
 }
+
 
 void Drone::moveLeft()
 {

@@ -63,12 +63,12 @@ void World::updateObjects(float dt) {
 
     float droneX = m_drone.getPosition().x;
     float vehicleX = m_vehicle.getPosition().x;
-    float vehicleHalfWidth = m_vehicle.getBounds().size.x / 2.f;   
+    float vehicleHalfWidth = m_vehicle.getBounds().size.x / 2.f;
 
     for (auto& enemy : m_enemies) {
         enemy->setDroneX(droneX);
         enemy->setVehicleX(vehicleX);
-        enemy->setVehicleHalfWidth(vehicleHalfWidth);              // ← והשורה הזו
+        enemy->setVehicleHalfWidth(vehicleHalfWidth);
         enemy->update(dt);
     }
 
@@ -89,7 +89,7 @@ void World::collectEnemyFire() {
         float enemyX = enemy->getPosition().x;
         float direction = (vehicleX < enemyX) ? -1.f : 1.f;
         m_bullets.emplace_back(ResourceManager::instance().getImage(GameObjects::Bullet),
-            enemy->getPosition(), direction * BulletConfig::Speed);
+            enemy->getMuzzlePosition(), direction * BulletConfig::Speed);
         enemy->clearFireRequest();
     }
 }
@@ -135,7 +135,7 @@ void World::processDead() {
 void World::checkResult() {
     if (m_vehicle.isDead() ||
         m_drone.getBatteryPercent() <= 0.f ||
-        (m_drone.getRemainingAmmo() == 0 && !m_enemies.empty())) {
+        (m_drone.getRemainingAmmo() == 0 && !m_enemies.empty() && m_bombs.empty())) {
         m_result = LevelResult::Lost;
         return;
     }
