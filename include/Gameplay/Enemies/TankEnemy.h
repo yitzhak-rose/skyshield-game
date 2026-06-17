@@ -5,7 +5,7 @@
 class TankEnemy : public Enemy {
 public:
     /// @brief Constructs a tank enemy with a texture and a starting position.
-    TankEnemy(const sf::Texture& texture, sf::Vector2f position);
+    TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
 
     /// @brief First hit wounds (changes color); second hit kills.
     void onHit() override;

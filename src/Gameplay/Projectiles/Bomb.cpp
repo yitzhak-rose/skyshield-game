@@ -1,8 +1,8 @@
 #include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/Constants.h"
 
-Bomb::Bomb(const sf::Texture &texture, sf::Vector2f position)
-    : MovingObject(texture, position, {0.f, BombConfig::FallSpeed})
+Bomb::Bomb(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
+    : MovingObject(texture, position, { 0.f, BombConfig::FallSpeed }, gameState)
 {
 }
 

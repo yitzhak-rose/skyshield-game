@@ -9,7 +9,7 @@ public:
 
     /// @brief Constructs an enemy with a texture, position, and its animation parameters.
     Enemy(const sf::Texture& texture, sf::Vector2f position,
-        int frameCount, float frameDuration, float scale);
+        int frameCount, float frameDuration, float scale, GameState& gameState);
 
     /// @brief Updates the enemy for one frame (runs the AI: panic / fire / advance).
     void update(float dt) override;
@@ -45,6 +45,9 @@ protected:
 
     /// @brief Returns true while the enemy is in its firing state.
     bool isFiring() const { return m_state == EnemyState::Firing; }
+
+    /// @brief Marks the enemy dead and records its reward in the shared state.
+    void defeat();
 
     /// @brief Cycles the enemy's sprite-sheet frames.
     Animation m_animation;

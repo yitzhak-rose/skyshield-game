@@ -1,9 +1,11 @@
 #include "Gameplay/Objects/CommandVehicle.h"
 #include "Gameplay/Constants.h"
+#include "Gameplay/GameState.h"
 
 // Builds the vehicle, then crops the sprite to one frame and centers its origin.
-CommandVehicle::CommandVehicle(const sf::Texture& texture, sf::Vector2f position)
-    : GameObject(texture, position)
+CommandVehicle::CommandVehicle(
+    const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
+    : GameObject(texture, position, gameState)
     , m_animation(Animation::frameSize(texture, VehicleConfig::FrameCount),
         VehicleConfig::FrameCount, VehicleConfig::FrameDuration)
 {
@@ -16,7 +18,7 @@ void CommandVehicle::update(float dt) {
     int step = static_cast<int>(m_frameTimer / VehicleConfig::FrameDuration);
 
     int frame;
-    if (m_armor >= VehicleConfig::CriticalArmor)
+    if (getArmorPercent() >= VehicleConfig::CriticalArmor)
         frame = step % VehicleConfig::NormalFrames;
     else {
         int burningCount = VehicleConfig::FrameCount - VehicleConfig::NormalFrames;
@@ -26,9 +28,11 @@ void CommandVehicle::update(float dt) {
 }
 
 void CommandVehicle::takeDamage() {
-    m_armor -= VehicleConfig::DamagePerHit;
-    if (m_armor <= 0.f) {
-        m_armor = 0.f;
+    gameState().damageVehicle(VehicleConfig::DamagePerHit);
+    if (getArmorPercent() <= 0.f)
         destroy();
-    }
+}
+
+float CommandVehicle::getArmorPercent() const {
+    return gameState().getVehicleArmorPercent();
 }

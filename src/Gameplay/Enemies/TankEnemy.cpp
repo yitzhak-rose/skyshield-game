@@ -1,9 +1,9 @@
 #include "Gameplay/Enemies/TankEnemy.h"
 #include "Gameplay/Constants.h"
 
-TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position)
+TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : Enemy(texture, position, TankEnemyConfig::FrameCount,
-        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale)
+        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale, gameState)
 {
 }
 
@@ -13,7 +13,7 @@ void TankEnemy::onHit() {
         m_sprite.setColor(sf::Color(150, 150, 150)); // darken to show damage
     }
     else {
-        destroy();
+        defeat();
     }
 }
 

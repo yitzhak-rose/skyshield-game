@@ -8,7 +8,7 @@ class CommandVehicle : public GameObject
 {
 public:
     /// @brief Constructs the vehicle with a texture and a starting position.
-    CommandVehicle(const sf::Texture& texture, sf::Vector2f position);
+    CommandVehicle(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
 
     /// @brief Updates the vehicle for one frame (loops beacon frames, or burning frames if critical).
     void update(float dt) override;
@@ -17,7 +17,7 @@ public:
     void takeDamage();
 
     /// @brief Returns the current armor as a percentage (0 to 100).
-    float getArmorPercent() const { return m_armor; }
+    float getArmorPercent() const;
 
 private:
     /// @brief Provides the frame geometry of the vehicle sheet.
@@ -26,6 +26,4 @@ private:
     /// @brief Time accumulated to drive the frame loop.
     float m_frameTimer = 0.f;
 
-    /// @brief Remaining armor as a percentage.
-    float m_armor = VehicleConfig::StartArmor;
 };

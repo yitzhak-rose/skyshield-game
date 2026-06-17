@@ -2,8 +2,9 @@
 #include "Gameplay/Constants.h"
 
 // Centers the single-frame sprite and faces it along its travel direction.
-Bullet::Bullet(const sf::Texture& texture, sf::Vector2f position, float velocityX)
-    : MovingObject(texture, position, { velocityX, 0.f })
+Bullet::Bullet(const sf::Texture& texture, sf::Vector2f position,
+    float velocityX, GameState& gameState)
+    : MovingObject(texture, position, { velocityX, 0.f }, gameState)
 {
 }
 

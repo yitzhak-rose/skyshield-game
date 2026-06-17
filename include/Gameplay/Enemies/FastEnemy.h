@@ -6,7 +6,7 @@ class FastEnemy : public Enemy {
 public:
 
     /// @brief Constructs a fast enemy with a texture and a starting position.
-    FastEnemy(const sf::Texture& texture, sf::Vector2f position);
+    FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
 
     /// @brief Dies immediately when hit.
     void onHit() override;

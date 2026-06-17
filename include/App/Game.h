@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Gameplay/GameState.h"
 #include "Gameplay/World.h"
 
 class Game {
@@ -17,6 +18,7 @@ private:
 
     sf::RenderWindow window;
     sf::Sprite m_backgroundSprite;
+    GameState m_gameState;
     World m_world;
     sf::Clock m_clock;
 };

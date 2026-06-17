@@ -1,7 +1,8 @@
 #include "Gameplay/Objects/MovingObject.h"
 
-MovingObject::MovingObject(const sf::Texture& texture, sf::Vector2f position, sf::Vector2f velocity)
-    : GameObject(texture, position)
+MovingObject::MovingObject(const sf::Texture& texture, sf::Vector2f position,
+    sf::Vector2f velocity, GameState& gameState)
+    : GameObject(texture, position, gameState)
     , m_velocity(velocity)
 {
 }

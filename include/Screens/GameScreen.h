@@ -2,12 +2,13 @@
 
 #include "Screens/Screen.h"
 #include "Gameplay/World.h"
+#include "Gameplay/GameState.h"
 #include "Gameplay/LevelConfig.h"
 #include <SFML/Graphics.hpp>
 
 class GameScreen: public Screen {
 public:
-    GameScreen();
+    explicit GameScreen(GameState& gameState);
 
     void startGame();
     void draw(sf::RenderWindow& window) override;

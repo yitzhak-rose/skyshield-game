@@ -6,7 +6,8 @@ class MovingObject : public GameObject {
 public:
 
     // Constructs the object with a texture, position, and velocity.
-    MovingObject(const sf::Texture& texture, sf::Vector2f position, sf::Vector2f velocity);
+    MovingObject(const sf::Texture& texture, sf::Vector2f position,
+        sf::Vector2f velocity, GameState& gameState);
 
 protected:
 

@@ -1,14 +1,14 @@
 #include "Gameplay/Enemies/FastEnemy.h"
 #include "Gameplay/Constants.h"
 
-FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position)
+FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : Enemy(texture, position, FastEnemyConfig::FrameCount,
-        FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale)
+        FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale, gameState)
 {
 }
 
 void FastEnemy::onHit() {
-    destroy();
+    defeat();
 }
 
 int FastEnemy::getReward() const {

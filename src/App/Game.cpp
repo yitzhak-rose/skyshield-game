@@ -18,7 +18,7 @@ Game::Game()
                             static_cast<unsigned int>(WindowConfig::Height) }),
         "SkyShield"),
     m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)),
-    m_world(makeDebugConfig()) {
+    m_world(makeDebugConfig(), m_gameState) {
     window.setFramerateLimit(60);
     initBackground();
 }

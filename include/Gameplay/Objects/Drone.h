@@ -8,7 +8,7 @@ class Drone : public MovingObject
 {
 public:
     /// @brief Constructs the drone with a texture and a starting position.
-    Drone(const sf::Texture& texture, sf::Vector2f position);
+    Drone(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
 
     /// @brief Updates the drone for one frame (movement, animation, battery drain).
     void update(float dt) override;
@@ -23,33 +23,19 @@ public:
     void stop();
 
     /// @brief Returns true if the drone has at least one bomb left.
-    bool canDropBomb() const { return m_ammo > 0; }
+    bool canDropBomb() const;
 
     /// @brief Consumes one bomb from the ammo count.
-    void consumeAmmo() { m_ammo--; }
-
-    /// @brief Sets how fast the battery drains per second.
-    void setDrainRate(float rate) { m_drainRate = rate; }
-
-    /// @brief Sets the ammo count.
-    void setAmmo(int ammo) { m_ammo = ammo; }
+    bool consumeAmmo();
 
     /// @brief Returns the current battery level as a percentage (0 to 100).
-    float getBatteryPercent() const { return m_battery; }
+    float getBatteryPercent() const;
 
     /// @brief Returns the number of bombs remaining.
-    int getRemainingAmmo() const { return m_ammo; }
+    int getRemainingAmmo() const;
 
 private:
     /// @brief Cycles the drone's rotor frames.
     Animation m_animation;
 
-    /// @brief Remaining battery charge as a percentage.
-    float m_battery = DroneConfig::StartBattery;
-
-    /// @brief How much battery drains per second.
-    float m_drainRate = 0.f;
-
-    /// @brief Number of bombs left to drop.
-    int m_ammo = 0;
 };

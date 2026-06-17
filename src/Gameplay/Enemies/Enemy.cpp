@@ -1,16 +1,25 @@
 #include "Gameplay/Enemies/Enemy.h"
 #include "Gameplay/Constants.h"
+#include "Gameplay/GameState.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <cmath>
 
 Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
-    int frameCount, float frameDuration, float scale)
-    : MovingObject(texture, position, { 0.f, 0.f })
+    int frameCount, float frameDuration, float scale, GameState& gameState)
+    : MovingObject(texture, position, { 0.f, 0.f }, gameState)
     , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
     , m_stopRange(randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
 {
     setupSprite(m_animation.getFrameRect(), scale);
+}
+
+void Enemy::defeat() {
+    if (isDead())
+        return;
+
+    destroy();
+    gameState().recordEnemyDefeated(getReward());
 }
 
 void Enemy::update(float dt) {

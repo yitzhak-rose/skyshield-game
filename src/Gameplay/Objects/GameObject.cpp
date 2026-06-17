@@ -1,8 +1,9 @@
 #include "Gameplay/Objects/GameObject.h"
 
 // Constructor
-GameObject::GameObject(const sf::Texture& texture, sf::Vector2f position)
+GameObject::GameObject(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : m_sprite(texture)
+    , m_gameState(gameState)
 {
     m_sprite.setPosition(position);
 }

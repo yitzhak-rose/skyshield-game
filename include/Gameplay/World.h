@@ -5,8 +5,8 @@
 #include "Gameplay/Enemies/Enemy.h"
 #include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/Projectiles/Bullet.h"
+#include "Gameplay/GameState.h"
 #include "Gameplay/LevelConfig.h"
-#include "Enums/LevelResult.h"
 
 #include <vector>
 #include <memory>
@@ -17,7 +17,7 @@ class World {
 public:
 
     // Builds the level: creates the drone and vehicle, applies the level config.
-    World(const LevelConfig& config);
+    World(const LevelConfig& config, GameState& gameState);
 
     // Advances the whole simulation by one frame.
     void update(float dt);
@@ -34,10 +34,10 @@ public:
     void dropBomb();
 
     // Returns whether the level is running, won, or lost.
-    LevelResult getResult() const { return m_result; }
+    LevelResult getResult() const { return m_gameState.getLevelResult(); }
 
     // Returns the coins earned in this level.
-    int getCoinsEarned() const { return m_coinsEarned; }
+    int getCoinsEarned() const { return m_gameState.getLevelCoins(); }
 
     // Read-only access for the HUD (battery, ammo, armor).
     const Drone& getDrone() const { return m_drone; }
@@ -60,7 +60,7 @@ private:
     // Resolves bomb-enemy and bullet-vehicle overlaps.
     void handleCollisions();
 
-    // Removes dead objects and rewards coins for dead enemies.
+    // Removes objects that were marked dead during simulation.
     void processDead();
 
     // Decides if the level is now won or lost.
@@ -68,6 +68,9 @@ private:
 
     // The level's fixed parameters (read-only after construction).
     LevelConfig m_config;
+
+    // Mutable data shared by the game, world, objects, and HUD.
+    GameState& m_gameState;
 
     // The player and the protected target.
     Drone m_drone;
@@ -82,7 +85,4 @@ private:
     int   m_enemiesToSpawn;
     float m_spawnTimer = 0.f;
 
-    // Level progress.
-    int         m_coinsEarned = 0;
-    LevelResult m_result = LevelResult::Running;
 };

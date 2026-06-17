@@ -6,7 +6,8 @@ class Bullet : public MovingObject
 {
 public:
     // Constructs a bullet at a position, moving at a given horizontal velocity.
-    Bullet(const sf::Texture &texture, sf::Vector2f position, float velocityX);
+    Bullet(const sf::Texture& texture, sf::Vector2f position,
+        float velocityX, GameState& gameState);
 
     // Moves the bullet and destroys it once it leaves the screen.
     void update(float dt) override;

@@ -7,20 +7,20 @@
 #include <algorithm>
 
 // Builds the level: creates the drone and vehicle, applies the config.
-World::World(const LevelConfig& config)
+World::World(const LevelConfig& config, GameState& gameState)
     : m_config(config)
+    , m_gameState(gameState)
     , m_drone(ResourceManager::instance().getImage(GameObjects::Drone),
-        { WindowConfig::Width / 2.f, DroneConfig::FixedY })
+        { WindowConfig::Width / 2.f, DroneConfig::FixedY }, gameState)
     , m_vehicle(ResourceManager::instance().getImage(GameObjects::CommandCar),
-        { WindowConfig::Width / 2.f, EnemyConfig::SpawnY })
+        { WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, gameState)
     , m_enemiesToSpawn(config.enemyCount)
 {
-    m_drone.setDrainRate(config.batteryDrain);
-    m_drone.setAmmo(config.startAmmo);
+    m_gameState.startLevel(config);
 }
 
 void World::update(float dt) {
-    if (m_result != LevelResult::Running)
+    if (m_gameState.getLevelResult() != LevelResult::Running)
         return;
 
     spawnEnemies(dt);
@@ -51,10 +51,12 @@ void World::spawnEnemy() {
     bool isTank = (randomFloat(0.f, 1.f) < m_config.tankChance);
     if (isTank)
         m_enemies.push_back(std::make_unique<TankEnemy>(
-            ResourceManager::instance().getImage(GameObjects::Enemy), position));
+            ResourceManager::instance().getImage(GameObjects::Enemy),
+            position, m_gameState));
     else
         m_enemies.push_back(std::make_unique<FastEnemy>(
-            ResourceManager::instance().getImage(GameObjects::SmallEnemy), position));
+            ResourceManager::instance().getImage(GameObjects::SmallEnemy),
+            position, m_gameState));
 }
 
 void World::updateObjects(float dt) {
@@ -89,7 +91,7 @@ void World::collectEnemyFire() {
         float enemyX = enemy->getPosition().x;
         float direction = (vehicleX < enemyX) ? -1.f : 1.f;
         m_bullets.emplace_back(ResourceManager::instance().getImage(GameObjects::Bullet),
-            enemy->getPosition(), direction * BulletConfig::Speed);
+            enemy->getPosition(), direction * BulletConfig::Speed, m_gameState);
         enemy->clearFireRequest();
     }
 }
@@ -114,11 +116,6 @@ void World::handleCollisions() {
 }
 
 void World::processDead() {
-    for (auto& enemy : m_enemies) {
-        if (enemy->isDead())
-            m_coinsEarned += enemy->getReward();
-    }
-
     std::erase_if(m_enemies, [](const std::unique_ptr<Enemy>& enemy) {
         return enemy->isDead();
         });
@@ -134,14 +131,14 @@ void World::processDead() {
 
 void World::checkResult() {
     if (m_vehicle.isDead() ||
-        m_drone.getBatteryPercent() <= 0.f ||
-        (m_drone.getRemainingAmmo() == 0 && !m_enemies.empty())) {
-        m_result = LevelResult::Lost;
+        m_gameState.getBatteryPercent() <= 0.f ||
+        (m_gameState.getBombsAvailable() == 0 && !m_enemies.empty())) {
+        m_gameState.setLevelResult(LevelResult::Lost);
         return;
     }
 
     if (m_enemies.empty() && m_enemiesToSpawn == 0)
-        m_result = LevelResult::Won;
+        m_gameState.setLevelResult(LevelResult::Won);
 }
 
 void World::draw(sf::RenderWindow& window) const {
@@ -160,10 +157,12 @@ void World::draw(sf::RenderWindow& window) const {
 }
 
 void World::dropBomb() {
-    if (!m_drone.canDropBomb())
+    if (!m_drone.consumeAmmo())
         return;
 
     sf::Vector2f position = m_drone.getPosition();
-    m_bombs.emplace_back(ResourceManager::instance().getImage(GameObjects::Bomb), position);
-    m_drone.consumeAmmo();
+    m_bombs.emplace_back(
+        ResourceManager::instance().getImage(GameObjects::Bomb),
+        position,
+        m_gameState);
 }
