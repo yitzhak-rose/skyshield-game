@@ -27,10 +27,6 @@ void Drone::update(float dt)
     gameState().updateBattery(dt);
 }
 
-bool Drone::canDropBomb() const {
-    return gameState().getBombsAvailable() > 0;
-}
-
 bool Drone::consumeAmmo() {
     return gameState().consumeBomb();
 }

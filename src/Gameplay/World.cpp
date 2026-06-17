@@ -1,8 +1,7 @@
 #include "Gameplay/World.h"
 #include "Resources/ResourceManager.h"
 #include "Gameplay/Constants.h"
-#include "Gameplay/Enemies/FastEnemy.h"
-#include "Gameplay/Enemies/TankEnemy.h"
+#include "Gameplay/Enemies/EnemyFactory.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 
@@ -48,15 +47,9 @@ void World::spawnEnemy() {
     float x = fromLeft ? 0.f : WindowConfig::Width;
     sf::Vector2f position = { x, EnemyConfig::SpawnY };
 
-    bool isTank = (randomFloat(0.f, 1.f) < m_config.tankChance);
-    if (isTank)
-        m_enemies.push_back(std::make_unique<TankEnemy>(
-            ResourceManager::instance().getImage(GameObjects::Enemy),
-            position, m_gameState));
-    else
-        m_enemies.push_back(std::make_unique<FastEnemy>(
-            ResourceManager::instance().getImage(GameObjects::SmallEnemy),
-            position, m_gameState));
+    EnemyType type = (randomFloat(0.f, 1.f) < m_config.tankChance)
+        ? EnemyType::Tank : EnemyType::Fast;
+    m_enemies.push_back(EnemyFactory::create(type, position, m_gameState));
 }
 
 void World::updateObjects(float dt) {
