@@ -1,6 +1,7 @@
 #include "Gameplay/Objects/CommandVehicle.h"
 #include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
+#include <cmath>
 
 // Builds the vehicle, then crops the sprite to one frame and centers its origin.
 CommandVehicle::CommandVehicle(
@@ -8,6 +9,7 @@ CommandVehicle::CommandVehicle(
     : GameObject(texture, position, gameState)
     , m_animation(Animation::frameSize(texture, VehicleConfig::FrameCount),
         VehicleConfig::FrameCount, VehicleConfig::FrameDuration)
+    , m_basePosition(position)
 {
     setupSprite(m_animation.getFrameRect(), VehicleConfig::Scale);
 }
@@ -25,10 +27,23 @@ void CommandVehicle::update(float dt) {
         frame = VehicleConfig::NormalFrames + step % burningCount;
     }
     m_sprite.setTextureRect(m_animation.frameRect(frame));
+
+    // Briefly shake after a hit, decaying back to the resting position.
+    if (m_shakeTimer > 0.f) {
+        m_shakeTimer -= dt;
+        float decay = m_shakeTimer / VehicleConfig::ShakeDuration; // 1 -> 0
+        float offsetX = std::sin(m_shakeTimer * VehicleConfig::ShakeSpeed)
+            * VehicleConfig::ShakeMagnitude * decay;
+        m_sprite.setPosition({ m_basePosition.x + offsetX, m_basePosition.y });
+    }
+    else {
+        m_sprite.setPosition(m_basePosition);
+    }
 }
 
 void CommandVehicle::takeDamage() {
     gameState().damageVehicle(VehicleConfig::DamagePerHit);
+    m_shakeTimer = VehicleConfig::ShakeDuration; // kick off a fresh shake on every hit
     if (getArmorPercent() <= 0.f)
         destroy();
 }

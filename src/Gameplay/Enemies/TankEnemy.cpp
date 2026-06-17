@@ -3,8 +3,10 @@
 
 TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : Enemy(texture, position, TankEnemyConfig::FrameCount,
-        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale, gameState)
+        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale,
+        { TankEnemyConfig::MuzzleX, TankEnemyConfig::MuzzleY }, gameState)
 {
+    m_animation.setLoop(false); // the firing flash plays once per shot, not in a loop
 }
 
 void TankEnemy::onHit() {
@@ -25,10 +27,13 @@ float TankEnemy::getSpeed() const {
     return TankEnemyConfig::Speed;
 }
 
-// Plays the muzzle-flash sequence only while firing; rewinds to frame 0 otherwise.
+// The 5 frames run across the telegraph window via dt; firing resets them for the next cycle.
 void TankEnemy::updateAnimation(float dt) {
-    if (isFiring())
-        m_animation.update(dt);
-    else
+    if (!isFiring()) {        // not firing -> sit on the loaded frame 0
+        m_animation.reset();
+        return;
+    }
+    m_animation.update(dt);
+    if (isFireRequested())    // the shot leaves right after the last frame -> restart the cycle
         m_animation.reset();
 }

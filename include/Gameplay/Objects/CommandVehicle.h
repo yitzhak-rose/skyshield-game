@@ -23,7 +23,12 @@ private:
     /// @brief Provides the frame geometry of the vehicle sheet.
     Animation m_animation;
 
+    /// @brief The vehicle's resting position; the sprite returns here after each shake.
+    sf::Vector2f m_basePosition;
+
     /// @brief Time accumulated to drive the frame loop.
     float m_frameTimer = 0.f;
 
+    /// @brief Time left in the current hit-shake (0 = not shaking).
+    float m_shakeTimer = 0.f;
 };

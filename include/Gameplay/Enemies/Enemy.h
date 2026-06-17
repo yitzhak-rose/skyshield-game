@@ -7,12 +7,16 @@
 class Enemy : public MovingObject {
 public:
 
-    /// @brief Constructs an enemy with a texture, position, and its animation parameters.
+    /// @brief Constructs an enemy with a texture, position, animation params, and muzzle offset.
     Enemy(const sf::Texture& texture, sf::Vector2f position,
-        int frameCount, float frameDuration, float scale, GameState& gameState);
+        int frameCount, float frameDuration, float scale,
+        sf::Vector2f muzzleOffset, GameState& gameState);
 
     /// @brief Updates the enemy for one frame (runs the AI: panic / fire / advance).
     void update(float dt) override;
+
+    /// @brief Returns the world position the enemy's gun fires from (faces the vehicle).
+    sf::Vector2f getMuzzlePosition() const;
 
     /// @brief Receives the vehicle's x-position from the Level.
     void setVehicleX(float vehicleX) { m_vehicleX = vehicleX; }
@@ -95,6 +99,9 @@ private:
 
     /// @brief This enemy's randomized stopping distance from the vehicle.
     float m_stopRange = 0.f;
+
+    /// @brief Gun-tip offset from the enemy's center, defined facing right.
+    sf::Vector2f m_muzzleOffset;
 
     /// @brief Time counted toward the next shot.
     float m_fireTimer = 0.f;

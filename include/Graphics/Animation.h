@@ -20,6 +20,9 @@ public:
     /// @brief Rewinds the animation to its first frame.
     void reset();
 
+    /// @brief Sets whether the animation restarts after its last frame.
+    void setLoop(bool loop) { m_loop = loop; }
+
     /// @brief Returns true when a non-looping animation has shown its last frame.
     bool isFinished() const { return m_finished; }
 

@@ -6,10 +6,12 @@
 #include <cmath>
 
 Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
-    int frameCount, float frameDuration, float scale, GameState& gameState)
+    int frameCount, float frameDuration, float scale,
+    sf::Vector2f muzzleOffset, GameState& gameState)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
     , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
     , m_stopRange(randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
+    , m_muzzleOffset(muzzleOffset)
 {
     setupSprite(m_animation.getFrameRect(), scale);
 }
@@ -20,6 +22,12 @@ void Enemy::defeat() {
 
     destroy();
     gameState().recordEnemyDefeated(getReward());
+}
+
+// Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
+sf::Vector2f Enemy::getMuzzlePosition() const {
+    float facing = (m_vehicleX < getPosition().x) ? -1.f : 1.f;
+    return getPosition() + sf::Vector2f{ facing * m_muzzleOffset.x, m_muzzleOffset.y };
 }
 
 void Enemy::update(float dt) {
@@ -41,10 +49,16 @@ void Enemy::updateAnimation(float dt) {
 
 // Mirrors the sprite when moving left; the art faces right by default.
 void Enemy::updateFacing() {
-    if (m_velocity.x == 0.f)
-        return;
     float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
-    float flip = (m_velocity.x < 0.f) ? -1.f : 1.f;
+
+    float flip;
+    if (m_velocity.x != 0.f)
+        flip = (m_velocity.x < 0.f) ? -1.f : 1.f;      // moving: face the travel direction
+    else if (isFiring())
+        flip = (m_vehicleX < getPosition().x) ? -1.f : 1.f; // stopped to fire: face the vehicle
+    else
+        return;                                          // otherwise keep current facing
+
     m_sprite.setScale({ flip * scale, scale });
 }
 
@@ -84,12 +98,14 @@ void Enemy::panic(float dt) {
     setPosition({ std::clamp(getPosition().x, leftWall, rightWall), getPosition().y });
 }
 
-// Computes the left/right movement bounds (screen edges + vehicle).
+// Computes the left/right movement bounds for the enemy's center,
+// inset by its own half-width so the whole body stays inside the bounds.
 std::pair<float, float> Enemy::calculateWalls(float x) const {
+    float half = getBounds().size.x / 2.f;
     float gap = m_vehicleHalfWidth + EnemyConfig::VehicleGap;
     bool leftOfVehicle = (x < m_vehicleX);
-    float leftWall = leftOfVehicle ? 0.f : m_vehicleX + gap;
-    float rightWall = leftOfVehicle ? m_vehicleX - gap : WindowConfig::Width;
+    float leftWall = leftOfVehicle ? half : m_vehicleX + gap + half;
+    float rightWall = leftOfVehicle ? m_vehicleX - gap - half : WindowConfig::Width - half;
     return { leftWall, rightWall };
 }
 
@@ -121,8 +137,11 @@ void Enemy::updateFiring(float dt) {
     }
 }
 
+// Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
 bool Enemy::isDroneInRange() const {
-    return std::abs(m_droneX - getPosition().x) < EnemyConfig::PanicRange;
+    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
+        : EnemyConfig::PanicRange;
+    return std::abs(m_droneX - getPosition().x) < range;
 }
 
 bool Enemy::isInFiringRange() const {

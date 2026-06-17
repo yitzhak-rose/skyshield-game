@@ -3,7 +3,8 @@
 
 FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : Enemy(texture, position, FastEnemyConfig::FrameCount,
-        FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale, gameState)
+        FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale,
+        { FastEnemyConfig::MuzzleX, FastEnemyConfig::MuzzleY }, gameState)
 {
 }
 

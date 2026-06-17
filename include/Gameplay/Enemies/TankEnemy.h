@@ -17,7 +17,7 @@ private:
     /// @brief Returns this enemy's movement speed.
     float getSpeed() const override;
 
-    /// @brief Animates the firing flash only while firing; stays on frame 0 otherwise.
+    /// @brief Plays the 5 firing frames across the telegraph window, in sync with the timer.
     void updateAnimation(float dt) override;
 
     /// @brief True after the first hit.

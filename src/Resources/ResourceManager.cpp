@@ -20,7 +20,11 @@ std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
 }
 
 sf::Texture& ResourceManager::getImage(GameObjects image) {
-    return m_imageTextures[image];
+    auto it = m_imageTextures.find(image);
+    if (it == m_imageTextures.end())
+        throw std::runtime_error("Requested texture is not loaded (id "
+            + std::to_string(static_cast<int>(image)) + ")");
+    return it->second;
 }
 
 // PRIVATE
