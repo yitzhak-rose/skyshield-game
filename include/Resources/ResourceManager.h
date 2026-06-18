@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <stdexcept>
+#include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
 #include "Resources.h"
 
@@ -23,6 +24,11 @@ public:
     /// @param image The GameObject enum representing the desired texture.
     /// @return Reference to the requested sf::Texture.
     sf::Texture& getImage(GameObjects image);
+
+    /// @brief Retrieves a specific font by its font enum key.
+    /// @param font The font enum representing the desired font.
+    /// @return Reference to the requested sf::Font.
+    sf::Font& getFont(Fonts font);
 
 private:
     /// @brief Private constructor to enforce the singleton pattern.
@@ -55,4 +61,7 @@ private:
 
     /// @brief Storage for loaded game object textures.
     std::map<GameObjects, sf::Texture> m_imageTextures;
+
+    /// @brief Storage for loaded fonts.
+    std::map<Fonts, sf::Font> m_fonts;
 };

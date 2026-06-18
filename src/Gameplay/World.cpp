@@ -44,11 +44,11 @@ void World::spawnEnemies(float dt) {
 }
 
 void World::spawnEnemy() {
-    bool fromLeft = (randomFloat(0.f, 1.f) < 0.5f);
+    bool fromLeft = (Utils::randomFloat(0.f, 1.f) < 0.5f);
     float x = fromLeft ? 0.f : WindowConfig::Width;
     sf::Vector2f position = { x, EnemyConfig::SpawnY };
 
-    bool isTank = (randomFloat(0.f, 1.f) < m_config.tankChance);
+    bool isTank = (Utils::randomFloat(0.f, 1.f) < m_config.tankChance);
     if (isTank)
         m_enemies.push_back(std::make_unique<TankEnemy>(
             ResourceManager::instance().getImage(GameObjects::Enemy),

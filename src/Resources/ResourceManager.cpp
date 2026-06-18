@@ -1,6 +1,7 @@
 #include "Resources/ResourceManager.h"
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 
 ResourceManager& ResourceManager::instance() {
     static ResourceManager _instance;
@@ -13,6 +14,7 @@ ResourceManager::ResourceManager() {
 
 void ResourceManager::loadData() {
     loadResources(Resources::imageResources, m_imageTextures);
+    loadResources(Resources::fontResources, m_fonts);
 }
 
 std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
@@ -24,6 +26,14 @@ sf::Texture& ResourceManager::getImage(GameObjects image) {
     if (it == m_imageTextures.end())
         throw std::runtime_error("Requested texture is not loaded (id "
             + std::to_string(static_cast<int>(image)) + ")");
+    return it->second;
+}
+
+sf::Font& ResourceManager::getFont(Fonts font) {
+    auto it = m_fonts.find(font);
+    if (it == m_fonts.end())
+        throw std::runtime_error("Requested font is not loaded (id "
+            + std::to_string(static_cast<int>(font)) + ")");
     return it->second;
 }
 
@@ -48,7 +58,15 @@ void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& reso
             path = resource.path;
         }
 
-        if (!val.loadFromFile(path)) {
+        bool loaded = false;
+        if constexpr (std::is_same_v<Value, sf::Font>) {
+            loaded = val.openFromFile(path);
+        }
+        else {
+            loaded = val.loadFromFile(path);
+        }
+
+        if (!loaded) {
             throw std::runtime_error("Failed to load resource from path: " + path);
         }
 

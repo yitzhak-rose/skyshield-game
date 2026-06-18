@@ -1,6 +1,5 @@
 #include "App/Game.h"
 #include "Resources/ResourceManager.h"
-#include "Gameplay/Constants.h"
 
 // Temporary level parameters until the levels file (stages.txt) is read.
 static LevelConfig makeDebugConfig() {
@@ -18,10 +17,13 @@ Game::Game()
                             static_cast<unsigned int>(WindowConfig::Height) }),
         "SkyShield"),
     m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)),
-    m_world(makeDebugConfig(), m_gameState) {
+    m_world(makeDebugConfig(), m_gameState),
+    m_menuBar(std::make_unique<MenuBar>(76.f, m_gameState)) {
     window.setFramerateLimit(60);
     initBackground();
 }
+
+Game::~Game() = default;
 
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
@@ -71,5 +73,6 @@ void Game::render() {
     window.clear(sf::Color::Black);
     window.draw(m_backgroundSprite);
     m_world.draw(window);
+    window.draw(*m_menuBar);
     window.display();
 }

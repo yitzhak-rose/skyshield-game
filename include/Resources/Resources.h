@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string>
+#include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
 
 /// @brief Generic metadata struct to associate a resource key (enum) with its default file path.
@@ -23,6 +24,14 @@ namespace Resources {
     { GameObjects::Drone, "drone.png" },
     { GameObjects::Enemy, "enemy.png" },
     { GameObjects::SmallEnemy, "smallEnemy.png" },
+
+} };
+
+    /// @brief Statically defined configuration of fonts and their paths.
+    inline const std::array<ResourceInfo<Fonts>, 3> fontResources = { {
+    { Fonts::BattleGrid, "BattleGridFree.ttf" },
+    { Fonts::StencilForce, "StencilForce.otf" },
+    { Fonts::GameBattles, "game-battles-2.ttf" },
 
 } };
 }

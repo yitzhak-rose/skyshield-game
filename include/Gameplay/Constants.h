@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/Graphics/Color.hpp>
+
 // All game-wide tunable values, grouped by domain.
 
 namespace VehicleConfig {
@@ -46,6 +48,17 @@ namespace BatteryConfig {
     inline constexpr int FrameCount = 5;
     inline constexpr float FrameDuration = 1.f;
     inline constexpr float Scale = 1.f;
+}
+
+namespace MenuBarConfig {
+    inline constexpr unsigned int TextSize = 32;
+    inline constexpr unsigned int TitleTextSize = 42;
+    inline constexpr float SidePadding = 28.f;
+    inline constexpr float IconSize = 46.f;
+    inline constexpr float BatteryHeight = 46.f;
+    inline constexpr float BombTextGap = 14.f;
+    inline const sf::Color BackgroundColor(16, 20, 28, 220);
+    inline const sf::Color TitleColor(244, 232, 178);
 }
 
 namespace EnemyConfig {

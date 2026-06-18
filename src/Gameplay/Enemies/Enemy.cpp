@@ -10,7 +10,7 @@ Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
     sf::Vector2f muzzleOffset, GameState& gameState)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
     , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
-    , m_stopRange(randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
+    , m_stopRange(Utils::randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
     , m_muzzleOffset(muzzleOffset)
 {
     setupSprite(m_animation.getFrameRect(), scale);

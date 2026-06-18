@@ -1,15 +1,119 @@
-#include "Menubar.h"
+#include "Screens/Menubar.h"
+#include "Gameplay/Constants.h"
+#include "Gameplay/GameState.h"
+#include "Resources/ResourceManager.h"
+#include "Utilities/Utils.h"
 
-MenuBar::MenuBar(float width, float height, GameState& gameState, const sf::Font& font)
-    : m_background({width, height}), m_state(gameState), m_font(font) {
+#include <algorithm>
+#include <cmath>
+
+MenuBar::MenuBar(float height, GameState& gameState)
+    : m_background({WindowConfig::Width, height})
+    , m_bombSprite(ResourceManager::instance().getImage(GameObjects::Bomb))
+    , m_batterySprite(ResourceManager::instance().getImage(GameObjects::Battery))
+    , m_state(gameState)
+    , m_font(ResourceManager::instance().getFont(Fonts::StencilForce))
+    , m_width(WindowConfig::Width)
+    , m_height(height) {
+    configureBackground();
+    configureBombSprite();
+    configureBatterySprite();
 }
 
-sf::Text MenuBar::displayText(std::string, int, sf::Vector2f, const sf::Font& font) const {
-    return sf::Text(font);
+void MenuBar::configureBackground() {
+    m_background.setFillColor(MenuBarConfig::BackgroundColor);
 }
 
-void MenuBar::draw(sf::RenderTarget&, sf::RenderStates) const {
+void MenuBar::configureBombSprite() {
+    const sf::FloatRect bombBounds = m_bombSprite.getLocalBounds();
+    GraphicsUtils::centerOrigin(m_bombSprite);
+    m_bombSprite.setRotation(sf::degrees(180.f));
+    m_bombSprite.setScale({ MenuBarConfig::IconSize / bombBounds.size.x,
+                            MenuBarConfig::IconSize / bombBounds.size.y });
+    m_bombSprite.setPosition({
+        MenuBarConfig::SidePadding + MenuBarConfig::IconSize / 2.f,
+        m_height / 2.f
+    });
 }
 
-void MenuBar::drawMenuBarInfo(sf::RenderTarget&, sf::RenderStates) const {
+void MenuBar::configureBatterySprite() {
+    m_batterySprite.setTextureRect(batteryFrameRect());
+    GraphicsUtils::centerOrigin(m_batterySprite);
+
+    const sf::FloatRect batteryBounds = m_batterySprite.getLocalBounds();
+    const float batteryScale = MenuBarConfig::BatteryHeight / batteryBounds.size.y;
+    m_batterySprite.setScale({ batteryScale, batteryScale });
+    m_batterySprite.setPosition({
+        m_width - MenuBarConfig::SidePadding - batteryBounds.size.x * batteryScale / 2.f,
+        m_height / 2.f
+    });
+}
+
+void MenuBar::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    states.transform *= getTransform();
+    target.draw(m_background, states);
+    drawContent(target, states);
+}
+
+void MenuBar::drawContent(sf::RenderTarget& target, sf::RenderStates states) const {
+    drawBombCounter(target, states);
+    drawTitle(target, states);
+    drawBattery(target, states);
+}
+
+void MenuBar::drawBombCounter(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(m_bombSprite, states);
+    target.draw(makeBombCounterText(), states);
+}
+
+void MenuBar::drawTitle(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(makeTitleText(), states);
+}
+
+void MenuBar::drawBattery(sf::RenderTarget& target, sf::RenderStates states) const {
+    updateBatterySpriteForView(target.getView());
+    target.draw(m_batterySprite, states);
+}
+
+sf::Text MenuBar::makeBombCounterText() const {
+    sf::Text text(m_font, "x " + std::to_string(m_state.getBombsAvailable()), MenuBarConfig::TextSize);
+    text.setFillColor(sf::Color::White);
+    text.setPosition({
+        MenuBarConfig::SidePadding + MenuBarConfig::IconSize + MenuBarConfig::BombTextGap,
+        (m_height - MenuBarConfig::TextSize) / 2.f - 2.f
+    });
+    return text;
+}
+
+sf::Text MenuBar::makeTitleText() const {
+    sf::Text title(m_font, "SkyShield", MenuBarConfig::TitleTextSize);
+    title.setFillColor(MenuBarConfig::TitleColor);
+    GraphicsUtils::centerOrigin(title);
+    title.setPosition({ m_width / 2.f, m_height / 2.f });
+    return title;
+}
+
+void MenuBar::updateBatterySpriteForView(const sf::View& view) const {
+    m_batterySprite.setTextureRect(batteryFrameRect());
+    GraphicsUtils::centerOrigin(m_batterySprite);
+
+    const float batteryHalfWidth = m_batterySprite.getGlobalBounds().size.x / 2.f;
+    const float rightEdge = view.getCenter().x + view.getSize().x / 2.f;
+    m_batterySprite.setPosition({
+        rightEdge - MenuBarConfig::SidePadding - batteryHalfWidth,
+        m_height / 2.f
+    });
+}
+
+sf::IntRect MenuBar::batteryFrameRect() const {
+    const sf::Vector2u textureSize = m_batterySprite.getTexture().getSize();
+    const int frameWidth = static_cast<int>(textureSize.x) / BatteryConfig::FrameCount;
+    const int frameHeight = static_cast<int>(textureSize.y);
+    const float batteryPercent = std::clamp(m_state.getBatteryPercent(), 0.f, BatteryConfig::FullPercent);
+    const float emptyPercent = BatteryConfig::FullPercent - batteryPercent;
+    const float frameStep = BatteryConfig::FullPercent / static_cast<float>(BatteryConfig::FrameCount - 1);
+    const int frameIndex = std::clamp(static_cast<int>(std::round(emptyPercent / frameStep)),
+        0, BatteryConfig::FrameCount - 1);
+
+    return sf::IntRect({ frameIndex * frameWidth, 0 }, { frameWidth, frameHeight });
 }
