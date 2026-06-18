@@ -36,7 +36,7 @@ namespace BulletConfig {
 
 namespace DroneConfig {
     inline constexpr float Speed = 300.f; // horizontal pixels per second
-    inline constexpr float FixedY = 80.f;  // locked vertical position
+    inline constexpr float FixedY = 150.f;  // locked vertical position
     inline constexpr float StartBattery = 100.f; // battery starts full (percent)
     inline constexpr int   FrameCount = 4;     // rotor frames in drone.png
     inline constexpr float FrameDuration = 0.08f; // seconds each frame is shown

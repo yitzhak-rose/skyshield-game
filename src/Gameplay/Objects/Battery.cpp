@@ -1,25 +1,18 @@
 #include "Gameplay/Objects/Battery.h"
 #include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
-
-#include <algorithm>
 #include <cmath>
 
+// Builds the battery and crops the sprite to its first frame.
 Battery::Battery(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : GameObject(texture, position, gameState)
-    , m_animation(
-        Animation::frameSize(texture, BatteryConfig::FrameCount),
-        BatteryConfig::FrameCount,
-        BatteryConfig::FrameDuration,
-        false) {
+    , m_animation(Animation::frameSize(texture, BatteryConfig::FrameCount),
+        BatteryConfig::FrameCount, BatteryConfig::FrameDuration, false)
+{
     setupSprite(m_animation.getFrameRect(), BatteryConfig::Scale);
-    updateFrame();
 }
 
-void Battery::update(float) {
-    updateFrame();
-}
-
+// Draws the charge-appropriate frame to the menu bar, rounded to whole pixels.
 void Battery::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     sf::Sprite sprite = m_sprite;
     const sf::Vector2f position = sprite.getPosition();
@@ -28,24 +21,14 @@ void Battery::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     target.draw(sprite, states);
 }
 
-void Battery::setDisplayHeight(float height) {
-    const sf::IntRect frame = m_animation.getFrameRect();
-    const float scale = height / static_cast<float>(frame.size.y);
-    m_sprite.setScale({ scale, scale });
-}
-
+// Returns the current charge percentage.
 float Battery::getBatteryPercent() const {
     return gameState().getBatteryPercent();
 }
 
-void Battery::updateFrame() {
-    m_sprite.setTextureRect(m_animation.frameRect(getFrameIndex()));
-}
-
+// Maps the current charge percentage to a frame index (full -> 0, empty -> last).
 int Battery::getFrameIndex() const {
-    const float batteryPercent = std::clamp(getBatteryPercent(), 0.f, BatteryConfig::FullPercent);
-    const float emptyPercent = BatteryConfig::FullPercent - batteryPercent;
+    const float emptyPercent = BatteryConfig::FullPercent - getBatteryPercent();
     const float frameStep = BatteryConfig::FullPercent / (BatteryConfig::FrameCount - 1);
-    return std::clamp(static_cast<int>(std::round(emptyPercent / frameStep)),
-        0, BatteryConfig::FrameCount - 1);
+    return static_cast<int>(std::round(emptyPercent / frameStep));
 }
