@@ -22,9 +22,6 @@ public:
     /// @brief Stops the drone's horizontal movement.
     void stop();
 
-    /// @brief Returns true if the drone has at least one bomb left.
-    bool canDropBomb() const;
-
     /// @brief Consumes one bomb from the ammo count.
     bool consumeAmmo();
 
