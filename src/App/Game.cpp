@@ -1,44 +1,49 @@
 #include "App/Game.h"
+#include "Screens/GameScreen.h"
 #include "Resources/ResourceManager.h"
-
-// Temporary level parameters until the levels file (stages.txt) is read.
-static LevelConfig makeDebugConfig() {
-    return LevelConfig{
-        .enemyCount = 10,
-        .tankChance = 0.3f,
-        .spawnInterval = 2.f,
-        .batteryDrain = 1.5f,
-        .startAmmo = 20
-    };
-}
+#include "Gameplay/ConfigLoader.h"
+#include "Gameplay/Constants.h"
+#include "Enums/LevelResult.h"
 
 Game::Game()
     : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
                             static_cast<unsigned int>(WindowConfig::Height) }),
-        "SkyShield"),
-    m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)),
-    m_world(makeDebugConfig(), m_gameState),
-    m_menuBar(std::make_unique<MenuBar>(76.f, m_gameState)) {
+        "SkyShield")
+    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background))
+    , m_stages(ConfigLoader::load("stages.txt")) {
     window.setFramerateLimit(60);
     initBackground();
+    startStage(0);
 }
 
 Game::~Game() = default;
 
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
-    sf::Vector2u textureSize = texture.getSize();
+    const sf::Vector2u textureSize = texture.getSize();
     m_backgroundSprite.setScale({
         WindowConfig::Width / static_cast<float>(textureSize.x),
         WindowConfig::Height / static_cast<float>(textureSize.y)
         });
 }
 
+void Game::startStage(int index) {
+    m_currentStage = index;
+    m_screen = std::make_unique<GameScreen>(m_stages[index], m_gameState);
+}
+
+void Game::advanceStage() {
+    if (m_currentStage + 1 < static_cast<int>(m_stages.size()))
+        startStage(m_currentStage + 1);
+    else
+        window.close(); // last stage cleared — victory screen comes later
+}
+
 void Game::run() {
+    m_clock.restart();
     while (window.isOpen()) {
         float dt = m_clock.restart().asSeconds();
         processEvents();
-        handleInput();
         update(dt);
         render();
     }
@@ -46,34 +51,28 @@ void Game::run() {
 
 void Game::processEvents() {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
-        if (event->is<sf::Event::Closed>()) {
+        if (event->is<sf::Event::Closed>())
             window.close();
-        }
-        else if (const auto* key = event->getIf<sf::Event::KeyPressed>()) {
-            if (key->code == sf::Keyboard::Key::Space)
-                m_world.dropBomb();
-        }
+        else
+            m_screen->handleEvent(*event);
     }
 }
 
-void Game::handleInput() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-        m_world.moveDroneLeft();
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-        m_world.moveDroneRight();
-    else
-        m_world.stopDrone();
-}
-
 void Game::update(float dt) {
-    m_world.update(dt);
-    m_menuBar->update(dt);
+    m_screen->update(dt);
+
+    if (m_screen->isFinished()) {
+        switch (m_screen->getResult()) {
+        case LevelResult::Won:     advanceStage();  break;
+        case LevelResult::Lost:    window.close();  break; // game-over screen comes later
+        case LevelResult::Running:                  break;
+        }
+    }
 }
 
 void Game::render() {
     window.clear(sf::Color::Black);
     window.draw(m_backgroundSprite);
-    m_world.draw(window);
-    window.draw(*m_menuBar);
+    m_screen->draw(window);
     window.display();
 }

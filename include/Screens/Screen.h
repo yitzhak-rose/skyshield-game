@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Enums/LevelResult.h"
 
 /// \brief Abstract base class for all game screens.
 class Screen {
@@ -14,11 +15,17 @@ public:
     /// \param window The render window.
     virtual void draw(sf::RenderWindow& window) = 0;
 
-    /// \brief Handles input events (mouse clicks, etc.).
-    /// \param mousePos The current mouse position in world coordinates.
-    virtual void handleInput(sf::Vector2f /*mousePos*/) {}
+    /// \brief Handles a single input event (key press, mouse click, etc.).
+    /// \param event The event to handle.
+    virtual void handleEvent(const sf::Event& /*event*/) {}
 
     /// \brief Updates the screen logic.
     /// \param deltaTime Time elapsed since last frame.
     virtual void update(float /*deltaTime*/) {}
+
+    /// \brief Returns true once the screen is done and wants to be replaced.
+    virtual bool isFinished() const { return false; }
+
+    /// \brief Reports the screen's outcome (defaults to Running for screens with no result).
+    virtual LevelResult getResult() const { return LevelResult::Running; }
 };

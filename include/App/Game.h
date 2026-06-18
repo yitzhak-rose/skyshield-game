@@ -2,9 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include <vector>
 #include "Gameplay/GameState.h"
-#include "Gameplay/World.h"
-#include "Screens/Menubar.h"
+#include "Gameplay/LevelConfig.h"
+#include "Screens/Screen.h"
 
 class Game {
 public:
@@ -14,15 +15,19 @@ public:
 
 private:
     void processEvents();
-    void handleInput();
     void update(float dt);
     void render();
     void initBackground();
+    void startStage(int index);
+    void advanceStage();
 
     sf::RenderWindow window;
-    sf::Sprite m_backgroundSprite;
-    GameState m_gameState;
-    World m_world;
-    std::unique_ptr<MenuBar> m_menuBar;
     sf::Clock m_clock;
+    sf::Sprite m_backgroundSprite;
+
+    GameState m_gameState;
+    std::vector<LevelConfig> m_stages;
+    int m_currentStage = 0;
+
+    std::unique_ptr<Screen> m_screen;
 };
