@@ -59,6 +59,7 @@ namespace MenuBarConfig {
     inline constexpr float BombTextGap = 14.f;
     inline const sf::Color BackgroundColor(16, 20, 28, 220);
     inline const sf::Color TitleColor(244, 232, 178);
+    inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter
 }
 
 namespace EnemyConfig {
@@ -92,4 +93,12 @@ namespace TankEnemyConfig {
     inline constexpr float Scale = 0.6f;       // sheet frame is large; shrink to fit
     inline constexpr float MuzzleX = 101.f;    // cannon tip: well forward (long barrel)
     inline constexpr float MuzzleY = -17.f;    // cannon tip height, raised so the flash centers on the bore
+}
+
+namespace CoinConfig {
+    inline constexpr int   FrameCount = 7;     // spinning frames in coin.png
+    inline constexpr float FrameDuration = 0.08f; // seconds each spin frame is shown
+    inline constexpr float Scale = 1.f;   // base on-screen size of the icon
+    inline constexpr float PopDuration = 0.2f;  // seconds the count "pops" after it grows
+    inline constexpr float PopMagnitude = 0.4f;  // extra scale at the peak of the pop (0.4 = +40%)
 }

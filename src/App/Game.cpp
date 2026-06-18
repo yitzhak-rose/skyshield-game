@@ -67,6 +67,7 @@ void Game::handleInput() {
 
 void Game::update(float dt) {
     m_world.update(dt);
+    m_menuBar->update(dt);
 }
 
 void Game::render() {

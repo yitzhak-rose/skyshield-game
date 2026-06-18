@@ -8,9 +8,11 @@
 #include <cmath>
 
 MenuBar::MenuBar(float height, GameState& gameState)
-    : m_background({WindowConfig::Width, height})
+    : m_background({ WindowConfig::Width, height })
     , m_bombSprite(ResourceManager::instance().getImage(GameObjects::Bomb))
     , m_batterySprite(ResourceManager::instance().getImage(GameObjects::Battery))
+    , m_coin(ResourceManager::instance().getImage(GameObjects::Coin),
+        ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_state(gameState)
     , m_font(ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_width(WindowConfig::Width)
@@ -18,6 +20,12 @@ MenuBar::MenuBar(float height, GameState& gameState)
     configureBackground();
     configureBombSprite();
     configureBatterySprite();
+    configureCoin();
+}
+
+void MenuBar::update(float dt) {
+    m_coin.update(dt);
+    m_coin.setCount(m_state.getCoins());
 }
 
 void MenuBar::configureBackground() {
@@ -33,7 +41,7 @@ void MenuBar::configureBombSprite() {
     m_bombSprite.setPosition({
         MenuBarConfig::SidePadding + MenuBarConfig::IconSize / 2.f,
         m_height / 2.f
-    });
+        });
 }
 
 void MenuBar::configureBatterySprite() {
@@ -46,7 +54,11 @@ void MenuBar::configureBatterySprite() {
     m_batterySprite.setPosition({
         m_width - MenuBarConfig::SidePadding - batteryBounds.size.x * batteryScale / 2.f,
         m_height / 2.f
-    });
+        });
+}
+
+void MenuBar::configureCoin() {
+    m_coin.setPosition({ MenuBarConfig::CoinIconX, m_height / 2.f });
 }
 
 void MenuBar::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -59,6 +71,7 @@ void MenuBar::drawContent(sf::RenderTarget& target, sf::RenderStates states) con
     drawBombCounter(target, states);
     drawTitle(target, states);
     drawBattery(target, states);
+    m_coin.draw(target, states);
 }
 
 void MenuBar::drawBombCounter(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -81,7 +94,7 @@ sf::Text MenuBar::makeBombCounterText() const {
     text.setPosition({
         MenuBarConfig::SidePadding + MenuBarConfig::IconSize + MenuBarConfig::BombTextGap,
         (m_height - MenuBarConfig::TextSize) / 2.f - 2.f
-    });
+        });
     return text;
 }
 
@@ -102,7 +115,7 @@ void MenuBar::updateBatterySpriteForView(const sf::View& view) const {
     m_batterySprite.setPosition({
         rightEdge - MenuBarConfig::SidePadding - batteryHalfWidth,
         m_height / 2.f
-    });
+        });
 }
 
 sf::IntRect MenuBar::batteryFrameRect() const {
