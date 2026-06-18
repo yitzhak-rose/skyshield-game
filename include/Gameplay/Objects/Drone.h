@@ -34,5 +34,4 @@ public:
 private:
     /// @brief Cycles the drone's rotor frames.
     Animation m_animation;
-
 };

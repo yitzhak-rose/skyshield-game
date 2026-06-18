@@ -1,55 +1,60 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <functional>
+#include "Interfaces/IDrawable.h"
 
 class GameState;
 
-// «abstract» base for every visible, collidable object.
-class GameObject {
+/// @brief «abstract» base holding the shared data and the shared sprite-draw of every game object.
+class GameObject : public IDrawable {
 public:
 
-    // Constructs the object with a texture and a starting position.
+    /// @brief Constructs the object with a texture and a starting position.
     GameObject(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
 
-    // Destructor.
-    virtual ~GameObject() = default;
+    /// @brief Pure-virtual destructor.
+    virtual ~GameObject() = 0;
 
-    // Updates the object's state for one frame.
-    virtual void update(float dt) = 0;
+    /// @brief Draws the object's sprite to the window.
+    void draw(sf::RenderWindow& window) const override;
 
-    // Draws the object to the window.
-    virtual void draw(sf::RenderWindow& window) const;
-
-    // Returns the object's collision box.
+    /// @brief Returns the object's collision box.
     virtual sf::FloatRect getBounds() const;
 
-    // Returns the object's position.
+    /// @brief Returns the object's position.
     sf::Vector2f getPosition() const;
 
-    // Sets the object's position.
+    /// @brief Sets the object's position.
     void setPosition(sf::Vector2f position);
 
-    // Returns true while the object is still in play.
+    /// @brief Returns true while the object is still in play.
     bool isAlive() const { return m_alive; }
 
-    // Returns true if the object has been dead.
+    /// @brief Returns true once the object has been marked dead.
     bool isDead() const { return !m_alive; }
 
-    // Marks the object as dead.
+    /// @brief Marks the object as dead.
     void destroy() { m_alive = false; }
 
 protected:
 
-    // Crops the sprite to one frame, centers its origin, and applies a scale.
+    /// @brief Crops the sprite to one frame, centers its origin, and applies a scale.
     void setupSprite(sf::IntRect frame, float scale);
 
+    /// @brief Returns mutable access to the shared game state.
     GameState& gameState() { return m_gameState.get(); }
+
+    /// @brief Returns read-only access to the shared game state.
     const GameState& gameState() const { return m_gameState.get(); }
 
-    // The object's drawable sprite.
+    /// @brief The object's drawable sprite.
     sf::Sprite m_sprite;
 
 private:
+
+    /// @brief Reference to the shared game state.
     std::reference_wrapper<GameState> m_gameState;
+
+    /// @brief Tracks whether the object is still in play.
     bool m_alive = true;
 };
