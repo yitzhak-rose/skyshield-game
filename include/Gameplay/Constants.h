@@ -59,11 +59,12 @@ namespace MenuBarConfig {
     inline constexpr float BombTextGap = 14.f;
     inline const sf::Color BackgroundColor(16, 20, 28, 220);
     inline const sf::Color TitleColor(244, 232, 178);
+    inline constexpr float Height = 76.f; // menu bar height in pixels
     inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter
 }
 
 namespace EnemyConfig {
-    inline constexpr float SpawnY = 600.f; // ground level (all enemies on this line)
+    inline constexpr float SpawnY = 575.f; // ground level (all enemies on this line)
     inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle
     inline constexpr float StopRangeMax = 230.f; // max stopping distance from vehicle
     inline constexpr float PanicMultiplier = 2.f;   // flee speed = base speed × this

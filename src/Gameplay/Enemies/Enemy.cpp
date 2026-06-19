@@ -24,10 +24,19 @@ void Enemy::defeat() {
     gameState().recordEnemyDefeated(getReward());
 }
 
+// Returns the sign of the direction from the enemy toward the vehicle.
+float Enemy::directionToVehicle() const {
+    return (m_vehicleX < getPosition().x) ? -1.f : 1.f;
+}
+
 // Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
 sf::Vector2f Enemy::getMuzzlePosition() const {
-    float facing = (m_vehicleX < getPosition().x) ? -1.f : 1.f;
-    return getPosition() + sf::Vector2f{ facing * m_muzzleOffset.x, m_muzzleOffset.y };
+    return getPosition() + sf::Vector2f{ directionToVehicle() * m_muzzleOffset.x, m_muzzleOffset.y };
+}
+
+// Builds the bullet's horizontal velocity from the firing direction and the bullet speed.
+float Enemy::getBulletVelocityX() const {
+    return directionToVehicle() * BulletConfig::Speed;
 }
 
 void Enemy::update(float dt) {
@@ -55,7 +64,7 @@ void Enemy::updateFacing() {
     if (m_velocity.x != 0.f)
         flip = (m_velocity.x < 0.f) ? -1.f : 1.f;      // moving: face the travel direction
     else if (isFiring())
-        flip = (m_vehicleX < getPosition().x) ? -1.f : 1.f; // stopped to fire: face the vehicle
+        flip = directionToVehicle();                    // stopped to fire: face the vehicle
     else
         return;                                          // otherwise keep current facing
 
@@ -72,8 +81,7 @@ void Enemy::decideState() {
 }
 
 void Enemy::advance(float dt) {
-    float direction = (m_vehicleX < getPosition().x) ? -1.f : 1.f;
-    m_velocity.x = direction * getSpeed();
+    m_velocity.x = directionToVehicle() * getSpeed();
     move(dt);
 }
 

@@ -18,6 +18,9 @@ public:
     /// @brief Returns the world position the enemy's gun fires from (faces the vehicle).
     sf::Vector2f getMuzzlePosition() const;
 
+    /// @brief Returns the bullet's launch velocity: direction toward the vehicle × bullet speed.
+    float getBulletVelocityX() const;
+
     /// @brief Receives the vehicle's x-position from the Level.
     void setVehicleX(float vehicleX) { m_vehicleX = vehicleX; }
 
@@ -57,6 +60,9 @@ protected:
     Animation m_animation;
 
 private:
+
+    /// @brief Returns -1 when the vehicle is to the left, +1 when to the right.
+    float directionToVehicle() const;
 
     /// @brief Decides which state the enemy is in this frame.
     void decideState();

@@ -2,7 +2,7 @@
 
 GameScreen::GameScreen(const LevelConfig& config, GameState& gameState)
     : m_world(config, gameState)
-    , m_menuBar(std::make_unique<MenuBar>(76.f, gameState)) {
+    , m_menuBar(std::make_unique<MenuBar>(MenuBarConfig::Height, gameState)) {
 }
 
 void GameScreen::handleEvent(const sf::Event& event) {

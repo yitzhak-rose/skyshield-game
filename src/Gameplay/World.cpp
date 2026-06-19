@@ -75,16 +75,12 @@ void World::updateObjects(float dt) {
 }
 
 void World::collectEnemyFire() {
-    float vehicleX = m_vehicle.getPosition().x;
-
     for (auto& enemy : m_enemies) {
         if (!enemy->isFireRequested())
             continue;
 
-        float enemyX = enemy->getPosition().x;
-        float direction = (vehicleX < enemyX) ? -1.f : 1.f;
         m_bullets.emplace_back(ResourceManager::instance().getImage(GameObjects::Bullet),
-            enemy->getMuzzlePosition(), direction * BulletConfig::Speed, m_gameState);
+            enemy->getMuzzlePosition(), enemy->getBulletVelocityX(), m_gameState);
         enemy->clearFireRequest();
     }
 }
