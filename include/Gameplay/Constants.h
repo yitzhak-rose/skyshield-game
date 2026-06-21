@@ -94,6 +94,23 @@ namespace OverlayViewConfig {
     inline const sf::Color DangerButtonColor(145, 61, 65);
 }
 
+namespace StartScreenConfig {
+    inline constexpr float SettingsPadding = 24.f;
+    inline constexpr float SettingsButtonSize = 78.f;
+    inline constexpr float SettingsIconSize = 48.f;
+    inline constexpr float ButtonWidth = 360.f;
+    inline constexpr float ButtonHeight = 72.f;
+    inline constexpr float ButtonGap = 28.f;
+    inline constexpr float ButtonOutlineThickness = 2.f;
+    inline constexpr unsigned int ButtonTextSize = 36;
+    inline const sf::Color ButtonColor(16, 20, 28, 175);
+    inline const sf::Color ButtonHoverColor(49, 119, 88, 220);
+    inline const sf::Color ButtonOutlineColor(244, 232, 178, 215);
+    inline const sf::Color ButtonTextColor(255, 255, 255);
+    inline const sf::Color SettingsButtonColor(16, 20, 28, 185);
+    inline const sf::Color SettingsButtonHoverColor(49, 119, 88, 225);
+}
+
 namespace EnemyConfig {
     inline constexpr float SpawnY = 575.f; // ground level (all enemies on this line)
     inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle

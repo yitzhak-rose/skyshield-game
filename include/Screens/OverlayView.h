@@ -34,7 +34,8 @@ public:
 
     /// @brief Handles keyboard and mouse events for selection and activation.
     /// @param event The SFML event to process.
-    void handleEvent(const sf::Event& event);
+    /// @param window The render window used to map mouse pixels into view coordinates.
+    void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
 
     /// @brief Updates overlay animation or time-based state.
     /// @param dt Time elapsed since the previous frame.

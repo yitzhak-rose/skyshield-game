@@ -1,5 +1,6 @@
 #include "App/Game.h"
 #include "Screens/GameScreen.h"
+#include "Screens/StartScreen.h"
 #include "Resources/ResourceManager.h"
 #include "Gameplay/ConfigLoader.h"
 #include "Gameplay/Constants.h"
@@ -14,7 +15,7 @@ Game::Game()
     , m_stages(ConfigLoader::load("stages.txt")) {
     window.setFramerateLimit(60);
     initBackground();
-    startStage(0);
+    showStartScreen();
 }
 
 Game::~Game() = default;
@@ -34,6 +35,11 @@ void Game::startStage(int index) {
         m_stages[static_cast<std::size_t>(index)],
         m_gameState,
         [this]() { window.close(); });
+}
+
+void Game::showStartScreen() {
+    m_currentStage = -1;
+    m_screen = std::make_unique<StartScreen>();
 }
 
 void Game::advanceStage() {
@@ -65,8 +71,12 @@ void Game::update(float dt) {
     if (m_screen->isFinished()) {
         switch (m_screen->getResult()) {
             case LevelResult::Won:
-                std::cout << "Won" << std::endl;
-                advanceStage();
+                if (m_currentStage < 0) {
+                    startStage(0);
+                } else {
+                    std::cout << "Won" << std::endl;
+                    advanceStage();
+                }
                 break;
             case LevelResult::Lost:
                 std::cout << "Lost" << std::endl;

@@ -9,6 +9,8 @@ enum class GameObjects {
     CommandCar,
     Drone,
     Enemy,
+    Gear,
     SmallEnemy,
+    StartBackground,
     Max
 };

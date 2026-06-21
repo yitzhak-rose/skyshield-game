@@ -37,9 +37,6 @@ private:
     /// @brief Applies real-time movement input to the drone.
     void handleInput();
 
-    /// @brief Shows the initial overlay before gameplay starts.
-    void showStartOverlay();
-
     /// @brief Shows the loss summary and restart/quit actions.
     void showGameOverOverlay();
 

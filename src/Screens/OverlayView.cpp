@@ -57,22 +57,17 @@ void OverlayView::configureLayout() {
     m_selectedAction = m_actions.size() - 1;
 }
 
-void OverlayView::handleEvent(const sf::Event& event) {
+void OverlayView::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
     if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>()) {
-        updateSelectionFromMouse({
-            static_cast<float>(mouseMove->position.x),
-            static_cast<float>(mouseMove->position.y)
-            });
+        updateSelectionFromMouse(window.mapPixelToCoords(mouseMove->position, window.getDefaultView()));
     }
 
     if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
         if (mousePress->button != sf::Mouse::Button::Left)
             return;
 
-        const int actionIndex = buttonIndexAt({
-            static_cast<float>(mousePress->position.x),
-            static_cast<float>(mousePress->position.y)
-            });
+        const int actionIndex = buttonIndexAt(
+            window.mapPixelToCoords(mousePress->position, window.getDefaultView()));
         if (actionIndex >= 0)
             activateAction(static_cast<std::size_t>(actionIndex));
     }

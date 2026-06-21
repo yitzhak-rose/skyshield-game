@@ -25,6 +25,11 @@ public:
     /// @param event The event to handle.
     virtual void handleEvent(const sf::Event& /*event*/) {}
 
+    /// @brief Handles a single input event with access to window coordinate mapping.
+    /// @param event The event to handle.
+    /// @param window The render window.
+    virtual void handleEvent(const sf::Event& event, const sf::RenderWindow& /*window*/) { handleEvent(event); }
+
     /// @brief Updates the screen logic.
     /// @param deltaTime Time elapsed since last frame.
     virtual void update(float /*deltaTime*/) {}
@@ -43,7 +48,7 @@ protected:
     bool hasOverlay() const { return m_overlay != nullptr; }
 
     /// @brief Sends an event to the overlay when one is active.
-    bool handleOverlayEvent(const sf::Event& event);
+    bool handleOverlayEvent(const sf::Event& event, const sf::RenderWindow& window);
 
     /// @brief Updates the overlay when one is active.
     bool updateOverlay(float deltaTime);

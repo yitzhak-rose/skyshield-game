@@ -10,13 +10,9 @@ GameScreen::GameScreen(const LevelConfig& config, GameState& gameState, std::fun
     , m_quitGame(std::move(quitGame))
     , m_world(std::make_unique<World>(m_config, m_gameState))
     , m_menuBar(std::make_unique<MenuBar>(MenuBarConfig::Height, gameState)) {
-    showStartOverlay();
 }
 
 void GameScreen::handleEvent(const sf::Event& event) {
-    if (handleOverlayEvent(event))
-        return;
-
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         if (key->code == sf::Keyboard::Key::Space)
             m_world->dropBomb();
@@ -48,16 +44,6 @@ void GameScreen::handleInput() {
         m_world->moveDroneRight();
     else
         m_world->stopDrone();
-}
-
-void GameScreen::showStartOverlay() {
-    showOverlay(std::make_unique<OverlayView>(
-        "SkyShield",
-        std::vector<std::string>{ "Protect the command vehicle" },
-        std::vector<OverlayAction>{
-            { "Quit", OverlayActionType::Danger, m_quitGame },
-            { "Start", OverlayActionType::Primary, []() {} }
-        }));
 }
 
 void GameScreen::showGameOverOverlay() {

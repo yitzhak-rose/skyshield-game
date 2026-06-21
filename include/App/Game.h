@@ -17,6 +17,7 @@ private:
     void update(float dt);
     void render();
     void initBackground();
+    void showStartScreen();
     void startStage(int index);
     void advanceStage();
 
@@ -26,7 +27,7 @@ private:
 
     GameState m_gameState;
     std::vector<LevelConfig> m_stages;
-    int m_currentStage = 0;
+    int m_currentStage = -1;
 
     std::unique_ptr<Screen> m_screen;
 };

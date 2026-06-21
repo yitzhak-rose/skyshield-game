@@ -11,8 +11,8 @@ void Screen::handleEvents(sf::RenderWindow& window) {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
         if (event->is<sf::Event::Closed>())
             window.close();
-        else if (!handleOverlayEvent(*event))
-            handleEvent(*event);
+        else if (!handleOverlayEvent(*event, window))
+            handleEvent(*event, window);
 
         clearDismissedOverlay();
     }
@@ -22,11 +22,11 @@ void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
     m_overlay = std::move(overlay);
 }
 
-bool Screen::handleOverlayEvent(const sf::Event& event) {
+bool Screen::handleOverlayEvent(const sf::Event& event, const sf::RenderWindow& window) {
     if (!hasOverlay())
         return false;
 
-    m_overlay->handleEvent(event);
+    m_overlay->handleEvent(event, window);
     clearDismissedOverlay();
     return true;
 }
