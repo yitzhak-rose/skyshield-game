@@ -17,7 +17,7 @@ class World {
 public:
 
     // Builds the level: creates the drone and vehicle, applies the level config.
-    World(const LevelConfig& config, GameState& gameState);
+    World(const LevelConfig& config, GameState& gameState, int levelNumber);
 
     // Advances the whole simulation by one frame.
     void update(float dt);

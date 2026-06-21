@@ -12,5 +12,6 @@ enum class GameObjects {
     Gear,
     SmallEnemy,
     StartBackground,
+    XSquare,
     Max
 };

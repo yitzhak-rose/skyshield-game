@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 MenuBar::MenuBar(float height, GameState& gameState)
     : m_background({ WindowConfig::Width, height })
@@ -15,6 +16,7 @@ MenuBar::MenuBar(float height, GameState& gameState)
         ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_state(gameState)
     , m_font(ResourceManager::instance().getFont(Fonts::StencilForce))
+    , m_levelFont(ResourceManager::instance().getFont(Fonts::BattleGrid))
     , m_width(WindowConfig::Width)
     , m_height(height) {
     configureBackground();
@@ -71,12 +73,17 @@ void MenuBar::drawContent(sf::RenderTarget& target, sf::RenderStates states) con
     drawBombCounter(target, states);
     drawTitle(target, states);
     drawBattery(target, states);
+    drawLevelIndicator(target, states);
     m_coin.draw(target, states);
 }
 
 void MenuBar::drawBombCounter(sf::RenderTarget& target, sf::RenderStates states) const {
     target.draw(m_bombSprite, states);
     target.draw(makeBombCounterText(), states);
+}
+
+void MenuBar::drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(makeLevelText(), states);
 }
 
 void MenuBar::drawTitle(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -94,6 +101,24 @@ sf::Text MenuBar::makeBombCounterText() const {
     text.setPosition({
         MenuBarConfig::SidePadding + MenuBarConfig::IconSize + MenuBarConfig::BombTextGap,
         (m_height - MenuBarConfig::TextSize) / 2.f - 2.f
+        });
+    return text;
+}
+
+sf::Text MenuBar::makeLevelText() const {
+    sf::Text text(m_levelFont, "Level " + std::to_string(m_state.getLevelNumber()), MenuBarConfig::LevelTextSize);
+    text.setFillColor(MenuBarConfig::LevelTextColor);
+
+    const sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin({
+        textBounds.position.x + textBounds.size.x,
+        textBounds.position.y + textBounds.size.y / 2.f
+        });
+
+    const sf::FloatRect batteryBounds = m_batterySprite.getGlobalBounds();
+    text.setPosition({
+        batteryBounds.position.x - MenuBarConfig::LevelBatteryGap,
+        m_height / 2.f
         });
     return text;
 }

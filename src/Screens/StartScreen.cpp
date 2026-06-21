@@ -5,7 +5,9 @@
 #include "Utilities/Utils.h"
 
 #include <algorithm>
+#include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -25,10 +27,12 @@ sf::Vector2f centerOf(const sf::RectangleShape& shape) {
 }
 }
 
-StartScreen::StartScreen()
+StartScreen::StartScreen(std::function<void()> quitGame)
     : m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::StartBackground))
     , m_settingsButton({ StartScreenConfig::SettingsButtonSize, StartScreenConfig::SettingsButtonSize })
     , m_settingsSprite(ResourceManager::instance().getImage(GameObjects::Gear))
+    , m_quitButton({ StartScreenConfig::QuitButtonSize, StartScreenConfig::QuitButtonSize })
+    , m_quitSprite(ResourceManager::instance().getImage(GameObjects::XSquare))
     , m_startButton({ StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight })
     , m_shopButton({ StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight })
     , m_startText(ResourceManager::instance().getFont(Fonts::StencilForce),
@@ -36,7 +40,8 @@ StartScreen::StartScreen()
                   StartScreenConfig::ButtonTextSize)
     , m_shopText(ResourceManager::instance().getFont(Fonts::StencilForce),
                  "Shop",
-                 StartScreenConfig::ButtonTextSize) {
+                 StartScreenConfig::ButtonTextSize)
+    , m_quitGame(std::move(quitGame)) {
     configureLayout();
 }
 
@@ -66,6 +71,7 @@ void StartScreen::draw(sf::RenderWindow& window) {
     drawTextButton(window, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
     drawTextButton(window, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
     drawSettingsButton(window);
+    drawQuitButton(window);
     drawOverlay(window);
 }
 
@@ -76,6 +82,7 @@ LevelResult StartScreen::getResult() const {
 void StartScreen::configureLayout() {
     configureBackground();
     configureSettingsButton();
+    configureQuitButtonStyle();
     configureMainButtons();
     configureButtonText();
 }
@@ -103,6 +110,19 @@ void StartScreen::configureSettingsButton() {
     m_settingsSprite.setScale({ settingsScale, settingsScale });
     GraphicsUtils::centerOrigin(m_settingsSprite);
     m_settingsSprite.setPosition(centerOf(m_settingsButton));
+}
+
+void StartScreen::configureQuitButtonStyle() {
+    m_quitButton.setFillColor(StartScreenConfig::QuitButtonColor);
+    m_quitButton.setOutlineColor(StartScreenConfig::ButtonOutlineColor);
+    m_quitButton.setOutlineThickness(StartScreenConfig::ButtonOutlineThickness);
+
+    const sf::Vector2u quitSize = m_quitSprite.getTexture().getSize();
+    const float quitScale = StartScreenConfig::QuitIconSize /
+        static_cast<float>(std::max(quitSize.x, quitSize.y));
+    m_quitSprite.setScale({ quitScale, quitScale });
+    GraphicsUtils::centerOrigin(m_quitSprite);
+    m_quitSprite.setColor(StartScreenConfig::QuitIconColor);
 }
 
 void StartScreen::configureMainButtons() {
@@ -144,6 +164,10 @@ void StartScreen::handleClick(sf::Vector2f position) {
         case Button::Settings:
             showFeatureUnavailableOverlay();
             break;
+        case Button::Quit:
+            if (m_quitGame)
+                m_quitGame();
+            break;
         case Button::None:
             break;
     }
@@ -156,6 +180,9 @@ void StartScreen::updateHover(sf::Vector2f position) {
 StartScreen::Button StartScreen::buttonAt(sf::Vector2f position) const {
     if (contains(m_settingsButton.getGlobalBounds(), position))
         return Button::Settings;
+
+    if (contains(m_quitButton.getGlobalBounds(), position))
+        return Button::Quit;
 
     if (contains(m_startButton.getGlobalBounds(), position))
         return Button::Start;
@@ -182,6 +209,29 @@ void StartScreen::drawSettingsButton(sf::RenderTarget& target) const {
 
     target.draw(settingsButton);
     target.draw(m_settingsSprite);
+}
+
+void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
+    updateQuitButtonForTarget(target);
+
+    sf::RectangleShape quitButton = m_quitButton;
+    if (m_hoveredButton == Button::Quit)
+        quitButton.setFillColor(StartScreenConfig::QuitButtonHoverColor);
+
+    target.draw(quitButton);
+    target.draw(m_quitSprite);
+}
+
+void StartScreen::updateQuitButtonForTarget(const sf::RenderTarget& target) const {
+    const sf::View view = target.getView();
+    const float rightEdge = view.getCenter().x + view.getSize().x / 2.f;
+    const float topEdge = view.getCenter().y - view.getSize().y / 2.f;
+
+    m_quitButton.setPosition({
+        rightEdge - StartScreenConfig::SettingsPadding - StartScreenConfig::QuitButtonSize,
+        topEdge + StartScreenConfig::SettingsPadding
+        });
+    m_quitSprite.setPosition(centerOf(m_quitButton));
 }
 
 void StartScreen::drawTextButton(sf::RenderTarget& target,

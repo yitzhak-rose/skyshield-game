@@ -2,17 +2,14 @@
 #include "Screens/GameScreen.h"
 #include "Screens/StartScreen.h"
 #include "Resources/ResourceManager.h"
-#include "Gameplay/ConfigLoader.h"
 #include "Gameplay/Constants.h"
 #include "Enums/LevelResult.h"
-#include <iostream>
 
 Game::Game()
     : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
                             static_cast<unsigned int>(WindowConfig::Height) }),
         "SkyShield")
-    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background))
-    , m_stages(ConfigLoader::load("stages.txt")) {
+    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
     window.setFramerateLimit(60);
     initBackground();
     showStartScreen();
@@ -29,24 +26,19 @@ void Game::initBackground() {
         });
 }
 
-void Game::startStage(int index) {
-    m_currentStage = index;
+void Game::showGameScreen() {
     m_screen = std::make_unique<GameScreen>(
-        m_stages[static_cast<std::size_t>(index)],
         m_gameState,
-        [this]() { window.close(); });
+        [this]() { requestStartScreen(); });
 }
 
 void Game::showStartScreen() {
-    m_currentStage = -1;
-    m_screen = std::make_unique<StartScreen>();
+    m_startScreenRequested = false;
+    m_screen = std::make_unique<StartScreen>([this]() { window.close(); });
 }
 
-void Game::advanceStage() {
-    if (m_currentStage + 1 < static_cast<int>(m_stages.size()))
-        startStage(m_currentStage + 1);
-    else
-        window.close(); // last stage cleared — victory screen comes later
+void Game::requestStartScreen() {
+    m_startScreenRequested = true;
 }
 
 void Game::run() {
@@ -68,20 +60,19 @@ void Game::run() {
 void Game::update(float dt) {
     m_screen->update(dt);
 
+    if (m_startScreenRequested) {
+        showStartScreen();
+        return;
+    }
+
     if (m_screen->isFinished()) {
         switch (m_screen->getResult()) {
             case LevelResult::Won:
-                if (m_currentStage < 0) {
-                    startStage(0);
-                } else {
-                    std::cout << "Won" << std::endl;
-                    advanceStage();
-                }
+                showGameScreen();
                 break;
             case LevelResult::Lost:
-                std::cout << "Lost" << std::endl;
                 break;
-        case LevelResult::Running:
+            case LevelResult::Running:
                 break;
         }
     }

@@ -54,12 +54,15 @@ namespace BatteryConfig {
 namespace MenuBarConfig {
     inline constexpr unsigned int TextSize = 32;
     inline constexpr unsigned int TitleTextSize = 42;
+    inline constexpr unsigned int LevelTextSize = 28;
     inline constexpr float SidePadding = 28.f;
     inline constexpr float IconSize = 46.f;
     inline constexpr float BatteryHeight = 46.f;
     inline constexpr float BombTextGap = 14.f;
+    inline constexpr float LevelBatteryGap = 24.f;
     inline const sf::Color BackgroundColor(16, 20, 28, 220);
     inline const sf::Color TitleColor(244, 232, 178);
+    inline const sf::Color LevelTextColor(235, 238, 245);
     inline constexpr float Height = 76.f; // menu bar height in pixels
     inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter
 }
@@ -98,6 +101,8 @@ namespace StartScreenConfig {
     inline constexpr float SettingsPadding = 24.f;
     inline constexpr float SettingsButtonSize = 78.f;
     inline constexpr float SettingsIconSize = 48.f;
+    inline constexpr float QuitButtonSize = 78.f;
+    inline constexpr float QuitIconSize = 48.f;
     inline constexpr float ButtonWidth = 360.f;
     inline constexpr float ButtonHeight = 72.f;
     inline constexpr float ButtonGap = 28.f;
@@ -109,6 +114,9 @@ namespace StartScreenConfig {
     inline const sf::Color ButtonTextColor(255, 255, 255);
     inline const sf::Color SettingsButtonColor(16, 20, 28, 185);
     inline const sf::Color SettingsButtonHoverColor(49, 119, 88, 225);
+    inline const sf::Color QuitButtonColor(145, 61, 65, 225);
+    inline const sf::Color QuitButtonHoverColor(210, 62, 70, 245);
+    inline const sf::Color QuitIconColor(255, 255, 255);
 }
 
 namespace EnemyConfig {

@@ -14,7 +14,7 @@ struct ResourceInfo {
 
 namespace Resources {
     /// @brief Statically defined configuration of game object textures and their paths.
-    inline const std::array<ResourceInfo<GameObjects>, 11> imageResources = { {
+    inline const std::array<ResourceInfo<GameObjects>, 12> imageResources = { {
     { GameObjects::Background, "background.png" },
     { GameObjects::Battery, "battery.png" },
     { GameObjects::Bomb, "bomb.png" },
@@ -26,6 +26,7 @@ namespace Resources {
     { GameObjects::Gear, "gear.png" },
     { GameObjects::SmallEnemy, "smallEnemy.png" },
     { GameObjects::StartBackground, "start-background.png" },
+    { GameObjects::XSquare, "x.square.png" },
 
 } };
 

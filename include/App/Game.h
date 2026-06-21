@@ -2,9 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include <vector>
 #include "Gameplay/GameState.h"
-#include "Gameplay/LevelConfig.h"
 #include "Screens/Screen.h"
 
 class Game {
@@ -18,16 +16,15 @@ private:
     void render();
     void initBackground();
     void showStartScreen();
-    void startStage(int index);
-    void advanceStage();
+    void showGameScreen();
+    void requestStartScreen();
 
     sf::RenderWindow window;
     sf::Clock m_clock;
     sf::Sprite m_backgroundSprite;
 
     GameState m_gameState;
-    std::vector<LevelConfig> m_stages;
-    int m_currentStage = -1;
+    bool m_startScreenRequested = false;
 
     std::unique_ptr<Screen> m_screen;
 };

@@ -6,7 +6,7 @@
 #include <algorithm>
 
 // Builds the level: creates the drone and vehicle, applies the config.
-World::World(const LevelConfig& config, GameState& gameState)
+World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     : m_config(config)
     , m_gameState(gameState)
     , m_drone(ResourceManager::instance().getImage(GameObjects::Drone),
@@ -15,7 +15,7 @@ World::World(const LevelConfig& config, GameState& gameState)
         { WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, gameState)
     , m_enemiesToSpawn(config.enemyCount)
 {
-    m_gameState.startLevel(config);
+    m_gameState.startLevel(config, levelNumber);
 }
 
 void World::update(float dt) {
