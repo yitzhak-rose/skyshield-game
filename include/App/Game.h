@@ -14,7 +14,6 @@ public:
     void run();
 
 private:
-    void processEvents();
     void update(float dt);
     void render();
     void initBackground();

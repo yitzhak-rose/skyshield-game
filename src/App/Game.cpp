@@ -4,6 +4,7 @@
 #include "Gameplay/ConfigLoader.h"
 #include "Gameplay/Constants.h"
 #include "Enums/LevelResult.h"
+#include <iostream>
 
 Game::Game()
     : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
@@ -29,7 +30,10 @@ void Game::initBackground() {
 
 void Game::startStage(int index) {
     m_currentStage = index;
-    m_screen = std::make_unique<GameScreen>(m_stages[index], m_gameState);
+    m_screen = std::make_unique<GameScreen>(
+        m_stages[static_cast<std::size_t>(index)],
+        m_gameState,
+        [this]() { window.close(); });
 }
 
 void Game::advanceStage() {
@@ -43,18 +47,15 @@ void Game::run() {
     m_clock.restart();
     while (window.isOpen()) {
         float dt = m_clock.restart().asSeconds();
-        processEvents();
-        update(dt);
-        render();
-    }
-}
+        m_screen->handleEvents(window);
+        if (!window.isOpen())
+            break;
 
-void Game::processEvents() {
-    while (const std::optional<sf::Event> event = window.pollEvent()) {
-        if (event->is<sf::Event::Closed>())
-            window.close();
-        else
-            m_screen->handleEvent(*event);
+        update(dt);
+        if (!window.isOpen())
+            break;
+
+        render();
     }
 }
 
@@ -63,9 +64,15 @@ void Game::update(float dt) {
 
     if (m_screen->isFinished()) {
         switch (m_screen->getResult()) {
-        case LevelResult::Won:     advanceStage();  break;
-        case LevelResult::Lost:    window.close();  break; // game-over screen comes later
-        case LevelResult::Running:                  break;
+            case LevelResult::Won:
+                std::cout << "Won" << std::endl;
+                advanceStage();
+                break;
+            case LevelResult::Lost:
+                std::cout << "Lost" << std::endl;
+                break;
+        case LevelResult::Running:
+                break;
         }
     }
 }

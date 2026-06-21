@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics/Color.hpp>
+#include <cstddef>
 
 // All game-wide tunable values, grouped by domain.
 
@@ -61,6 +62,36 @@ namespace MenuBarConfig {
     inline const sf::Color TitleColor(244, 232, 178);
     inline constexpr float Height = 76.f; // menu bar height in pixels
     inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter
+}
+
+namespace OverlayViewConfig {
+    inline constexpr std::size_t MaxActions = 3;
+    inline constexpr float PanelWidth = 660.f;
+    inline constexpr float PanelHeight = 360.f;
+    inline constexpr float PanelOutlineThickness = 3.f;
+    inline constexpr float ButtonWidth = 220.f;
+    inline constexpr float ButtonHeight = 64.f;
+    inline constexpr float ButtonGap = 30.f;
+    inline constexpr float ButtonTopOffset = 82.f;
+    inline constexpr float TitleTopOffset = -112.f;
+    inline constexpr float BodyTopOffset = -35.f;
+    inline constexpr float BodyLineSpacing = 38.f;
+    inline constexpr float ButtonOutlineThickness = 2.f;
+    inline constexpr float SelectedButtonOutlineThickness = 4.f;
+    inline constexpr int SelectedColorBoost = 24;
+    inline constexpr unsigned int TitleTextSize = 48;
+    inline constexpr unsigned int BodyTextSize = 28;
+    inline constexpr unsigned int ButtonTextSize = 30;
+    inline const sf::Color ScrimColor(0, 0, 0, 135);
+    inline const sf::Color PanelColor(16, 20, 28, 235);
+    inline const sf::Color PanelOutlineColor(244, 232, 178, 210);
+    inline const sf::Color TitleColor(244, 232, 178);
+    inline const sf::Color BodyColor(235, 238, 245);
+    inline const sf::Color ButtonTextColor(255, 255, 255);
+    inline const sf::Color ButtonOutlineColor(255, 255, 255, 220);
+    inline const sf::Color DefaultButtonColor(58, 68, 86);
+    inline const sf::Color PrimaryButtonColor(49, 119, 88);
+    inline const sf::Color DangerButtonColor(145, 61, 65);
 }
 
 namespace EnemyConfig {
