@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
+#include "Enums/Sounds.h"
 #include "Resources.h"
 
 /// @brief Singleton class that manages the loading, storing, and retrieval of game resources.
@@ -30,6 +31,11 @@ public:
     /// @return Reference to the requested sf::Font.
     sf::Font& getFont(Fonts font);
 
+    /// @brief Retrieves a specific sound asset path by its sound enum key.
+    /// @param sound The sound enum representing the desired sound asset.
+    /// @return Path to the requested sound asset.
+    const std::string& getSoundPath(Sounds sound) const;
+
 private:
     /// @brief Private constructor to enforce the singleton pattern.
     /// @throws std::runtime_error If any resource fails to load.
@@ -45,6 +51,10 @@ private:
     /// @brief Loads all resource configurations defined in the Resources arrays.
     /// @throws std::runtime_error If any resource loading fails.
     void loadData();
+
+    /// @brief Stores sound asset paths and verifies they can be opened.
+    /// @throws std::runtime_error If any sound file is missing.
+    void loadSoundPaths();
 
     /// @brief Template helper function to load a list of resource infos into a destination map.
     /// @tparam Key The key type for the map (e.g. enum class).
@@ -64,4 +74,7 @@ private:
 
     /// @brief Storage for loaded fonts.
     std::map<Fonts, sf::Font> m_fonts;
+
+    /// @brief Storage for sound asset paths used by streaming music and effects.
+    std::map<Sounds, std::string> m_soundPaths;
 };

@@ -4,6 +4,7 @@
 #include <string>
 #include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
+#include "Enums/Sounds.h"
 
 /// @brief Generic metadata struct to associate a resource key (enum) with its default file path.
 template <typename Key>
@@ -35,6 +36,15 @@ namespace Resources {
     { Fonts::BattleGrid, "BattleGridFree.ttf" },
     { Fonts::StencilForce, "StencilForce.otf" },
     { Fonts::GameBattles, "game-battles-2.ttf" },
+
+} };
+
+    /// @brief Statically defined configuration of sound assets and their paths.
+    inline const std::array<ResourceInfo<Sounds>, 4> soundResources = { {
+    { Sounds::Background, "background-sound.mp3" },
+    { Sounds::LevelFinished, "level-finished.mp3" },
+    { Sounds::MissionFailed, "mission-failed.mp3" },
+    { Sounds::StartBackground, "start-background-sound.mp3" },
 
 } };
 }

@@ -2,6 +2,7 @@
 #include "Screens/GameScreen.h"
 #include "Screens/StartScreen.h"
 #include "Resources/ResourceManager.h"
+#include "Resources/SoundManager.h"
 #include "Gameplay/Constants.h"
 #include "Enums/LevelResult.h"
 
@@ -30,11 +31,13 @@ void Game::initBackground() {
 
 void Game::showGameScreen() {
     m_activeScreen = ActiveScreen::Game;
+    SoundManager::instance().startBackground();
     m_screen = std::make_unique<GameScreen>(m_gameState);
 }
 
 void Game::showStartScreen() {
     m_activeScreen = ActiveScreen::Start;
+    SoundManager::instance().startStartBackground();
     m_screen = std::make_unique<StartScreen>();
 }
 
@@ -123,6 +126,7 @@ ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
 
 void Game::update(float dt) {
     m_screen->update(dt);
+    SoundManager::instance().update(dt);
     handleScreenCommand();
 }
 

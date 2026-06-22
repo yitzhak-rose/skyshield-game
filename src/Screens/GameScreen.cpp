@@ -1,6 +1,7 @@
 #include "Screens/GameScreen.h"
 
 #include "Gameplay/ConfigLoader.h"
+#include "Resources/SoundManager.h"
 
 #include <string>
 #include <utility>
@@ -55,6 +56,7 @@ void GameScreen::handleInput() {
 }
 
 void GameScreen::showGameOverOverlay() {
+    SoundManager::instance().playMissionFailed();
     showOverlay(std::make_unique<OverlayView>(
         "Game Over",
         makeLevelSummaryLines(),
@@ -65,6 +67,7 @@ void GameScreen::showGameOverOverlay() {
 
 void GameScreen::showLevelCompletedOverlay() {
     m_completionOverlayShown = true;
+    SoundManager::instance().playLevelFinished();
     showOverlay(std::make_unique<OverlayView>(
         "Level Completed",
         makeLevelSummaryLines(),
@@ -75,6 +78,7 @@ void GameScreen::showLevelCompletedOverlay() {
 
 void GameScreen::showGameCompletedOverlay() {
     m_completionOverlayShown = true;
+    SoundManager::instance().playLevelFinished();
     showOverlay(std::make_unique<OverlayView>(
         "Game Completed",
         makeLevelSummaryLines(),

@@ -1,4 +1,5 @@
 #include "Resources/ResourceManager.h"
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <type_traits>
@@ -15,6 +16,7 @@ ResourceManager::ResourceManager() {
 void ResourceManager::loadData() {
     loadResources(Resources::imageResources, m_imageTextures);
     loadResources(Resources::fontResources, m_fonts);
+    loadSoundPaths();
 }
 
 std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
@@ -37,7 +39,26 @@ sf::Font& ResourceManager::getFont(Fonts font) {
     return it->second;
 }
 
+const std::string& ResourceManager::getSoundPath(Sounds sound) const {
+    auto it = m_soundPaths.find(sound);
+    if (it == m_soundPaths.end())
+        throw std::runtime_error("Requested sound is not loaded (id "
+            + std::to_string(static_cast<int>(sound)) + ")");
+    return it->second;
+}
+
 // PRIVATE
+
+void ResourceManager::loadSoundPaths() {
+    for (const auto& resource : Resources::soundResources) {
+        std::ifstream file(resource.path);
+        if (!file)
+            throw std::runtime_error("Failed to find sound resource from path: " + resource.path);
+
+        if (resource.type != Sounds::Max)
+            m_soundPaths[resource.type] = resource.path;
+    }
+}
 
 template<typename Key, typename Value, std::size_t N>
 void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& resources, 
