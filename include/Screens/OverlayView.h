@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+struct ScreenEventContext;
+
 /// @brief Visual style for an overlay action button.
 enum class OverlayActionType {
     Default,
@@ -34,8 +36,8 @@ public:
 
     /// @brief Handles keyboard and mouse events for selection and activation.
     /// @param event The SFML event to process.
-    /// @param window The render window used to map mouse pixels into view coordinates.
-    void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
+    /// @param context Event data derived by Game.
+    void handleEvent(const sf::Event& event, const ScreenEventContext& context);
 
     /// @brief Updates overlay animation or time-based state.
     /// @param dt Time elapsed since the previous frame.

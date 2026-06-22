@@ -6,16 +6,14 @@
 #include <utility>
 #include <vector>
 
-GameScreen::GameScreen(GameState& gameState,
-                       std::function<void()> returnToStart)
+GameScreen::GameScreen(GameState& gameState)
     : m_gameState(gameState)
-    , m_returnToStart(std::move(returnToStart))
     , m_stages(ConfigLoader::load("stages.txt"))
     , m_menuBar(std::make_unique<MenuBar>(MenuBarConfig::Height, gameState)) {
     startCurrentStage();
 }
 
-void GameScreen::handleEvent(const sf::Event& event) {
+void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         if (key->code == sf::Keyboard::Key::Space)
             m_world->dropBomb();
@@ -41,10 +39,10 @@ void GameScreen::update(float deltaTime) {
     }
 }
 
-void GameScreen::draw(sf::RenderWindow& window) {
-    m_world->draw(window);
-    window.draw(*m_menuBar);
-    drawOverlay(window);
+void GameScreen::draw(sf::RenderTarget& target) {
+    m_world->draw(target);
+    target.draw(*m_menuBar);
+    drawOverlay(target);
 }
 
 void GameScreen::handleInput() {
@@ -61,7 +59,7 @@ void GameScreen::showGameOverOverlay() {
         "Game Over",
         makeLevelSummaryLines(),
         std::vector<OverlayAction>{
-            { "Go to Start", OverlayActionType::Primary, m_returnToStart }
+            { "Go to Start", OverlayActionType::Primary, [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
         }));
 }
 
@@ -81,7 +79,7 @@ void GameScreen::showGameCompletedOverlay() {
         "Game Completed",
         makeLevelSummaryLines(),
         std::vector<OverlayAction>{
-            { "Start Screen", OverlayActionType::Primary, m_returnToStart }
+            { "Start Screen", OverlayActionType::Primary, [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
         }));
 }
 

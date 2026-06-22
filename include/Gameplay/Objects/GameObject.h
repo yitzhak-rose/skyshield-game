@@ -16,7 +16,7 @@ public:
     virtual ~GameObject() = 0;
 
     /// @brief Draws the object's sprite to the window.
-    void draw(sf::RenderWindow& window) const override;
+    void draw(sf::RenderTarget& target) const override;
 
     /// @brief Returns the object's collision box.
     virtual sf::FloatRect getBounds() const;

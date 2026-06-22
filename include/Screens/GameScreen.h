@@ -17,17 +17,16 @@ public:
     /// @brief Creates the gameplay screen for a full run through the configured stages.
     /// @param gameState Shared mutable game state.
     /// @param returnToStart Callback used after the full game is completed.
-    GameScreen(GameState& gameState,
-               std::function<void()> returnToStart);
+    explicit GameScreen(GameState& gameState);
 
     /// @brief Handles gameplay input when no overlay is active.
-    void handleEvent(const sf::Event& event) override;
+    void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;
 
     /// @brief Updates the world, HUD, or active overlay.
     void update(float deltaTime) override;
 
     /// @brief Draws the world, HUD, and any active overlay.
-    void draw(sf::RenderWindow& window) override;
+    void draw(sf::RenderTarget& target) override;
 
 private:
     /// @brief Applies real-time movement input to the drone.
@@ -58,8 +57,6 @@ private:
     void restartLevel();
 
     GameState& m_gameState;
-
-    std::function<void()> m_returnToStart;
 
     bool m_completionOverlayShown = false;
 

@@ -130,19 +130,19 @@ void World::checkResult() {
         m_gameState.setLevelResult(LevelResult::Won);
 }
 
-void World::draw(sf::RenderWindow& window) const {
-    m_vehicle.draw(window);
+void World::draw(sf::RenderTarget& target) const {
+    m_vehicle.draw(target);
 
     for (const auto& enemy : m_enemies)
-        enemy->draw(window);
+        enemy->draw(target);
 
     for (const auto& bullet : m_bullets)
-        bullet.draw(window);
+        bullet.draw(target);
 
     for (const auto& bomb : m_bombs)
-        bomb.draw(window);
+        bomb.draw(target);
 
-    m_drone.draw(window);
+    m_drone.draw(target);
 }
 
 void World::dropBomb() {

@@ -23,7 +23,7 @@ public:
     void update(float dt);
 
     // Draws every object in the level.
-    void draw(sf::RenderWindow& window) const;
+    void draw(sf::RenderTarget& target) const;
 
     // Steers the player's drone (called by PlayState from input).
     void moveDroneLeft() { m_drone.moveLeft(); }

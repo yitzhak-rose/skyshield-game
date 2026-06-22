@@ -1,32 +1,27 @@
 #include "Screens/Screen.h"
 
-#include <optional>
 #include <utility>
 
 Screen::Screen() = default;
 
 Screen::~Screen() = default;
 
-void Screen::handleEvents(sf::RenderWindow& window) {
-    while (const std::optional<sf::Event> event = window.pollEvent()) {
-        if (event->is<sf::Event::Closed>())
-            window.close();
-        else if (!handleOverlayEvent(*event, window))
-            handleEvent(*event, window);
+void Screen::handleEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (!handleOverlayEvent(event, context))
+        handleScreenEvent(event, context);
 
-        clearDismissedOverlay();
-    }
+    clearDismissedOverlay();
 }
 
 void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
     m_overlay = std::move(overlay);
 }
 
-bool Screen::handleOverlayEvent(const sf::Event& event, const sf::RenderWindow& window) {
+bool Screen::handleOverlayEvent(const sf::Event& event, const ScreenEventContext& context) {
     if (!hasOverlay())
         return false;
 
-    m_overlay->handleEvent(event, window);
+    m_overlay->handleEvent(event, context);
     clearDismissedOverlay();
     return true;
 }
@@ -40,14 +35,11 @@ bool Screen::updateOverlay(float deltaTime) {
     return true;
 }
 
-void Screen::drawOverlay(sf::RenderWindow& window) const {
+void Screen::drawOverlay(sf::RenderTarget& target) const {
     if (!hasOverlay())
         return;
 
-    const sf::View previousView = window.getView();
-    window.setView(window.getDefaultView());
-    window.draw(*m_overlay);
-    window.setView(previousView);
+    target.draw(*m_overlay);
 }
 
 void Screen::clearDismissedOverlay() {

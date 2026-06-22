@@ -1,6 +1,7 @@
 #include "Screens/OverlayView.h"
 #include "Gameplay/Constants.h"
 #include "Resources/ResourceManager.h"
+#include "Screens/Screen.h"
 #include "Utilities/Utils.h"
 
 #include <algorithm>
@@ -57,17 +58,16 @@ void OverlayView::configureLayout() {
     m_selectedAction = m_actions.size() - 1;
 }
 
-void OverlayView::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
-    if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>()) {
-        updateSelectionFromMouse(window.mapPixelToCoords(mouseMove->position, window.getDefaultView()));
+void OverlayView::handleEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (event.is<sf::Event::MouseMoved>()) {
+        updateSelectionFromMouse(context.mousePosition);
     }
 
     if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
         if (mousePress->button != sf::Mouse::Button::Left)
             return;
 
-        const int actionIndex = buttonIndexAt(
-            window.mapPixelToCoords(mousePress->position, window.getDefaultView()));
+        const int actionIndex = buttonIndexAt(context.mousePosition);
         if (actionIndex >= 0)
             activateAction(static_cast<std::size_t>(actionIndex));
     }

@@ -5,9 +5,7 @@
 #include "Utilities/Utils.h"
 
 #include <algorithm>
-#include <functional>
 #include <memory>
-#include <utility>
 #include <vector>
 
 namespace {
@@ -27,7 +25,7 @@ sf::Vector2f centerOf(const sf::RectangleShape& shape) {
 }
 }
 
-StartScreen::StartScreen(std::function<void()> quitGame)
+StartScreen::StartScreen()
     : m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::StartBackground))
     , m_settingsButton({ StartScreenConfig::SettingsButtonSize, StartScreenConfig::SettingsButtonSize })
     , m_settingsSprite(ResourceManager::instance().getImage(GameObjects::Gear))
@@ -40,25 +38,24 @@ StartScreen::StartScreen(std::function<void()> quitGame)
                   StartScreenConfig::ButtonTextSize)
     , m_shopText(ResourceManager::instance().getFont(Fonts::StencilForce),
                  "Shop",
-                 StartScreenConfig::ButtonTextSize)
-    , m_quitGame(std::move(quitGame)) {
+                 StartScreenConfig::ButtonTextSize) {
     configureLayout();
 }
 
-void StartScreen::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
-    if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>()) {
-        updateHover(window.mapPixelToCoords(mouseMove->position, window.getDefaultView()));
+void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (event.is<sf::Event::MouseMoved>()) {
+        updateHover(context.mousePosition);
     }
 
     if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
         if (mousePress->button == sf::Mouse::Button::Left)
-            handleClick(window.mapPixelToCoords(mousePress->position, window.getDefaultView()));
+            handleClick(context.mousePosition);
     }
 
     if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
         if (key->code == sf::Keyboard::Key::Enter ||
             key->code == sf::Keyboard::Key::Space)
-            m_startRequested = true;
+            requestCommand(ScreenCommand::StartGame);
     }
 }
 
@@ -66,17 +63,17 @@ void StartScreen::update(float deltaTime) {
     updateOverlay(deltaTime);
 }
 
-void StartScreen::draw(sf::RenderWindow& window) {
-    window.draw(m_backgroundSprite);
-    drawTextButton(window, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
-    drawTextButton(window, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
-    drawSettingsButton(window);
-    drawQuitButton(window);
-    drawOverlay(window);
+void StartScreen::draw(sf::RenderTarget& target) {
+    target.draw(m_backgroundSprite);
+    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
+    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
+    drawSettingsButton(target);
+    drawQuitButton(target);
+    drawOverlay(target);
 }
 
 LevelResult StartScreen::getResult() const {
-    return m_startRequested ? LevelResult::Won : LevelResult::Running;
+    return getCommand() == ScreenCommand::StartGame ? LevelResult::Won : LevelResult::Running;
 }
 
 void StartScreen::configureLayout() {
@@ -158,15 +155,14 @@ void StartScreen::configureButtonText() {
 void StartScreen::handleClick(sf::Vector2f position) {
     switch (buttonAt(position)) {
         case Button::Start:
-            m_startRequested = true;
+            requestCommand(ScreenCommand::StartGame);
             break;
         case Button::Shop:
         case Button::Settings:
             showFeatureUnavailableOverlay();
             break;
         case Button::Quit:
-            if (m_quitGame)
-                m_quitGame();
+            requestCommand(ScreenCommand::Quit);
             break;
         case Button::None:
             break;

@@ -9,20 +9,19 @@
 class StartScreen : public Screen {
 public:
     /// @brief Creates the start screen and lays out its controls.
-    /// @param quitGame Callback used when the quit button is clicked.
-    explicit StartScreen(std::function<void()> quitGame);
+    StartScreen();
 
     /// @brief Handles clicks and keyboard activation while no overlay is visible.
-    void handleEvent(const sf::Event& event, const sf::RenderWindow& window) override;
+    void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;
 
     /// @brief Updates any active modal overlay.
     void update(float deltaTime) override;
 
     /// @brief Draws the background, buttons, and modal overlay.
-    void draw(sf::RenderWindow& window) override;
+    void draw(sf::RenderTarget& target) override;
 
     /// @brief Returns true once Start Game has been chosen.
-    bool isFinished() const override { return m_startRequested; }
+    bool isFinished() const override { return getCommand() == ScreenCommand::StartGame; }
 
     /// @brief Reports completion to Game so it can enter stage 0.
     LevelResult getResult() const override;
@@ -95,8 +94,5 @@ private:
     sf::Text m_startText;
     sf::Text m_shopText;
 
-    std::function<void()> m_quitGame;
-
     Button m_hoveredButton = Button::None;
-    bool m_startRequested = false;
 };

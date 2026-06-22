@@ -5,6 +5,8 @@
 #include "Gameplay/Constants.h"
 #include "Enums/LevelResult.h"
 
+#include <optional>
+
 Game::Game()
     : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
                             static_cast<unsigned int>(WindowConfig::Height) }),
@@ -27,25 +29,24 @@ void Game::initBackground() {
 }
 
 void Game::showGameScreen() {
-    m_screen = std::make_unique<GameScreen>(
-        m_gameState,
-        [this]() { requestStartScreen(); });
+    m_activeScreen = ActiveScreen::Game;
+    m_screen = std::make_unique<GameScreen>(m_gameState);
 }
 
 void Game::showStartScreen() {
-    m_startScreenRequested = false;
-    m_screen = std::make_unique<StartScreen>([this]() { window.close(); });
-}
-
-void Game::requestStartScreen() {
-    m_startScreenRequested = true;
+    m_activeScreen = ActiveScreen::Start;
+    m_screen = std::make_unique<StartScreen>();
 }
 
 void Game::run() {
     m_clock.restart();
     while (window.isOpen()) {
         float dt = m_clock.restart().asSeconds();
-        m_screen->handleEvents(window);
+        handleEvents();
+        if (!window.isOpen())
+            break;
+
+        handleScreenCommand();
         if (!window.isOpen())
             break;
 
@@ -57,25 +58,72 @@ void Game::run() {
     }
 }
 
+void Game::handleEvents() {
+    while (const std::optional<sf::Event> event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            window.close();
+            continue;
+        }
+
+        m_screen->handleEvent(*event, makeEventContext(*event));
+    }
+}
+
+void Game::handleScreenCommand() {
+    const ScreenCommand command = m_screen->getCommand();
+    m_screen->clearCommand();
+
+    if (!isCommandAllowed(command))
+        return;
+
+    applyScreenCommand(command);
+}
+
+bool Game::isCommandAllowed(ScreenCommand command) const {
+    switch (command) {
+        case ScreenCommand::StartGame:
+            return m_activeScreen == ActiveScreen::Start;
+        case ScreenCommand::ReturnToStart:
+            return m_activeScreen == ActiveScreen::Game;
+        case ScreenCommand::Quit:
+            return m_activeScreen == ActiveScreen::Start;
+        case ScreenCommand::None:
+            return true;
+    }
+
+    return false;
+}
+
+void Game::applyScreenCommand(ScreenCommand command) {
+    switch (command) {
+        case ScreenCommand::StartGame:
+            showGameScreen();
+            break;
+        case ScreenCommand::ReturnToStart:
+            showStartScreen();
+            break;
+        case ScreenCommand::Quit:
+            window.close();
+            break;
+        case ScreenCommand::None:
+            break;
+    }
+}
+
+ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
+    ScreenEventContext context;
+
+    if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>())
+        context.mousePosition = window.mapPixelToCoords(mouseMove->position, window.getDefaultView());
+    else if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>())
+        context.mousePosition = window.mapPixelToCoords(mousePress->position, window.getDefaultView());
+
+    return context;
+}
+
 void Game::update(float dt) {
     m_screen->update(dt);
-
-    if (m_startScreenRequested) {
-        showStartScreen();
-        return;
-    }
-
-    if (m_screen->isFinished()) {
-        switch (m_screen->getResult()) {
-            case LevelResult::Won:
-                showGameScreen();
-                break;
-            case LevelResult::Lost:
-                break;
-            case LevelResult::Running:
-                break;
-        }
-    }
+    handleScreenCommand();
 }
 
 void Game::render() {

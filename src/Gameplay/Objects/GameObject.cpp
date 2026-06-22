@@ -11,8 +11,8 @@ GameObject::GameObject(const sf::Texture& texture, sf::Vector2f position, GameSt
 GameObject::~GameObject() = default;
 
 // Draws the sprite to the window.
-void GameObject::draw(sf::RenderWindow& window) const {
-    window.draw(m_sprite);
+void GameObject::draw(sf::RenderTarget& target) const {
+    target.draw(m_sprite);
 }
 
 // Crops the sprite to one frame, centers its origin, and applies a scale.
