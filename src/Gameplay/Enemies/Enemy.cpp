@@ -1,15 +1,23 @@
 #include "Gameplay/Enemies/Enemy.h"
+#include "Gameplay/Objects/Drone.h"
+#include "Gameplay/Objects/CommandVehicle.h"
+#include "Gameplay/Projectiles/Bullet.h"
 #include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
+#include "Resources/ResourceManager.h"
+#include "Enums/GameObjects.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <cmath>
 
 Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
     int frameCount, float frameDuration, float scale,
-    sf::Vector2f muzzleOffset, GameState& gameState)
+    sf::Vector2f muzzleOffset, GameState& gameState,
+    const Drone& drone, const CommandVehicle& vehicle)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
     , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
+    , m_drone(drone)
+    , m_vehicle(vehicle)
     , m_stopRange(Utils::randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
     , m_muzzleOffset(muzzleOffset)
 {
@@ -24,9 +32,14 @@ void Enemy::defeat() {
     gameState().recordEnemyDefeated(getReward());
 }
 
+// Live reads of the drone and vehicle, so the AI always sees their current state.
+float Enemy::vehicleX() const { return m_vehicle.getPosition().x; }
+float Enemy::vehicleHalfWidth() const { return m_vehicle.getBounds().size.x / 2.f; }
+float Enemy::droneX() const { return m_drone.getPosition().x; }
+
 // Returns the sign of the direction from the enemy toward the vehicle.
 float Enemy::directionToVehicle() const {
-    return (m_vehicleX < getPosition().x) ? -1.f : 1.f;
+    return (vehicleX() < getPosition().x) ? -1.f : 1.f;
 }
 
 // Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
@@ -49,6 +62,17 @@ void Enemy::update(float dt) {
     updateFacing();
     updateAnimation(dt);
     m_sprite.setTextureRect(m_animation.getFrameRect());
+}
+
+// When a shot is queued, the enemy itself builds the bullet and hands it to the World.
+std::unique_ptr<GameObject> Enemy::takeSpawn() {
+    if (!m_fireRequested)
+        return nullptr;
+
+    m_fireRequested = false;
+    return std::make_unique<Bullet>(
+        ResourceManager::instance().getImage(GameObjects::Bullet),
+        getMuzzlePosition(), getBulletVelocityX(), gameState());
 }
 
 // Default: animate continuously (used by the fast enemy's driving loop).
@@ -98,7 +122,7 @@ void Enemy::panic(float dt) {
 
     // If not mid-U-turn, flee away from the drone.
     if (!m_isUTurning)
-        m_fleeDirection = (m_droneX < x) ? 1.f : -1.f;
+        m_fleeDirection = (droneX() < x) ? 1.f : -1.f;
 
     // Move and clamp inside the bounds.
     m_velocity.x = m_fleeDirection * getSpeed() * EnemyConfig::PanicMultiplier;
@@ -110,10 +134,10 @@ void Enemy::panic(float dt) {
 // inset by its own half-width so the whole body stays inside the bounds.
 std::pair<float, float> Enemy::calculateWalls(float x) const {
     float half = getBounds().size.x / 2.f;
-    float gap = m_vehicleHalfWidth + EnemyConfig::VehicleGap;
-    bool leftOfVehicle = (x < m_vehicleX);
-    float leftWall = leftOfVehicle ? half : m_vehicleX + gap + half;
-    float rightWall = leftOfVehicle ? m_vehicleX - gap - half : WindowConfig::Width - half;
+    float gap = vehicleHalfWidth() + EnemyConfig::VehicleGap;
+    bool leftOfVehicle = (x < vehicleX());
+    float leftWall = leftOfVehicle ? half : vehicleX() + gap + half;
+    float rightWall = leftOfVehicle ? vehicleX() - gap - half : WindowConfig::Width - half;
     return { leftWall, rightWall };
 }
 
@@ -149,11 +173,11 @@ void Enemy::updateFiring(float dt) {
 bool Enemy::isDroneInRange() const {
     float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
         : EnemyConfig::PanicRange;
-    return std::abs(m_droneX - getPosition().x) < range;
+    return std::abs(droneX() - getPosition().x) < range;
 }
 
 bool Enemy::isInFiringRange() const {
-    float centerDist = std::abs(m_vehicleX - getPosition().x);
-    float gap = centerDist - m_vehicleHalfWidth - getBounds().size.x / 2.f;
+    float centerDist = std::abs(vehicleX() - getPosition().x);
+    float gap = centerDist - vehicleHalfWidth() - getBounds().size.x / 2.f;
     return gap <= m_stopRange;
 }

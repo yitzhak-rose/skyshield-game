@@ -1,12 +1,13 @@
 #include "Gameplay/Enemies/TankEnemy.h"
 #include "Gameplay/Constants.h"
 
-TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
+TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
+    const Drone& drone, const CommandVehicle& vehicle)
     : Enemy(texture, position, TankEnemyConfig::FrameCount,
         TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale,
-        { TankEnemyConfig::MuzzleX, TankEnemyConfig::MuzzleY }, gameState)
+        { TankEnemyConfig::MuzzleX, TankEnemyConfig::MuzzleY }, gameState, drone, vehicle)
 {
-    m_animation.setLoop(false); // the firing flash plays once per shot, not in a loop
+    m_animation.setLoop(true); // the firing flash plays once per shot, not in a loop
 }
 
 void TankEnemy::onHit() {
@@ -30,7 +31,6 @@ float TankEnemy::getSpeed() const {
 // The 5 frames run across the telegraph window via dt; firing resets them for the next cycle.
 void TankEnemy::updateAnimation(float dt) {
     if (!isFiring()) {        // not firing -> sit on the loaded frame 0
-        m_animation.reset();
         return;
     }
     m_animation.update(dt);

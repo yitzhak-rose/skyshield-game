@@ -1,11 +1,10 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
-#include "Interfaces/IUpdatable.h"
 #include "Graphics/Animation.h"
 #include "Gameplay/Constants.h"
 
 /// @brief The armored command vehicle the player protects. Stays in place but animates each frame.
-class CommandVehicle : public GameObject, public IUpdatable
+class CommandVehicle : public GameObject
 {
 public:
     /// @brief Constructs the vehicle with a texture and a starting position.

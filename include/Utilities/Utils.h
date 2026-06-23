@@ -5,6 +5,10 @@
 namespace Utils {
     /// @brief Returns a random float in the range [min, max].
     float randomFloat(float min, float max);
+
+    inline bool randomChance(float probability) {
+        return randomFloat(0.f, 1.f) <= probability;
+    }
 }
 
 namespace GraphicsUtils {

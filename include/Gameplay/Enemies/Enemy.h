@@ -2,39 +2,29 @@
 #include "Gameplay/Objects/MovingObject.h"
 #include "Graphics/Animation.h"
 #include "Enums/EnemyState.h"
+#include <memory>
+
+class Drone;
+class CommandVehicle;
 
 /// @brief «abstract» base for all enemies. Holds the shared AI; subclasses set the params.
+///        Reads the drone and the vehicle live through references, so there is no
+///        per-frame plumbing of their positions from the World.
 class Enemy : public MovingObject {
 public:
 
-    /// @brief Constructs an enemy with a texture, position, animation params, and muzzle offset.
+    /// @brief Constructs an enemy with a texture, position, animation params, muzzle offset,
+    ///        and live references to the drone (the threat) and the vehicle (the target).
     Enemy(const sf::Texture& texture, sf::Vector2f position,
         int frameCount, float frameDuration, float scale,
-        sf::Vector2f muzzleOffset, GameState& gameState);
+        sf::Vector2f muzzleOffset, GameState& gameState,
+        const Drone& drone, const CommandVehicle& vehicle);
 
     /// @brief Updates the enemy for one frame (runs the AI: panic / fire / advance).
     void update(float dt) override;
 
-    /// @brief Returns the world position the enemy's gun fires from (faces the vehicle).
-    sf::Vector2f getMuzzlePosition() const;
-
-    /// @brief Returns the bullet's launch velocity: direction toward the vehicle × bullet speed.
-    float getBulletVelocityX() const;
-
-    /// @brief Receives the vehicle's x-position from the Level.
-    void setVehicleX(float vehicleX) { m_vehicleX = vehicleX; }
-
-    /// @brief Receives the vehicle's half-width so ranges respect its body, not its center.
-    void setVehicleHalfWidth(float halfWidth) { m_vehicleHalfWidth = halfWidth; }
-
-    /// @brief Receives the drone's x-position from the Level.
-    void setDroneX(float droneX) { m_droneX = droneX; }
-
-    /// @brief Returns true if the enemy wants to fire a bullet this frame.
-    bool isFireRequested() const { return m_fireRequested; }
-
-    /// @brief Clears the fire request after the Level has created the bullet.
-    void clearFireRequest() { m_fireRequested = false; }
+    /// @brief When the enemy has decided to fire, hands the World a freshly built bullet.
+    std::unique_ptr<GameObject> takeSpawn() override;
 
     /// @brief Reacts to being hit by a bomb (FastEnemy dies, TankEnemy takes two hits).
     virtual void onHit() = 0;
@@ -53,6 +43,9 @@ protected:
     /// @brief Returns true while the enemy is in its firing state.
     bool isFiring() const { return m_state == EnemyState::Firing; }
 
+    /// @brief Returns true if the enemy wants to fire a bullet this frame.
+    bool isFireRequested() const { return m_fireRequested; }
+
     /// @brief Marks the enemy dead and records its reward in the shared state.
     void defeat();
 
@@ -60,6 +53,21 @@ protected:
     Animation m_animation;
 
 private:
+
+    /// @brief Returns the world position the enemy's gun fires from (faces the vehicle).
+    sf::Vector2f getMuzzlePosition() const;
+
+    /// @brief Returns the bullet's launch velocity: direction toward the vehicle × bullet speed.
+    float getBulletVelocityX() const;
+
+    /// @brief Returns the vehicle's current x-position.
+    float vehicleX() const;
+
+    /// @brief Returns the vehicle's current half-width (measured from its center).
+    float vehicleHalfWidth() const;
+
+    /// @brief Returns the drone's current x-position.
+    float droneX() const;
 
     /// @brief Returns -1 when the vehicle is to the left, +1 when to the right.
     float directionToVehicle() const;
@@ -94,14 +102,11 @@ private:
     /// @brief The enemy's current AI state.
     EnemyState m_state = EnemyState::Advancing;
 
-    /// @brief The vehicle's x-position, supplied by the Level.
-    float m_vehicleX = 0.f;
+    /// @brief The drone the enemy flees from (read live, never owned).
+    const Drone& m_drone;
 
-    /// @brief The vehicle's half-width, so ranges measure from its edge not its center.
-    float m_vehicleHalfWidth = 0.f;
-
-    /// @brief The drone's x-position, supplied by the Level.
-    float m_droneX = 0.f;
+    /// @brief The vehicle the enemy advances on and fires at (read live, never owned).
+    const CommandVehicle& m_vehicle;
 
     /// @brief This enemy's randomized stopping distance from the vehicle.
     float m_stopRange = 0.f;
