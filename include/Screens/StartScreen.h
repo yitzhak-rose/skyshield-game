@@ -1,15 +1,18 @@
 #pragma once
 
+#include "Gameplay/Coin.h"
 #include "Screens/Screen.h"
 
 #include <SFML/Graphics.hpp>
 #include <functional>
 
+class GameState;
+
 /// @brief Opening screen with start, shop, and settings actions.
 class StartScreen : public Screen {
 public:
-    /// @brief Creates the start screen and lays out its controls.
-    StartScreen();
+    /// @brief Creates the start screen, observes shared state, and lays out its controls.
+    explicit StartScreen(const GameState& gameState);
 
     /// @brief Handles clicks and keyboard activation while no overlay is visible.
     void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;
@@ -44,6 +47,9 @@ private:
     /// @brief Positions and styles the settings button and gear icon.
     void configureSettingsButton();
 
+    /// @brief Positions the saved coin counter near the top-right controls.
+    void configureCoinCounter();
+
     /// @brief Positions and styles the quit button icon.
     void configureQuitButtonStyle();
 
@@ -74,6 +80,9 @@ private:
     /// @brief Draws the quit button icon.
     void drawQuitButton(sf::RenderTarget& target) const;
 
+    /// @brief Draws the current coin total beside the top-right quit button.
+    void drawCoinCounter(sf::RenderTarget& target);
+
     /// @brief Positions the quit button against the current render target's top-right corner.
     void updateQuitButtonForTarget(const sf::RenderTarget& target) const;
 
@@ -87,6 +96,7 @@ private:
     sf::Sprite m_backgroundSprite;
     sf::RectangleShape m_settingsButton;
     sf::Sprite m_settingsSprite;
+    Coin m_coin;
     mutable sf::RectangleShape m_quitButton;
     mutable sf::Sprite m_quitSprite;
     sf::RectangleShape m_startButton;
@@ -94,5 +104,6 @@ private:
     sf::Text m_startText;
     sf::Text m_shopText;
 
+    const GameState& m_gameState;
     Button m_hoveredButton = Button::None;
 };

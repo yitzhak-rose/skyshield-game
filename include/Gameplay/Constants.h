@@ -103,6 +103,7 @@ namespace StartScreenConfig {
     inline constexpr float SettingsIconSize = 48.f;
     inline constexpr float QuitButtonSize = 78.f;
     inline constexpr float QuitIconSize = 48.f;
+    inline constexpr float CoinCounterWidth = 210.f;
     inline constexpr float ButtonWidth = 360.f;
     inline constexpr float ButtonHeight = 72.f;
     inline constexpr float ButtonGap = 28.f;

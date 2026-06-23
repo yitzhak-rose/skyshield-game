@@ -1,6 +1,6 @@
 #include "Screens/GameScreen.h"
 
-#include "Gameplay/ConfigLoader.h"
+#include "Gameplay/DataManager.h"
 #include "Resources/SoundManager.h"
 
 #include <string>
@@ -9,7 +9,7 @@
 
 GameScreen::GameScreen(GameState& gameState)
     : m_gameState(gameState)
-    , m_stages(ConfigLoader::load("stages.txt"))
+    , m_stages(DataManager::loadLevels("stages.json"))
     , m_menuBar(std::make_unique<MenuBar>(MenuBarConfig::Height, gameState)) {
     startCurrentStage();
 }

@@ -1,0 +1,32 @@
+{
+  "stages": [
+    {
+      "enemyCount": 10,
+      "tankChance": 0.3,
+      "spawnInterval": 2.5,
+      "batteryDrain": 1.5,
+      "startAmmo": 20
+    },
+    {
+      "enemyCount": 8,
+      "tankChance": 0.25,
+      "spawnInterval": 2.0,
+      "batteryDrain": 1.4,
+      "startAmmo": 16
+    },
+    {
+      "enemyCount": 12,
+      "tankChance": 0.4,
+      "spawnInterval": 1.6,
+      "batteryDrain": 1.6,
+      "startAmmo": 22
+    },
+    {
+      "enemyCount": 16,
+      "tankChance": 0.55,
+      "spawnInterval": 1.3,
+      "batteryDrain": 1.8,
+      "startAmmo": 28
+    }
+  ]
+}

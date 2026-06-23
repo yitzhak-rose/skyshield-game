@@ -31,6 +31,15 @@ private:
     /// @brief Replaces the current screen with the gameplay screen and marks it active.
     void showGameScreen();
 
+    /// @brief Loads saved persistent state before the first screen is shown.
+    void loadSavedData();
+
+    /// @brief Saves coins when the total has changed since the last write.
+    void saveCoinsIfChanged();
+
+    /// @brief Writes the current coin total to the save file.
+    void saveCoins();
+
     /// @brief Polls SFML events, handles window-owned events, and dispatches safe context to screens.
     void handleEvents();
 
@@ -51,6 +60,7 @@ private:
     sf::Sprite m_backgroundSprite;
 
     GameState m_gameState;
+    int m_lastSavedCoins = 0;
     ActiveScreen m_activeScreen = ActiveScreen::Start;
 
     std::unique_ptr<Screen> m_screen;
