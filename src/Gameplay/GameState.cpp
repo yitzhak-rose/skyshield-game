@@ -44,3 +44,7 @@ void GameState::recordEnemyDefeated(int coinReward) {
     ++m_enemiesDefeated;
     m_enemiesRemaining = std::max(0, m_enemiesRemaining - 1);
 }
+
+void GameState::setCoins(int coins) {
+    m_coins = std::max(0, coins);
+}

@@ -22,6 +22,9 @@ public:
     /// @brief Records a defeated enemy and awards its coins.
     void recordEnemyDefeated(int coinReward);
 
+    /// @brief Replaces the total coin count, clamping invalid negative values to zero.
+    void setCoins(int coins);
+
     int getLevelNumber() const { return m_levelNumber; }
     int getCoins() const { return m_coins; }
     int getLevelCoins() const { return m_levelCoins; }

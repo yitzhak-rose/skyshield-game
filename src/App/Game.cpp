@@ -4,9 +4,15 @@
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
 #include "Gameplay/Constants.h"
+#include "Gameplay/DataManager.h"
 #include "Enums/LevelResult.h"
 
 #include <optional>
+#include <string>
+
+namespace {
+const std::string SaveFilePath = "save.json";
+}
 
 Game::Game()
     : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
@@ -15,10 +21,13 @@ Game::Game()
     , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
     window.setFramerateLimit(60);
     initBackground();
+    loadSavedData();
     showStartScreen();
 }
 
-Game::~Game() = default;
+Game::~Game() {
+    saveCoins();
+}
 
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
@@ -38,7 +47,24 @@ void Game::showGameScreen() {
 void Game::showStartScreen() {
     m_activeScreen = ActiveScreen::Start;
     SoundManager::instance().startStartBackground();
-    m_screen = std::make_unique<StartScreen>();
+    m_screen = std::make_unique<StartScreen>(m_gameState);
+}
+
+void Game::loadSavedData() {
+    m_gameState.setCoins(DataManager::loadCoins(SaveFilePath));
+    m_lastSavedCoins = m_gameState.getCoins();
+}
+
+void Game::saveCoinsIfChanged() {
+    if (m_lastSavedCoins == m_gameState.getCoins())
+        return;
+
+    saveCoins();
+}
+
+void Game::saveCoins() {
+    DataManager::saveCoins(SaveFilePath, m_gameState.getCoins());
+    m_lastSavedCoins = m_gameState.getCoins();
 }
 
 void Game::run() {
@@ -126,6 +152,7 @@ ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
 
 void Game::update(float dt) {
     m_screen->update(dt);
+    saveCoinsIfChanged();
     SoundManager::instance().update(dt);
     handleScreenCommand();
 }

@@ -1,6 +1,7 @@
 #include "Screens/StartScreen.h"
 
 #include "Gameplay/Constants.h"
+#include "Gameplay/GameState.h"
 #include "Resources/ResourceManager.h"
 #include "Utilities/Utils.h"
 
@@ -25,10 +26,12 @@ sf::Vector2f centerOf(const sf::RectangleShape& shape) {
 }
 }
 
-StartScreen::StartScreen()
+StartScreen::StartScreen(const GameState& gameState)
     : m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::StartBackground))
     , m_settingsButton({ StartScreenConfig::SettingsButtonSize, StartScreenConfig::SettingsButtonSize })
     , m_settingsSprite(ResourceManager::instance().getImage(GameObjects::Gear))
+    , m_coin(ResourceManager::instance().getImage(GameObjects::Coin),
+        ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_quitButton({ StartScreenConfig::QuitButtonSize, StartScreenConfig::QuitButtonSize })
     , m_quitSprite(ResourceManager::instance().getImage(GameObjects::XSquare))
     , m_startButton({ StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight })
@@ -38,7 +41,8 @@ StartScreen::StartScreen()
                   StartScreenConfig::ButtonTextSize)
     , m_shopText(ResourceManager::instance().getFont(Fonts::StencilForce),
                  "Shop",
-                 StartScreenConfig::ButtonTextSize) {
+                 StartScreenConfig::ButtonTextSize)
+    , m_gameState(gameState) {
     configureLayout();
 }
 
@@ -60,6 +64,8 @@ void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCon
 }
 
 void StartScreen::update(float deltaTime) {
+    m_coin.update(deltaTime);
+    m_coin.setCount(m_gameState.getCoins());
     updateOverlay(deltaTime);
 }
 
@@ -68,6 +74,7 @@ void StartScreen::draw(sf::RenderTarget& target) {
     drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
     drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
     drawSettingsButton(target);
+    drawCoinCounter(target);
     drawQuitButton(target);
     drawOverlay(target);
 }
@@ -79,6 +86,7 @@ LevelResult StartScreen::getResult() const {
 void StartScreen::configureLayout() {
     configureBackground();
     configureSettingsButton();
+    configureCoinCounter();
     configureQuitButtonStyle();
     configureMainButtons();
     configureButtonText();
@@ -107,6 +115,16 @@ void StartScreen::configureSettingsButton() {
     m_settingsSprite.setScale({ settingsScale, settingsScale });
     GraphicsUtils::centerOrigin(m_settingsSprite);
     m_settingsSprite.setPosition(centerOf(m_settingsButton));
+}
+
+void StartScreen::configureCoinCounter() {
+    m_coin.setCount(m_gameState.getCoins());
+    m_coin.setPosition({
+        WindowConfig::Width - StartScreenConfig::SettingsPadding -
+            StartScreenConfig::QuitButtonSize -
+            StartScreenConfig::CoinCounterWidth,
+        StartScreenConfig::SettingsPadding + StartScreenConfig::QuitButtonSize / 2.f
+        });
 }
 
 void StartScreen::configureQuitButtonStyle() {
@@ -216,6 +234,16 @@ void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
 
     target.draw(quitButton);
     target.draw(m_quitSprite);
+}
+
+void StartScreen::drawCoinCounter(sf::RenderTarget& target) {
+    updateQuitButtonForTarget(target);
+    const sf::FloatRect quitBounds = m_quitButton.getGlobalBounds();
+    m_coin.setPosition({
+        quitBounds.position.x - StartScreenConfig::CoinCounterWidth,
+        quitBounds.position.y + quitBounds.size.y / 2.f
+        });
+    m_coin.draw(target);
 }
 
 void StartScreen::updateQuitButtonForTarget(const sf::RenderTarget& target) const {
