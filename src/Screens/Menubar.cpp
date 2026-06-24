@@ -82,19 +82,6 @@ void MenuBar::drawBombCounter(sf::RenderTarget& target, sf::RenderStates states)
     target.draw(makeBombCounterText(), states);
 }
 
-void MenuBar::drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const {
-    target.draw(makeLevelText(), states);
-}
-
-void MenuBar::drawTitle(sf::RenderTarget& target, sf::RenderStates states) const {
-    target.draw(makeTitleText(), states);
-}
-
-void MenuBar::drawBattery(sf::RenderTarget& target, sf::RenderStates states) const {
-    updateBatterySpriteForView(target.getView());
-    target.draw(m_batterySprite, states);
-}
-
 sf::Text MenuBar::makeBombCounterText() const {
     sf::Text text(m_font, "x " + std::to_string(m_state.getBombsAvailable()), MenuBarConfig::TextSize);
     text.setFillColor(sf::Color::White);
@@ -105,22 +92,8 @@ sf::Text MenuBar::makeBombCounterText() const {
     return text;
 }
 
-sf::Text MenuBar::makeLevelText() const {
-    sf::Text text(m_levelFont, "Level " + std::to_string(m_state.getLevelNumber()), MenuBarConfig::LevelTextSize);
-    text.setFillColor(MenuBarConfig::LevelTextColor);
-
-    const sf::FloatRect textBounds = text.getLocalBounds();
-    text.setOrigin({
-        textBounds.position.x + textBounds.size.x,
-        textBounds.position.y + textBounds.size.y / 2.f
-        });
-
-    const sf::FloatRect batteryBounds = m_batterySprite.getGlobalBounds();
-    text.setPosition({
-        batteryBounds.position.x - MenuBarConfig::LevelBatteryGap,
-        m_height / 2.f
-        });
-    return text;
+void MenuBar::drawTitle(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(makeTitleText(), states);
 }
 
 sf::Text MenuBar::makeTitleText() const {
@@ -129,6 +102,11 @@ sf::Text MenuBar::makeTitleText() const {
     GraphicsUtils::centerOrigin(title);
     title.setPosition({ m_width / 2.f, m_height / 2.f });
     return title;
+}
+
+void MenuBar::drawBattery(sf::RenderTarget& target, sf::RenderStates states) const {
+    updateBatterySpriteForView(target.getView());
+    target.draw(m_batterySprite, states);
 }
 
 void MenuBar::updateBatterySpriteForView(const sf::View& view) const {
@@ -154,4 +132,26 @@ sf::IntRect MenuBar::batteryFrameRect() const {
         0, BatteryConfig::FrameCount - 1);
 
     return sf::IntRect({ frameIndex * frameWidth, 0 }, { frameWidth, frameHeight });
+}
+
+void MenuBar::drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(makeLevelText(), states);
+}
+
+sf::Text MenuBar::makeLevelText() const {
+    sf::Text text(m_levelFont, "Level " + std::to_string(m_state.getLevelNumber()), MenuBarConfig::LevelTextSize);
+    text.setFillColor(MenuBarConfig::LevelTextColor);
+
+    const sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin({
+        textBounds.position.x + textBounds.size.x,
+        textBounds.position.y + textBounds.size.y / 2.f
+        });
+
+    const sf::FloatRect batteryBounds = m_batterySprite.getGlobalBounds();
+    text.setPosition({
+        batteryBounds.position.x - MenuBarConfig::LevelBatteryGap,
+        m_height / 2.f
+        });
+    return text;
 }

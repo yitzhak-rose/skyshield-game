@@ -1,5 +1,4 @@
 #include "Gameplay/World.h"
-#include "Gameplay/Enemies/EnemyFactory.h"
 #include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/CollisionHandling.h"
 #include "Resources/ResourceManager.h"
@@ -7,15 +6,15 @@
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <memory>
+#include "Gameplay/Factory.h" 
 
-// Builds the level: creates the drone and vehicle, applies the config.
+// Builds the level: creates the vehicle and drone (into m_objects), applies the config.
 World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     : m_config(config)
     , m_gameState(gameState)
-    , m_drone(ResourceManager::instance().getImage(GameObjects::Drone),
-        { WindowConfig::Width / 2.f, DroneConfig::FixedY }, gameState)
-    , m_vehicle(ResourceManager::instance().getImage(GameObjects::CommandCar),
-        { WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, gameState)
+    , m_objects()
+    , m_vehicle(Factory::createAndAdd<CommandVehicle>(GameObjects::CommandCar, sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState, m_objects))
+    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone, sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState, m_objects))
     , m_enemiesToSpawn(config.enemyCount)
 {
     m_gameState.startLevel(config, levelNumber);
@@ -26,7 +25,8 @@ void World::update(float dt) {
         return;
 
     spawnEnemies(dt);
-    updateObjects(dt);
+    for (const auto& object : m_objects)
+        object->update(dt);
     collectSpawned();
     handleCollisions();
     processDead();
@@ -52,54 +52,34 @@ void World::spawnEnemy() {
 
     EnemyType type = (Utils::randomFloat(0.f, 1.f) < m_config.tankChance)
         ? EnemyType::Tank : EnemyType::Fast;
-    m_objects.push_back(EnemyFactory::create(type, position, m_gameState, m_drone, m_vehicle));
-}
-
-void World::updateObjects(float dt) {
-    // The drone and the vehicle update first, so enemies read their current state.
-    m_drone.update(dt);
-    m_vehicle.update(dt);
-
-    for (auto& object : m_objects)
-        object->update(dt);
+    m_objects.push_back(Factory::createEnemy(type, position, m_gameState, m_drone, m_vehicle));
 }
 
 void World::collectSpawned() {
-    // Gather first, then append: appending while iterating would invalidate the loop.
-    std::vector<std::unique_ptr<GameObject>> spawned;
-    for (auto& object : m_objects)
-        if (auto child = object->takeSpawn())
-            spawned.push_back(std::move(child));
+    auto spawned = std::vector<std::unique_ptr<GameObject>>{};
 
-    for (auto& child : spawned)
-        m_objects.push_back(std::move(child));
+    // 1. Collect every newly spawned child from this frame
+    for (auto& obj : m_objects) {
+        if (auto child = obj->takeSpawn()) {
+            spawned.push_back(std::move(child));
+        }
+    }
+
+    // 2. Move the collected children into the main object list
+    m_objects.insert(
+        m_objects.end(),
+        std::make_move_iterator(spawned.begin()),
+        std::make_move_iterator(spawned.end())
+    );
 }
 
 void World::handleCollisions() {
-    // The vehicle is the only collidable that is not in m_objects, so it is
-    // tested explicitly against each object. Every object is also tested
-    // against every later object. Dead objects are skipped, which keeps a
-    // single bomb from striking more than one enemy in the same frame.
-    for (std::size_t i = 0; i < m_objects.size(); ++i) {
-        GameObject& a = *m_objects[i];
-        if (a.isDead())
-            continue;
-
-        if (a.getBounds().findIntersection(m_vehicle.getBounds()))
-            processCollision(a, m_vehicle);
-
+    for (std::size_t i = 0; i < m_objects.size(); ++i)
         for (std::size_t j = i + 1; j < m_objects.size(); ++j) {
-            if (a.isDead())
-                break;
-
-            GameObject& b = *m_objects[j];
-            if (b.isDead())
-                continue;
-
-            if (a.getBounds().findIntersection(b.getBounds()))
-                processCollision(a, b);
+            if (!m_objects[i]->isDead() && !m_objects[j]->isDead() &&
+                m_objects[i]->getBounds().findIntersection(m_objects[j]->getBounds()))
+                processCollision(*m_objects[i], *m_objects[j]);
         }
-    }
 }
 
 void World::processDead() {
@@ -109,9 +89,7 @@ void World::processDead() {
 }
 
 void World::checkResult() {
-    // Lost: the vehicle is destroyed, the battery is empty, or the level is
-    // unwinnable (no ammo, no bomb still falling, and enemies still remain).
-    if (m_vehicle.isDead() ||
+    if (m_gameState.getVehicleArmorPercent() <= 0.f ||
         m_gameState.getBatteryPercent() <= 0.f ||
         (m_gameState.getBombsAvailable() == 0 &&
             m_gameState.getActiveBombs() == 0 &&
@@ -120,27 +98,24 @@ void World::checkResult() {
         return;
     }
 
-    // Won: every enemy has been defeated.
     if (m_gameState.getEnemiesRemaining() == 0)
         m_gameState.setLevelResult(LevelResult::Won);
 }
 
 void World::draw(sf::RenderTarget& target) const {
-    // The vehicle sits at the back; the drone draws on top of everything.
-    m_vehicle.draw(target);
-
     for (const auto& object : m_objects)
         object->draw(target);
-
-    m_drone.draw(target);
 }
 
 void World::dropBomb() {
+    // 1. Check there's ammo left (and if so, take one bomb off the count)
     if (!m_drone.consumeAmmo())
         return;
 
-    m_objects.push_back(std::make_unique<Bomb>(
-        ResourceManager::instance().getImage(GameObjects::Bomb),
+    // 2. Build the bomb through the factory and push it straight into the object list
+    m_objects.push_back(Factory::create(
+        GameObjects::Bomb,
         m_drone.getPosition(),
-        m_gameState));
+        m_gameState
+    ));
 }

@@ -57,6 +57,12 @@ private:
     /// @brief Computes panel and button geometry.
     void configureLayout();
 
+    /// @brief Selects the button currently under the mouse cursor.
+    void updateSelectionFromMouse(sf::Vector2f mousePosition);
+
+    /// @brief Returns the button index at a position, or -1 if none.
+    int buttonIndexAt(sf::Vector2f position) const;
+
     /// @brief Dismisses the overlay and runs the selected action.
     void activateAction(std::size_t actionIndex);
 
@@ -66,20 +72,14 @@ private:
     /// @brief Moves keyboard selection to the next button.
     void moveSelectionRight();
 
-    /// @brief Selects the button currently under the mouse cursor.
-    void updateSelectionFromMouse(sf::Vector2f mousePosition);
-
-    /// @brief Returns the button index at a position, or -1 if none.
-    int buttonIndexAt(sf::Vector2f position) const;
-
-    /// @brief Resolves a button color from its action type and selection state.
-    sf::Color buttonColor(const OverlayAction& action, bool selected) const;
-
     /// @brief Draws the overlay title and body text.
     void drawText(sf::RenderTarget& target, sf::RenderStates states) const;
 
     /// @brief Draws all action buttons.
     void drawButtons(sf::RenderTarget& target, sf::RenderStates states) const;
+
+    /// @brief Resolves a button color from its action type and selection state.
+    sf::Color buttonColor(const OverlayAction& action, bool selected) const;
 
     /// @brief Creates centered text using the overlay font.
     sf::Text makeCenteredText(const std::string& value,

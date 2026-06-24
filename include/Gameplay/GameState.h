@@ -22,13 +22,29 @@ public:
     /// @brief Records a defeated enemy and awards its coins.
     void recordEnemyDefeated(int coinReward);
 
-    /// @brief Replaces the total coin count, clamping invalid negative values to zero.
-    void setCoins(int coins);
+    /// @brief Spends coins if enough are available; returns whether the purchase succeeded.
+    bool spend(int cost);
+
+    /// @brief Adds bombs to the player's available ammo.
+    void addBombs(int amount);
+
+    /// @brief Refills battery by a percentage (may exceed the starting full value).
+    void addBattery(float amount);
+
+    /// @brief Restores vehicle armor by a percentage (may exceed the starting full value).
+    void addArmor(float amount);
+
+    /// @brief Tracks a bomb that is currently falling (used to detect an unwinnable state).
+    void addActiveBomb() { ++m_activeBombs; }
+
+    /// @brief Drops the count of falling bombs by one.
+    void removeActiveBomb() { if (m_activeBombs > 0) --m_activeBombs; }
 
     int getLevelNumber() const { return m_levelNumber; }
     int getCoins() const { return m_coins; }
     int getLevelCoins() const { return m_levelCoins; }
     int getBombsAvailable() const { return m_bombsAvailable; }
+    int getActiveBombs() const { return m_activeBombs; }
     float getBatteryPercent() const { return m_batteryPercent; }
     float getVehicleArmorPercent() const { return m_vehicleArmorPercent; }
     float getDamageTaken() const { return m_damageTaken; }
@@ -43,6 +59,7 @@ private:
     int m_coins = 0;
     int m_levelCoins = 0;
     int m_bombsAvailable = 0;
+    int m_activeBombs = 0;
     float m_batteryPercent = 0.f;
     float m_batteryDrainRate = 0.f;
     float m_vehicleArmorPercent = 0.f;

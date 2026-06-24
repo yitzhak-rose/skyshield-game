@@ -104,6 +104,19 @@ void Enemy::decideState() {
         m_state = EnemyState::Advancing;
 }
 
+// Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
+bool Enemy::isDroneInRange() const {
+    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
+        : EnemyConfig::PanicRange;
+    return std::abs(droneX() - getPosition().x) < range;
+}
+
+bool Enemy::isInFiringRange() const {
+    float centerDist = std::abs(vehicleX() - getPosition().x);
+    float gap = centerDist - vehicleHalfWidth() - getBounds().size.x / 2.f;
+    return gap <= m_stopRange;
+}
+
 void Enemy::advance(float dt) {
     m_velocity.x = directionToVehicle() * getSpeed();
     move(dt);
@@ -167,17 +180,4 @@ void Enemy::updateFiring(float dt) {
         m_fireRequested = true;
         m_fireTimer = 0.f;
     }
-}
-
-// Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
-bool Enemy::isDroneInRange() const {
-    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
-        : EnemyConfig::PanicRange;
-    return std::abs(droneX() - getPosition().x) < range;
-}
-
-bool Enemy::isInFiringRange() const {
-    float centerDist = std::abs(vehicleX() - getPosition().x);
-    float gap = centerDist - vehicleHalfWidth() - getBounds().size.x / 2.f;
-    return gap <= m_stopRange;
 }

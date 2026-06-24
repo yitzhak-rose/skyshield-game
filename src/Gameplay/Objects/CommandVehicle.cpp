@@ -41,13 +41,13 @@ void CommandVehicle::update(float dt) {
     }
 }
 
+float CommandVehicle::getArmorPercent() const {
+    return gameState().getVehicleArmorPercent();
+}
+
 void CommandVehicle::takeDamage() {
     gameState().damageVehicle(VehicleConfig::DamagePerHit);
     m_shakeTimer = VehicleConfig::ShakeDuration; // kick off a fresh shake on every hit
     if (getArmorPercent() <= 0.f)
         destroy();
-}
-
-float CommandVehicle::getArmorPercent() const {
-    return gameState().getVehicleArmorPercent();
 }

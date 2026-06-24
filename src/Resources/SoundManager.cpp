@@ -27,6 +27,19 @@ void SoundManager::startStartBackground() {
     playBackgroundTrack(Sounds::StartBackground);
 }
 
+void SoundManager::playBackgroundTrack(Sounds sound) {
+    if (!m_soundsEnabled)
+        return;
+
+    m_backgroundMusic.stop();
+    if (!m_backgroundMusic.openFromFile(ResourceManager::instance().getSoundPath(sound)))
+        throw std::runtime_error("Failed to open background sound");
+
+    m_backgroundMusic.setLooping(true);
+    m_backgroundMusic.setVolume(m_currentBackgroundVolume);
+    m_backgroundMusic.play();
+}
+
 void SoundManager::stopBackground() {
     m_backgroundMusic.stop();
     m_backgroundDucked = false;
@@ -50,37 +63,13 @@ void SoundManager::update(float deltaTime) {
     changeVolume(m_targetBackgroundVolume, deltaTime);
 }
 
-void SoundManager::playLevelFinished() {
-    playForegroundEffect(m_levelFinishedSound);
-}
-
-void SoundManager::playMissionFailed() {
-    playForegroundEffect(m_missionFailedSound);
-}
-
-void SoundManager::playForegroundEffect(sf::Sound& sound) {
-    if (!m_soundsEnabled)
-        return;
-
-    m_backgroundDucked = true;
-    m_targetBackgroundVolume = DuckedBackgroundVolume;
-
-    sound.stop();
-    sound.setPlayingOffset(sf::seconds(0.f));
-    sound.play();
-}
-
-void SoundManager::playBackgroundTrack(Sounds sound) {
-    if (!m_soundsEnabled)
-        return;
-
-    m_backgroundMusic.stop();
-    if (!m_backgroundMusic.openFromFile(ResourceManager::instance().getSoundPath(sound)))
-        throw std::runtime_error("Failed to open background sound");
-
-    m_backgroundMusic.setLooping(true);
-    m_backgroundMusic.setVolume(m_currentBackgroundVolume);
-    m_backgroundMusic.play();
+void SoundManager::restoreBackgroundVolumeIfEffectsFinished() {
+    if (m_backgroundDucked &&
+        m_levelFinishedSound.getStatus() == sf::Sound::Status::Stopped &&
+        m_missionFailedSound.getStatus() == sf::Sound::Status::Stopped) {
+        m_targetBackgroundVolume = BackgroundVolume;
+        m_backgroundDucked = false;
+    }
 }
 
 void SoundManager::changeVolume(float targetVolume, float deltaTime) {
@@ -101,11 +90,22 @@ void SoundManager::changeVolume(float targetVolume, float deltaTime) {
     m_backgroundMusic.setVolume(m_currentBackgroundVolume);
 }
 
-void SoundManager::restoreBackgroundVolumeIfEffectsFinished() {
-    if (m_backgroundDucked &&
-        m_levelFinishedSound.getStatus() == sf::Sound::Status::Stopped &&
-        m_missionFailedSound.getStatus() == sf::Sound::Status::Stopped) {
-        m_targetBackgroundVolume = BackgroundVolume;
-        m_backgroundDucked = false;
-    }
+void SoundManager::playLevelFinished() {
+    playForegroundEffect(m_levelFinishedSound);
+}
+
+void SoundManager::playMissionFailed() {
+    playForegroundEffect(m_missionFailedSound);
+}
+
+void SoundManager::playForegroundEffect(sf::Sound& sound) {
+    if (!m_soundsEnabled)
+        return;
+
+    m_backgroundDucked = true;
+    m_targetBackgroundVolume = DuckedBackgroundVolume;
+
+    sound.stop();
+    sound.setPlayingOffset(sf::seconds(0.f));
+    sound.play();
 }

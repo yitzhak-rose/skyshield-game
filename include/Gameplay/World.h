@@ -9,73 +9,65 @@
 #include <vector>
 #include <memory>
 
-// The game's logic core: owns every gameplay object, runs the simulation,
-// resolves collisions, and reports the stage outcome.
+/// @brief Owns and drives all gameplay objects for a single level: spawning enemies,
+///        updating and drawing the unified object list, resolving collisions, and
+///        tracking whether the level has been won or lost.
 class World {
 public:
-
-    // Builds the level: creates the drone and vehicle, applies the level config.
+    /// @brief Builds the level: creates the vehicle and drone, and applies the level config.
     World(const LevelConfig& config, GameState& gameState, int levelNumber);
 
-    // Advances the whole simulation by one frame.
+    /// @brief Advances spawning, all objects, collisions, and the win/loss check by one frame.
     void update(float dt);
 
-    // Draws every object in the level.
+    /// @brief Draws every live object in the world.
     void draw(sf::RenderTarget& target) const;
 
-    // Steers the player's drone (called by GameScreen from input).
+    /// @brief Starts the drone moving left.
     void moveDroneLeft() { m_drone.moveLeft(); }
+
+    /// @brief Starts the drone moving right.
     void moveDroneRight() { m_drone.moveRight(); }
+
+    /// @brief Stops the drone's horizontal movement.
     void stopDrone() { m_drone.stop(); }
 
-    // Drops a bomb if the drone still has ammo.
+    /// @brief Drops a bomb from the drone's current position, if ammo remains.
     void dropBomb();
 
-    // Returns whether the level is running, won, or lost.
+    /// @brief Returns whether the level is still running, won, or lost.
     LevelResult getResult() const { return m_gameState.getLevelResult(); }
 
-    // Returns the coins earned in this level.
+    /// @brief Returns the coins collected so far in the current level.
     int getCoinsEarned() const { return m_gameState.getLevelCoins(); }
 
 private:
-
-    // Spawns queued enemies over time.
+    /// @brief Spawns a new enemy once the spawn interval has elapsed, while any remain.
     void spawnEnemies(float dt);
 
-    // Creates a single enemy at a screen edge (type chosen by the tank chance).
+    /// @brief Creates a single enemy at a random screen edge.
     void spawnEnemy();
 
-    // Updates the drone, the vehicle, and every object in the world.
-    void updateObjects(float dt);
-
-    // Adds any objects the world's objects produced this frame (e.g. enemy bullets).
+    /// @brief Moves objects spawned by other objects this frame into the main object list.
     void collectSpawned();
 
-    // Resolves every overlapping pair of objects via multiple dispatch.
+    /// @brief Checks every pair of live objects for overlap and resolves any collisions.
     void handleCollisions();
 
-    // Removes objects that were marked dead during simulation.
+    /// @brief Removes all objects marked dead this frame.
     void processDead();
 
-    // Decides if the level is now won or lost.
+    /// @brief Updates the level result based on vehicle health, battery, and enemies remaining.
     void checkResult();
 
-    // The level's fixed parameters (read-only after construction).
     LevelConfig m_config;
-
-    // Mutable data shared by the game, world, objects, and HUD.
     GameState& m_gameState;
 
-    // The player and the protected target. Declared before m_objects so they
-    // outlive the enemies, which hold references to them.
-    Drone m_drone;
-    CommandVehicle m_vehicle;
-
-    // Every dynamic object (enemies, bombs, bullets) as one polymorphic collection.
     std::vector<std::unique_ptr<GameObject>> m_objects;
 
-    // Spawn state that changes during the level.
+    CommandVehicle& m_vehicle;
+    Drone& m_drone;
+
     int   m_enemiesToSpawn;
     float m_spawnTimer = 0.f;
-
 };

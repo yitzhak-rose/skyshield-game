@@ -46,14 +46,14 @@ private:
     /// @brief Opens a looping background track and starts it from the beginning.
     void playBackgroundTrack(Sounds sound);
 
-    /// @brief Plays a foreground effect and lowers background volume until effects finish.
-    void playForegroundEffect(sf::Sound& sound);
+    /// @brief Restores normal music volume if all foreground effects have finished.
+    void restoreBackgroundVolumeIfEffectsFinished();
 
     /// @brief Moves the background volume toward a target at a steady fade rate.
     void changeVolume(float targetVolume, float deltaTime);
 
-    /// @brief Restores normal music volume if all foreground effects have finished.
-    void restoreBackgroundVolumeIfEffectsFinished();
+    /// @brief Plays a foreground effect and lowers background volume until effects finish.
+    void playForegroundEffect(sf::Sound& sound);
 
     sf::Music m_backgroundMusic;
     sf::SoundBuffer m_levelFinishedBuffer;

@@ -13,10 +13,6 @@ void Screen::handleEvent(const sf::Event& event, const ScreenEventContext& conte
     clearDismissedOverlay();
 }
 
-void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
-    m_overlay = std::move(overlay);
-}
-
 bool Screen::handleOverlayEvent(const sf::Event& event, const ScreenEventContext& context) {
     if (!hasOverlay())
         return false;
@@ -45,4 +41,8 @@ void Screen::drawOverlay(sf::RenderTarget& target) const {
 void Screen::clearDismissedOverlay() {
     if (hasOverlay() && m_overlay->isDismissed())
         m_overlay.reset();
+}
+
+void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
+    m_overlay = std::move(overlay);
 }

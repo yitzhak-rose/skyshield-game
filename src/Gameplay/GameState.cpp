@@ -9,6 +9,7 @@ void GameState::startLevel(const LevelConfig& config, int levelNumber) {
     m_levelNumber = std::max(1, levelNumber);
     m_levelCoins = 0;
     m_bombsAvailable = std::max(0, config.startAmmo);
+    m_activeBombs = 0;
     m_batteryPercent = DroneConfig::StartBattery;
     m_batteryDrainRate = std::max(0.f, config.batteryDrain);
     m_vehicleArmorPercent = VehicleConfig::StartArmor;
@@ -45,6 +46,22 @@ void GameState::recordEnemyDefeated(int coinReward) {
     m_enemiesRemaining = std::max(0, m_enemiesRemaining - 1);
 }
 
-void GameState::setCoins(int coins) {
-    m_coins = std::max(0, coins);
+bool GameState::spend(int cost) {
+    if (cost < 0 || m_coins < cost)
+        return false;
+
+    m_coins -= cost;
+    return true;
+}
+
+void GameState::addBombs(int amount) {
+    m_bombsAvailable += std::max(0, amount);
+}
+
+void GameState::addBattery(float amount) {
+    m_batteryPercent += std::max(0.f, amount);
+}
+
+void GameState::addArmor(float amount) {
+    m_vehicleArmorPercent += std::max(0.f, amount);
 }

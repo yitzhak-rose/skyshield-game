@@ -37,12 +37,12 @@ private:
     void configureCoin();
     void drawContent(sf::RenderTarget& target, sf::RenderStates states) const;
     void drawBombCounter(sf::RenderTarget& target, sf::RenderStates states) const;
-    void drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const;
-    void drawTitle(sf::RenderTarget& target, sf::RenderStates states) const;
-    void drawBattery(sf::RenderTarget& target, sf::RenderStates states) const;
     sf::Text makeBombCounterText() const;
-    sf::Text makeLevelText() const;
+    void drawTitle(sf::RenderTarget& target, sf::RenderStates states) const;
     sf::Text makeTitleText() const;
-    sf::IntRect batteryFrameRect() const;
+    void drawBattery(sf::RenderTarget& target, sf::RenderStates states) const;
     void updateBatterySpriteForView(const sf::View& view) const;
+    sf::IntRect batteryFrameRect() const;
+    void drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const;
+    sf::Text makeLevelText() const;
 };

@@ -46,43 +46,6 @@ StartScreen::StartScreen(const GameState& gameState)
     configureLayout();
 }
 
-void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
-    if (event.is<sf::Event::MouseMoved>()) {
-        updateHover(context.mousePosition);
-    }
-
-    if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
-        if (mousePress->button == sf::Mouse::Button::Left)
-            handleClick(context.mousePosition);
-    }
-
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Enter ||
-            key->code == sf::Keyboard::Key::Space)
-            requestCommand(ScreenCommand::StartGame);
-    }
-}
-
-void StartScreen::update(float deltaTime) {
-    m_coin.update(deltaTime);
-    m_coin.setCount(m_gameState.getCoins());
-    updateOverlay(deltaTime);
-}
-
-void StartScreen::draw(sf::RenderTarget& target) {
-    target.draw(m_backgroundSprite);
-    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
-    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
-    drawSettingsButton(target);
-    drawCoinCounter(target);
-    drawQuitButton(target);
-    drawOverlay(target);
-}
-
-LevelResult StartScreen::getResult() const {
-    return getCommand() == ScreenCommand::StartGame ? LevelResult::Won : LevelResult::Running;
-}
-
 void StartScreen::configureLayout() {
     configureBackground();
     configureSettingsButton();
@@ -170,6 +133,27 @@ void StartScreen::configureButtonText() {
     m_shopText.setPosition(centerOf(m_shopButton));
 }
 
+void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (event.is<sf::Event::MouseMoved>()) {
+        updateHover(context.mousePosition);
+    }
+
+    if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
+        if (mousePress->button == sf::Mouse::Button::Left)
+            handleClick(context.mousePosition);
+    }
+
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+        if (key->code == sf::Keyboard::Key::Enter ||
+            key->code == sf::Keyboard::Key::Space)
+            requestCommand(ScreenCommand::StartGame);
+    }
+}
+
+void StartScreen::updateHover(sf::Vector2f position) {
+    m_hoveredButton = buttonAt(position);
+}
+
 void StartScreen::handleClick(sf::Vector2f position) {
     switch (buttonAt(position)) {
         case Button::Start:
@@ -185,10 +169,6 @@ void StartScreen::handleClick(sf::Vector2f position) {
         case Button::None:
             break;
     }
-}
-
-void StartScreen::updateHover(sf::Vector2f position) {
-    m_hoveredButton = buttonAt(position);
 }
 
 StartScreen::Button StartScreen::buttonAt(sf::Vector2f position) const {
@@ -216,6 +196,35 @@ void StartScreen::showFeatureUnavailableOverlay() {
         }));
 }
 
+void StartScreen::update(float deltaTime) {
+    m_coin.update(deltaTime);
+    m_coin.setCount(m_gameState.getCoins());
+    updateOverlay(deltaTime);
+}
+
+void StartScreen::draw(sf::RenderTarget& target) {
+    target.draw(m_backgroundSprite);
+    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
+    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
+    drawSettingsButton(target);
+    drawCoinCounter(target);
+    drawQuitButton(target);
+    drawOverlay(target);
+}
+
+void StartScreen::drawTextButton(sf::RenderTarget& target,
+                                 sf::RenderStates states,
+                                 const sf::RectangleShape& button,
+                                 const sf::Text& text,
+                                 Button buttonType) const {
+    sf::RectangleShape buttonShape = button;
+    if (m_hoveredButton == buttonType)
+        buttonShape.setFillColor(StartScreenConfig::ButtonHoverColor);
+
+    target.draw(buttonShape, states);
+    target.draw(text, states);
+}
+
 void StartScreen::drawSettingsButton(sf::RenderTarget& target) const {
     sf::RectangleShape settingsButton = m_settingsButton;
     if (m_hoveredButton == Button::Settings)
@@ -223,6 +232,16 @@ void StartScreen::drawSettingsButton(sf::RenderTarget& target) const {
 
     target.draw(settingsButton);
     target.draw(m_settingsSprite);
+}
+
+void StartScreen::drawCoinCounter(sf::RenderTarget& target) {
+    updateQuitButtonForTarget(target);
+    const sf::FloatRect quitBounds = m_quitButton.getGlobalBounds();
+    m_coin.setPosition({
+        quitBounds.position.x - StartScreenConfig::CoinCounterWidth,
+        quitBounds.position.y + quitBounds.size.y / 2.f
+        });
+    m_coin.draw(target);
 }
 
 void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
@@ -234,16 +253,6 @@ void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
 
     target.draw(quitButton);
     target.draw(m_quitSprite);
-}
-
-void StartScreen::drawCoinCounter(sf::RenderTarget& target) {
-    updateQuitButtonForTarget(target);
-    const sf::FloatRect quitBounds = m_quitButton.getGlobalBounds();
-    m_coin.setPosition({
-        quitBounds.position.x - StartScreenConfig::CoinCounterWidth,
-        quitBounds.position.y + quitBounds.size.y / 2.f
-        });
-    m_coin.draw(target);
 }
 
 void StartScreen::updateQuitButtonForTarget(const sf::RenderTarget& target) const {
@@ -258,15 +267,6 @@ void StartScreen::updateQuitButtonForTarget(const sf::RenderTarget& target) cons
     m_quitSprite.setPosition(centerOf(m_quitButton));
 }
 
-void StartScreen::drawTextButton(sf::RenderTarget& target,
-                                 sf::RenderStates states,
-                                 const sf::RectangleShape& button,
-                                 const sf::Text& text,
-                                 Button buttonType) const {
-    sf::RectangleShape buttonShape = button;
-    if (m_hoveredButton == buttonType)
-        buttonShape.setFillColor(StartScreenConfig::ButtonHoverColor);
-
-    target.draw(buttonShape, states);
-    target.draw(text, states);
+LevelResult StartScreen::getResult() const {
+    return getCommand() == ScreenCommand::StartGame ? LevelResult::Won : LevelResult::Running;
 }

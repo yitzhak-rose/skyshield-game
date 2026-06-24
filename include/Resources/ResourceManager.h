@@ -52,10 +52,6 @@ private:
     /// @throws std::runtime_error If any resource loading fails.
     void loadData();
 
-    /// @brief Stores sound asset paths and verifies they can be opened.
-    /// @throws std::runtime_error If any sound file is missing.
-    void loadSoundPaths();
-
     /// @brief Template helper function to load a list of resource infos into a destination map.
     /// @tparam Key The key type for the map (e.g. enum class).
     /// @tparam Value The value type to store (e.g. sf::Texture).
@@ -68,6 +64,10 @@ private:
     void loadResources(const std::array<ResourceInfo<Key>, N>& resources, 
                         std::map<Key, Value>& dataMap,
                         std::function<std::string(Key)> pathResolver = nullptr);
+
+    /// @brief Stores sound asset paths and verifies they can be opened.
+    /// @throws std::runtime_error If any sound file is missing.
+    void loadSoundPaths();
 
     /// @brief Storage for loaded game object textures.
     std::map<GameObjects, sf::Texture> m_imageTextures;
