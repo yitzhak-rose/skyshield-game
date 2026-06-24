@@ -1,18 +1,14 @@
 #include "Graphics/Animation.h"
 
 // Stores the strip layout and timing; frame state starts at zero.
-Animation::Animation(sf::Vector2i frameSize, int frameCount, float frameDuration, bool loop)
+Animation::Animation(sf::Vector2i frameSize, int frameCount, float frameDuration)
     : m_frameSize(frameSize)
     , m_frameCount(frameCount)
-    , m_frameDuration(frameDuration)
-    , m_loop(loop) {
+    , m_frameDuration(frameDuration) {
 }
 
-// Accumulates elapsed time and advances to the next frame when due.
+// Accumulates elapsed time and advances to the next frame when due, wrapping at the end.
 void Animation::update(float dt) {
-    if (m_finished)
-        return;
-
     m_timer += dt;
     if (m_timer < m_frameDuration)
         return;
@@ -20,14 +16,8 @@ void Animation::update(float dt) {
     m_timer -= m_frameDuration;
     ++m_currentFrame;
 
-    if (m_currentFrame >= m_frameCount) {
-        if (m_loop)
-            m_currentFrame = 0;
-        else {
-            m_currentFrame = m_frameCount - 1;
-            m_finished = true;
-        }
-    }
+    if (m_currentFrame >= m_frameCount)
+        m_currentFrame = 0;
 }
 
 // Maps the current frame index to its rectangle on the horizontal strip.
@@ -44,7 +34,6 @@ sf::IntRect Animation::frameRect(int index) const {
 void Animation::reset() {
     m_currentFrame = 0;
     m_timer = 0.f;
-    m_finished = false;
 }
 
 // Splits the texture width into equal frames; height is the full sheet height.

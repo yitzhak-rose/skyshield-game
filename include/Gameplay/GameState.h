@@ -22,20 +22,8 @@ public:
     /// @brief Records a defeated enemy and awards its coins.
     void recordEnemyDefeated(int coinReward);
 
-    /// @brief Spends coins if enough are available; returns whether the purchase succeeded.
-    bool spend(int cost);
-
-    /// @brief Adds bombs to the player's available ammo.
-    void addBombs(int amount);
-
-    /// @brief Refills battery by a percentage (may exceed the starting full value).
-    void addBattery(float amount);
-
-    /// @brief Restores vehicle armor by a percentage (may exceed the starting full value).
-    void addArmor(float amount);
-
     /// @brief Tracks a bomb that is currently falling (used to detect an unwinnable state).
-    void addActiveBomb() { ++m_activeBombs; }
+    void addActiveBomb() { m_activeBombs++; }
 
     /// @brief Drops the count of falling bombs by one.
     void removeActiveBomb() { if (m_activeBombs > 0) --m_activeBombs; }

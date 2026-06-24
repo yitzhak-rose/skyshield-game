@@ -39,9 +39,6 @@ public:
     /// @brief Sets the object's position.
     void setPosition(sf::Vector2f position);
 
-    /// @brief Returns true while the object is still in play.
-    bool isAlive() const { return m_alive; }
-
     /// @brief Returns true once the object has been marked dead.
     bool isDead() const { return !m_alive; }
 

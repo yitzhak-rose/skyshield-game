@@ -55,9 +55,9 @@ float Enemy::getBulletVelocityX() const {
 void Enemy::update(float dt) {
     decideState();
     switch (m_state) {
-    case EnemyState::Advancing:  advance(dt);       break;
-    case EnemyState::Panicking:  panic(dt);         break;
-    case EnemyState::Firing:     updateFiring(dt);  break;
+    case EnemyState::Advancing: advance(dt);      break;
+    case EnemyState::Panicking: panic(dt);        break;
+    case EnemyState::Firing:    updateFiring(dt); break;
     }
     updateFacing();
     updateAnimation(dt);
@@ -82,32 +82,24 @@ void Enemy::updateAnimation(float dt) {
 
 // Mirrors the sprite when moving left; the art faces right by default.
 void Enemy::updateFacing() {
-    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
-
     float flip;
-    if (m_velocity.x != 0.f)
-        flip = (m_velocity.x < 0.f) ? -1.f : 1.f;      // moving: face the travel direction
-    else if (isFiring())
-        flip = directionToVehicle();                    // stopped to fire: face the vehicle
-    else
-        return;                                          // otherwise keep current facing
+    if (m_velocity.x != 0.f)        flip = (m_velocity.x < 0.f) ? -1.f : 1.f;  // moving: face travel direction
+    else if (isFiring())            flip = directionToVehicle();               // stopped to fire: face vehicle
+    else                            return;                                    // otherwise keep current facing
 
+    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
     m_sprite.setScale({ flip * scale, scale });
 }
 
 void Enemy::decideState() {
-    if (isDroneInRange())
-        m_state = EnemyState::Panicking;
-    else if (isInFiringRange())
-        m_state = EnemyState::Firing;
-    else
-        m_state = EnemyState::Advancing;
+    m_state = isDroneInRange() ? EnemyState::Panicking
+        : isInFiringRange() ? EnemyState::Firing
+        : EnemyState::Advancing;
 }
 
 // Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
 bool Enemy::isDroneInRange() const {
-    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
-        : EnemyConfig::PanicRange;
+    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange : EnemyConfig::PanicRange;
     return std::abs(droneX() - getPosition().x) < range;
 }
 
@@ -124,20 +116,12 @@ void Enemy::advance(float dt) {
 
 void Enemy::panic(float dt) {
     float x = getPosition().x;
-
-    // Get the movement bounds, then how far we are from each.
     auto [leftWall, rightWall] = calculateWalls(x);
-    float distToLeft = x - leftWall;
-    float distToRight = rightWall - x;
+    updateUTurnState(x - leftWall, rightWall - x);
 
-    // Update the U-turn state.
-    updateUTurnState(distToLeft, distToRight);
-
-    // If not mid-U-turn, flee away from the drone.
     if (!m_isUTurning)
         m_fleeDirection = (droneX() < x) ? 1.f : -1.f;
 
-    // Move and clamp inside the bounds.
     m_velocity.x = m_fleeDirection * getSpeed() * EnemyConfig::PanicMultiplier;
     move(dt);
     setPosition({ std::clamp(getPosition().x, leftWall, rightWall), getPosition().y });

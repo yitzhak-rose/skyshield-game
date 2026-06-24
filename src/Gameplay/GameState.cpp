@@ -46,22 +46,3 @@ void GameState::recordEnemyDefeated(int coinReward) {
     m_enemiesRemaining = std::max(0, m_enemiesRemaining - 1);
 }
 
-bool GameState::spend(int cost) {
-    if (cost < 0 || m_coins < cost)
-        return false;
-
-    m_coins -= cost;
-    return true;
-}
-
-void GameState::addBombs(int amount) {
-    m_bombsAvailable += std::max(0, amount);
-}
-
-void GameState::addBattery(float amount) {
-    m_batteryPercent += std::max(0.f, amount);
-}
-
-void GameState::addArmor(float amount) {
-    m_vehicleArmorPercent += std::max(0.f, amount);
-}

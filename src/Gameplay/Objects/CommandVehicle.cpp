@@ -14,31 +14,34 @@ CommandVehicle::CommandVehicle(
     setupSprite(m_animation.getFrameRect(), VehicleConfig::Scale);
 }
 
-// Loops frames 0..3 (flashing beacon) while healthy, or 4..5 (burning) when critical.
+// Loops frames 0..3 (flashing beacon) while healthy, or 4..5 (burning) when critical, and runs the hit-shake.
 void CommandVehicle::update(float dt) {
+    updateAnimationFrame(dt);
+    updateShake(dt);
+}
+
+void CommandVehicle::updateAnimationFrame(float dt) {
     m_frameTimer += dt;
     int step = static_cast<int>(m_frameTimer / VehicleConfig::FrameDuration);
 
-    int frame;
-    if (getArmorPercent() >= VehicleConfig::CriticalArmor)
-        frame = step % VehicleConfig::NormalFrames;
-    else {
-        int burningCount = VehicleConfig::FrameCount - VehicleConfig::NormalFrames;
-        frame = VehicleConfig::NormalFrames + step % burningCount;
-    }
-    m_sprite.setTextureRect(m_animation.frameRect(frame));
+    const int frame = (getArmorPercent() >= VehicleConfig::CriticalArmor)
+        ? step % VehicleConfig::NormalFrames
+        : VehicleConfig::NormalFrames + step % (VehicleConfig::FrameCount - VehicleConfig::NormalFrames);
 
-    // Briefly shake after a hit, decaying back to the resting position.
-    if (m_shakeTimer > 0.f) {
-        m_shakeTimer -= dt;
-        float decay = m_shakeTimer / VehicleConfig::ShakeDuration; // 1 -> 0
-        float offsetX = std::sin(m_shakeTimer * VehicleConfig::ShakeSpeed)
-            * VehicleConfig::ShakeMagnitude * decay;
-        m_sprite.setPosition({ m_basePosition.x + offsetX, m_basePosition.y });
-    }
-    else {
+    m_sprite.setTextureRect(m_animation.frameRect(frame));
+}
+
+// Briefly shakes after a hit, decaying back to the resting position.
+void CommandVehicle::updateShake(float dt) {
+    if (m_shakeTimer <= 0.f) {
         m_sprite.setPosition(m_basePosition);
+        return;
     }
+
+    m_shakeTimer -= dt;
+    float decay = m_shakeTimer / VehicleConfig::ShakeDuration; // 1 -> 0
+    float offsetX = std::sin(m_shakeTimer * VehicleConfig::ShakeSpeed) * VehicleConfig::ShakeMagnitude * decay;
+    m_sprite.setPosition({ m_basePosition.x + offsetX, m_basePosition.y });
 }
 
 float CommandVehicle::getArmorPercent() const {

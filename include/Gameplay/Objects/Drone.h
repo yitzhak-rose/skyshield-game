@@ -25,12 +25,6 @@ public:
     /// @brief Consumes one bomb from the ammo count.
     bool consumeAmmo();
 
-    /// @brief Returns the current battery level as a percentage (0 to 100).
-    float getBatteryPercent() const;
-
-    /// @brief Returns the number of bombs remaining.
-    int getRemainingAmmo() const;
-
 private:
     /// @brief Cycles the drone's rotor frames.
     Animation m_animation;

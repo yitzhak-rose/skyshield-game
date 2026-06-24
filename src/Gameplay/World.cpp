@@ -13,8 +13,10 @@ World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     : m_config(config)
     , m_gameState(gameState)
     , m_objects()
-    , m_vehicle(Factory::createAndAdd<CommandVehicle>(GameObjects::CommandCar, sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState, m_objects))
-    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone, sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState, m_objects))
+    , m_vehicle(Factory::createAndAdd<CommandVehicle>(GameObjects::CommandCar,
+        sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState, m_objects))
+    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone, 
+        sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState, m_objects))
     , m_enemiesToSpawn(config.enemyCount)
 {
     m_gameState.startLevel(config, levelNumber);
@@ -74,8 +76,8 @@ void World::collectSpawned() {
 }
 
 void World::handleCollisions() {
-    for (std::size_t i = 0; i < m_objects.size(); ++i)
-        for (std::size_t j = i + 1; j < m_objects.size(); ++j) {
+    for (std::size_t i = 0; i < m_objects.size(); i++)
+        for (std::size_t j = i + 1; j < m_objects.size(); j++) {
             if (!m_objects[i]->isDead() && !m_objects[j]->isDead() &&
                 m_objects[i]->getBounds().findIntersection(m_objects[j]->getBounds()))
                 processCollision(*m_objects[i], *m_objects[j]);
@@ -108,11 +110,11 @@ void World::draw(sf::RenderTarget& target) const {
 }
 
 void World::dropBomb() {
-    // 1. Check there's ammo left (and if so, take one bomb off the count)
+    //  Check there's ammo left (and if so, take one bomb off the count)
     if (!m_drone.consumeAmmo())
         return;
 
-    // 2. Build the bomb through the factory and push it straight into the object list
+    //  Build the bomb through the factory and push it straight into the object list
     m_objects.push_back(Factory::create(
         GameObjects::Bomb,
         m_drone.getPosition(),

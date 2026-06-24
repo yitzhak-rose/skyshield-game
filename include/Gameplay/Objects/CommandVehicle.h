@@ -20,6 +20,12 @@ public:
     float getArmorPercent() const;
 
 private:
+    /// @brief Picks and shows the right beacon/burning frame for this moment.
+    void updateAnimationFrame(float dt);
+
+    /// @brief Drives the post-hit shake offset, or rests at the base position when idle.
+    void updateShake(float dt);
+
     /// @brief Provides the frame geometry of the vehicle sheet.
     Animation m_animation;
 

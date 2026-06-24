@@ -38,9 +38,6 @@ public:
     /// @brief Returns whether the level is still running, won, or lost.
     LevelResult getResult() const { return m_gameState.getLevelResult(); }
 
-    /// @brief Returns the coins collected so far in the current level.
-    int getCoinsEarned() const { return m_gameState.getLevelCoins(); }
-
 private:
     /// @brief Spawns a new enemy once the spawn interval has elapsed, while any remain.
     void spawnEnemies(float dt);

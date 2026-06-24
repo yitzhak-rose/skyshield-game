@@ -31,15 +31,6 @@ bool Drone::consumeAmmo() {
     return gameState().consumeBomb();
 }
 
-float Drone::getBatteryPercent() const {
-    return gameState().getBatteryPercent();
-}
-
-int Drone::getRemainingAmmo() const {
-    return gameState().getBombsAvailable();
-}
-
-
 void Drone::moveLeft()
 {
     m_velocity.x = -DroneConfig::Speed;

@@ -9,12 +9,13 @@
 
 #include <map>
 #include <typeindex>
+#include <functional> 
 
-using HitFunc = void(*)(GameObject&, GameObject&);
+using HitFunc = std::function<void(GameObject&, GameObject&)>;
 using Key = std::pair<std::type_index, std::type_index>;
 
 void processCollision(GameObject& o1, GameObject& o2) {
-    static const std::map<Key, HitFunc> map = {
+    static const std::map<Key, HitFunc> collisionLookup = {
         {{typeid(Bomb), typeid(FastEnemy)}, [](GameObject& b, GameObject& e) { b.destroy(); static_cast<Enemy&>(e).onHit(); }},
         {{typeid(FastEnemy), typeid(Bomb)}, [](GameObject& e, GameObject& b) { b.destroy(); static_cast<Enemy&>(e).onHit(); }},
         {{typeid(Bomb), typeid(TankEnemy)}, [](GameObject& b, GameObject& e) { b.destroy(); static_cast<Enemy&>(e).onHit(); }},
@@ -23,8 +24,8 @@ void processCollision(GameObject& o1, GameObject& o2) {
         {{typeid(CommandVehicle), typeid(Bullet)}, [](GameObject& v, GameObject& b) { b.destroy(); static_cast<CommandVehicle&>(v).takeDamage(); }}
     };
 
-    auto it = map.find({ typeid(o1), typeid(o2) });
-    if (it != map.end()) {
+    auto it = collisionLookup.find({ typeid(o1), typeid(o2) });
+    if (it != collisionLookup.end()) {
         it->second(o1, o2);
     }
 }
