@@ -1,0 +1,36 @@
+{
+  "assets": [
+    {
+      "id": "command_vehicle_default",
+      "type": "command_vehicle",
+      "name": "Default Command Vehicle",
+      "price": 0,
+      "file": "images/default/commandCar.png",
+      "default": true
+    },
+    {
+      "id": "drone_default",
+      "type": "drone",
+      "name": "Default Drone",
+      "price": 0,
+      "file": "images/default/drone.png",
+      "default": true
+    },
+    {
+      "id": "background_default",
+      "type": "background",
+      "name": "Default Background",
+      "price": 0,
+      "file": "images/default/background.png",
+      "default": true
+    },
+    {
+      "id": "background_music_default",
+      "type": "background_music",
+      "name": "Default Music",
+      "price": 0,
+      "file": "sounds/default/background-sound.mp3",
+      "default": true
+    }
+  ]
+}

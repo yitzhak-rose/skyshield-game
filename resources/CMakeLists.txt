@@ -1,23 +1,15 @@
-configure_file ("background.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("battery.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("bomb.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("bullet.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("coin.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("commandCar.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("drone.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("gear.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("smallEnemy.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("enemy.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("start-background.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("x.square.png" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("BattleGridFree.ttf" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("StencilForce.otf" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("game-battles-2.ttf" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("stages.json" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("background-sound.mp3" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("level-finished.mp3" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("mission-failed.mp3" ${CMAKE_BINARY_DIR} COPYONLY)
-configure_file ("start-background-sound.mp3" ${CMAKE_BINARY_DIR} COPYONLY)
+file (GLOB_RECURSE GAME_RESOURCE_FILES CONFIGURE_DEPENDS
+    LIST_DIRECTORIES false
+    RELATIVE ${CMAKE_CURRENT_LIST_DIR}
+    data/*
+    fonts/*
+    images/*
+    sounds/*
+)
+
+foreach (GAME_RESOURCE_FILE ${GAME_RESOURCE_FILES})
+    configure_file (${GAME_RESOURCE_FILE} ${CMAKE_BINARY_DIR}/${GAME_RESOURCE_FILE} COPYONLY)
+endforeach ()
 
 find_package (SFML 3.0 COMPONENTS Audio REQUIRED)
 target_link_libraries (${CMAKE_PROJECT_NAME} SFML::Audio)
