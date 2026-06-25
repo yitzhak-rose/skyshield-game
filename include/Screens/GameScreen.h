@@ -26,7 +26,7 @@ public:
     void update(float deltaTime) override;
 
     /// @brief Draws the world, HUD, and any active overlay.
-    void draw(sf::RenderTarget& target) override;
+    void draw(sf::RenderWindow& target) override;
 
 private:
     /// @brief Applies real-time movement input to the drone.

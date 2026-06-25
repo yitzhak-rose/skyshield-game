@@ -8,5 +8,5 @@ public:
     virtual ~IDrawable() = default;
 
     /// @brief Draws the object to the window.
-    virtual void draw(sf::RenderTarget& target) const = 0;
+    virtual void draw(sf::RenderWindow& target) const = 0;
 };

@@ -202,7 +202,7 @@ void StartScreen::update(float deltaTime) {
     updateOverlay(deltaTime);
 }
 
-void StartScreen::draw(sf::RenderTarget& target) {
+void StartScreen::draw(sf::RenderWindow& target) {
     target.draw(m_backgroundSprite);
     drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
     drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
@@ -212,7 +212,7 @@ void StartScreen::draw(sf::RenderTarget& target) {
     drawOverlay(target);
 }
 
-void StartScreen::drawTextButton(sf::RenderTarget& target,
+void StartScreen::drawTextButton(sf::RenderWindow& target,
                                  sf::RenderStates states,
                                  const sf::RectangleShape& button,
                                  const sf::Text& text,
@@ -225,7 +225,7 @@ void StartScreen::drawTextButton(sf::RenderTarget& target,
     target.draw(text, states);
 }
 
-void StartScreen::drawSettingsButton(sf::RenderTarget& target) const {
+void StartScreen::drawSettingsButton(sf::RenderWindow& target) const {
     sf::RectangleShape settingsButton = m_settingsButton;
     if (m_hoveredButton == Button::Settings)
         settingsButton.setFillColor(StartScreenConfig::SettingsButtonHoverColor);
@@ -234,7 +234,7 @@ void StartScreen::drawSettingsButton(sf::RenderTarget& target) const {
     target.draw(m_settingsSprite);
 }
 
-void StartScreen::drawCoinCounter(sf::RenderTarget& target) {
+void StartScreen::drawCoinCounter(sf::RenderWindow& target) {
     updateQuitButtonForTarget(target);
     const sf::FloatRect quitBounds = m_quitButton.getGlobalBounds();
     m_coin.setPosition({
@@ -244,7 +244,7 @@ void StartScreen::drawCoinCounter(sf::RenderTarget& target) {
     m_coin.draw(target);
 }
 
-void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
+void StartScreen::drawQuitButton(sf::RenderWindow& target) const {
     updateQuitButtonForTarget(target);
 
     sf::RectangleShape quitButton = m_quitButton;
@@ -255,7 +255,7 @@ void StartScreen::drawQuitButton(sf::RenderTarget& target) const {
     target.draw(m_quitSprite);
 }
 
-void StartScreen::updateQuitButtonForTarget(const sf::RenderTarget& target) const {
+void StartScreen::updateQuitButtonForTarget(const sf::RenderWindow& target) const {
     const sf::View view = target.getView();
     const float rightEdge = view.getCenter().x + view.getSize().x / 2.f;
     const float topEdge = view.getCenter().y - view.getSize().y / 2.f;

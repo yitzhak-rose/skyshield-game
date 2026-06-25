@@ -21,7 +21,7 @@ public:
     void update(float deltaTime) override;
 
     /// @brief Draws the background, buttons, and modal overlay.
-    void draw(sf::RenderTarget& target) override;
+    void draw(sf::RenderWindow& target) override;
 
     /// @brief Returns true once Start Game has been chosen.
     bool isFinished() const override { return getCommand() == ScreenCommand::StartGame; }
@@ -75,19 +75,19 @@ private:
     void showFeatureUnavailableOverlay();
 
     /// @brief Draws the settings button and gear icon.
-    void drawSettingsButton(sf::RenderTarget& target) const;
+    void drawSettingsButton(sf::RenderWindow& target) const;
 
     /// @brief Draws the quit button icon.
-    void drawQuitButton(sf::RenderTarget& target) const;
+    void drawQuitButton(sf::RenderWindow& target) const;
 
     /// @brief Draws the current coin total beside the top-right quit button.
-    void drawCoinCounter(sf::RenderTarget& target);
+    void drawCoinCounter(sf::RenderWindow& target);
 
     /// @brief Positions the quit button against the current render target's top-right corner.
-    void updateQuitButtonForTarget(const sf::RenderTarget& target) const;
+    void updateQuitButtonForTarget(const sf::RenderWindow& target) const;
 
     /// @brief Draws one text button.
-    void drawTextButton(sf::RenderTarget& target,
+    void drawTextButton(sf::RenderWindow& target,
                         sf::RenderStates states,
                         const sf::RectangleShape& button,
                         const sf::Text& text,

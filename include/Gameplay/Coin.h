@@ -19,7 +19,7 @@ public:
 
     /// @brief Draws the icon and the count onto the menu bar.
     void draw(sf::RenderTarget& target, sf::RenderStates states = {}) const;
-
+    
 private:
     /// @brief Cycles the coin's spin frames.
     Animation m_animation;

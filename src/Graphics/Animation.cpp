@@ -1,5 +1,11 @@
 #include "Graphics/Animation.h"
 
+// Splits the texture width into equal frames; height is the full sheet height.
+sf::Vector2i Animation::frameSize(const sf::Texture& texture, int frameCount) {
+    return { static_cast<int>(texture.getSize().x) / frameCount,
+             static_cast<int>(texture.getSize().y) };
+}
+
 // Stores the strip layout and timing; frame state starts at zero.
 Animation::Animation(sf::Vector2i frameSize, int frameCount, float frameDuration)
     : m_frameSize(frameSize)
@@ -36,8 +42,3 @@ void Animation::reset() {
     m_timer = 0.f;
 }
 
-// Splits the texture width into equal frames; height is the full sheet height.
-sf::Vector2i Animation::frameSize(const sf::Texture& texture, int frameCount) {
-    return { static_cast<int>(texture.getSize().x) / frameCount,
-             static_cast<int>(texture.getSize().y) };
-}

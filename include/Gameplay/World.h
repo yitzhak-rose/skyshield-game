@@ -21,7 +21,7 @@ public:
     void update(float dt);
 
     /// @brief Draws every live object in the world.
-    void draw(sf::RenderTarget& target) const;
+    void draw(sf::RenderWindow& target) const;
 
     /// @brief Starts the drone moving left.
     void moveDroneLeft() { m_drone.moveLeft(); }

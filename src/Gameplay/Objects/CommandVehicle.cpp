@@ -1,5 +1,4 @@
 #include "Gameplay/Objects/CommandVehicle.h"
-#include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
 #include <cmath>
 

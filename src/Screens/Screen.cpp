@@ -31,7 +31,7 @@ bool Screen::updateOverlay(float deltaTime) {
     return true;
 }
 
-void Screen::drawOverlay(sf::RenderTarget& target) const {
+void Screen::drawOverlay(sf::RenderWindow& target) const {
     if (!hasOverlay())
         return;
 
