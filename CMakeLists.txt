@@ -27,14 +27,14 @@ if (WIN32)
     set (SFML_DIR "${SFML_LOCATION}/lib/cmake/SFML")
 endif()
 
-# Graphics is required on all platforms
-find_package (SFML 3.0 COMPONENTS Graphics REQUIRED)
-target_link_libraries (${CMAKE_PROJECT_NAME} SFML::Graphics)
+# Graphics and audio are required on all platforms
+find_package (SFML 3.0 COMPONENTS Graphics Audio REQUIRED)
+target_link_libraries (${CMAKE_PROJECT_NAME} SFML::Graphics SFML::Audio)
 
-# Main and Audio are Windows-only (Mac gets them via the system/Homebrew SFML)
+# Main is Windows-only
 if (WIN32)
-    find_package (SFML 3.0 COMPONENTS Main Audio REQUIRED)
-    target_link_libraries (${CMAKE_PROJECT_NAME} SFML::Main SFML::Audio)
+    find_package (SFML 3.0 COMPONENTS Main REQUIRED)
+    target_link_libraries (${CMAKE_PROJECT_NAME} SFML::Main)
 
     # Copy DLLs to output directory — kept inside WIN32 guard because
     # $<TARGET_RUNTIME_DLLS:...> expands to empty on macOS and breaks the build

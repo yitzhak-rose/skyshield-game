@@ -7,8 +7,8 @@
 
 #include "Enums/GameObjects.h"
 #include "Enums/EnemyType.h"
+#include "Gameplay/Objects/GameObject.h"
 
-class GameObject;
 class GameState;
 class Drone;
 class CommandVehicle;
