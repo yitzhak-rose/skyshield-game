@@ -93,6 +93,7 @@ namespace OverlayViewConfig {
     inline const sf::Color ButtonTextColor(255, 255, 255);
     inline const sf::Color ButtonOutlineColor(255, 255, 255, 220);
     inline const sf::Color DefaultButtonColor(58, 68, 86);
+    inline const sf::Color DisabledButtonColor(74, 78, 86);
     inline const sf::Color PrimaryButtonColor(49, 119, 88);
     inline const sf::Color DangerButtonColor(145, 61, 65);
 }
@@ -118,6 +119,37 @@ namespace StartScreenConfig {
     inline const sf::Color QuitButtonColor(145, 61, 65, 225);
     inline const sf::Color QuitButtonHoverColor(210, 62, 70, 245);
     inline const sf::Color QuitIconColor(255, 255, 255);
+}
+
+namespace ShopScreenConfig {
+    inline constexpr float TopPadding = 28.f;
+    inline constexpr float SidePadding = 42.f;
+    inline constexpr float BackButtonWidth = 170.f;
+    inline constexpr float BackButtonHeight = 58.f;
+    inline constexpr float CategoryTop = 110.f;
+    inline constexpr float CategoryWidth = 300.f;
+    inline constexpr float CategoryHeight = 56.f;
+    inline constexpr float CategoryGap = 18.f;
+    inline constexpr float GridTop = 205.f;
+    inline constexpr float TileWidth = 300.f;
+    inline constexpr float TileHeight = 365.f;
+    inline constexpr float TileGap = 34.f;
+    inline constexpr float ThumbnailSize = 220.f;
+    inline constexpr float LockSize = 74.f;
+    inline constexpr float WarningDotRadius = 11.f;
+    inline constexpr unsigned int TitleTextSize = 52;
+    inline constexpr unsigned int ButtonTextSize = 28;
+    inline constexpr unsigned int TileNameSize = 22;
+    inline constexpr unsigned int TilePriceSize = 18;
+    inline const sf::Color BackgroundColor(11, 15, 22, 235);
+    inline const sf::Color PanelColor(16, 20, 28, 190);
+    inline const sf::Color PanelHoverColor(34, 45, 60, 220);
+    inline const sf::Color SelectedColor(49, 119, 88, 230);
+    inline const sf::Color OutlineColor(244, 232, 178, 205);
+    inline const sf::Color TextColor(245, 247, 252);
+    inline const sf::Color MutedTextColor(190, 198, 210);
+    inline const sf::Color LockedColor(255, 255, 255, 110);
+    inline const sf::Color WarningColor(235, 139, 39);
 }
 
 namespace EnemyConfig {

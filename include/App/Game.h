@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "Gameplay/GameState.h"
+#include "Gameplay/ShopData.h"
 #include "Screens/Screen.h"
 
 class Game {
@@ -18,7 +19,8 @@ private:
     /// but Game only executes commands that are valid for the current screen.
     enum class ActiveScreen {
         Start,
-        Game
+        Game,
+        Shop
     };
 
     void initBackground();
@@ -32,8 +34,14 @@ private:
     /// @brief Replaces the current screen with the gameplay screen and marks it active.
     void showGameScreen();
 
-    /// @brief Writes the current coin total to the save file.
-    void saveCoins();
+    /// @brief Replaces the current screen with the shop screen and marks it active.
+    void showShopScreen();
+
+    /// @brief Writes the current user data to the save file.
+    void saveUserData();
+
+    /// @brief Applies selected shop assets to the runtime resource maps.
+    void syncShopSelections();
 
     /// @brief Polls SFML events, handles window-owned events, and dispatches safe context to screens.
     void handleEvents();
@@ -52,8 +60,8 @@ private:
 
     void update(float dt);
 
-    /// @brief Saves coins when the total has changed since the last write.
-    void saveCoinsIfChanged();
+    /// @brief Saves user data when coins or shop selections have changed since the last write.
+    void saveUserDataIfChanged();
 
     void render();
 
@@ -62,7 +70,8 @@ private:
     sf::Sprite m_backgroundSprite;
 
     GameState m_gameState;
-    int m_lastSavedCoins = 0;
+    GameData m_gameData;
+    UserData m_lastSavedUserData;
     ActiveScreen m_activeScreen = ActiveScreen::Start;
 
     std::unique_ptr<Screen> m_screen;

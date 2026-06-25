@@ -15,36 +15,37 @@ struct ResourceInfo {
 
 namespace Resources {
     /// @brief Statically defined configuration of game object textures and their paths.
-    inline const std::array<ResourceInfo<GameObjects>, 12> imageResources = { {
-    { GameObjects::Background, "background.png" },
-    { GameObjects::Battery, "battery.png" },
-    { GameObjects::Bomb, "bomb.png" },
-    { GameObjects::Bullet, "bullet.png" },
-    { GameObjects::Coin, "coin.png" },
-    { GameObjects::CommandCar, "commandCar.png" },
-    { GameObjects::Drone, "drone.png" },
-    { GameObjects::Enemy, "enemy.png" },
-    { GameObjects::Gear, "gear.png" },
-    { GameObjects::SmallEnemy, "smallEnemy.png" },
-    { GameObjects::StartBackground, "start-background.png" },
-    { GameObjects::XSquare, "x.square.png" },
+    inline const std::array<ResourceInfo<GameObjects>, 13> imageResources = { {
+    { GameObjects::Background, "images/default/background.png" },
+    { GameObjects::Battery, "images/game/battery.png" },
+    { GameObjects::Bomb, "images/game/bomb.png" },
+    { GameObjects::Bullet, "images/game/bullet.png" },
+    { GameObjects::Coin, "images/game/coin.png" },
+    { GameObjects::CommandCar, "images/default/commandCar.png" },
+    { GameObjects::Drone, "images/default/drone.png" },
+    { GameObjects::Enemy, "images/game/enemy.png" },
+    { GameObjects::Gear, "images/game/gear.png" },
+    { GameObjects::Lock, "images/game/lock.png" },
+    { GameObjects::SmallEnemy, "images/game/smallEnemy.png" },
+    { GameObjects::StartBackground, "images/game/start-background.png" },
+    { GameObjects::XSquare, "images/game/x.square.png" },
 
 } };
 
     /// @brief Statically defined configuration of fonts and their paths.
     inline const std::array<ResourceInfo<Fonts>, 3> fontResources = { {
-    { Fonts::BattleGrid, "BattleGridFree.ttf" },
-    { Fonts::StencilForce, "StencilForce.otf" },
-    { Fonts::GameBattles, "game-battles-2.ttf" },
+    { Fonts::BattleGrid, "fonts/BattleGridFree.ttf" },
+    { Fonts::StencilForce, "fonts/StencilForce.otf" },
+    { Fonts::GameBattles, "fonts/game-battles-2.ttf" },
 
 } };
 
     /// @brief Statically defined configuration of sound assets and their paths.
     inline const std::array<ResourceInfo<Sounds>, 4> soundResources = { {
-    { Sounds::Background, "background-sound.mp3" },
-    { Sounds::LevelFinished, "level-finished.mp3" },
-    { Sounds::MissionFailed, "mission-failed.mp3" },
-    { Sounds::StartBackground, "start-background-sound.mp3" },
+    { Sounds::Background, "sounds/default/background-sound.mp3" },
+    { Sounds::LevelFinished, "sounds/game/level-finished.mp3" },
+    { Sounds::MissionFailed, "sounds/game/mission-failed.mp3" },
+    { Sounds::StartBackground, "sounds/game/start-background-sound.mp3" },
 
 } };
 }

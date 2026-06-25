@@ -15,9 +15,7 @@
 class GameScreen : public Screen {
 public:
     /// @brief Creates the gameplay screen for a full run through the configured stages.
-    /// @param gameState Shared mutable game state.
-    /// @param returnToStart Callback used after the full game is completed.
-    explicit GameScreen(GameState& gameState);
+    explicit GameScreen(GameState& gameState, const std::vector<LevelConfig>& stages);
 
     /// @brief Handles gameplay input when no overlay is active.
     void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;

@@ -16,6 +16,9 @@ enum class ScreenCommand {
     /// @brief Request to leave the start screen and create the gameplay screen.
     StartGame,
 
+    /// @brief Request to leave the start screen and create the shop screen.
+    OpenShop,
+
     /// @brief Request to leave gameplay and recreate the start screen.
     ReturnToStart,
 

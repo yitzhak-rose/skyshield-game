@@ -36,6 +36,12 @@ public:
     /// @brief Plays the mission-failed effect while temporarily lowering background volume.
     void playMissionFailed();
 
+    /// @brief Plays a seven-second preview from ten seconds into the given music file.
+    void playPreview(const std::string& path);
+
+    /// @brief Stops an active preview and resumes the previous background track if needed.
+    void stopPreview();
+
 private:
     SoundManager();
     ~SoundManager() = default;
@@ -56,6 +62,7 @@ private:
     void playForegroundEffect(sf::Sound& sound);
 
     sf::Music m_backgroundMusic;
+    sf::Music m_previewMusic;
     sf::SoundBuffer m_levelFinishedBuffer;
     sf::SoundBuffer m_missionFailedBuffer;
     sf::Sound m_levelFinishedSound;
@@ -63,10 +70,15 @@ private:
 
     bool m_soundsEnabled = true;
     bool m_backgroundDucked = false;
+    bool m_previewActive = false;
+    bool m_resumeBackgroundAfterPreview = false;
     float m_currentBackgroundVolume = BackgroundVolume;
     float m_targetBackgroundVolume = BackgroundVolume;
+    float m_previewElapsed = 0.f;
 
     static constexpr float BackgroundVolume = 100.f;
     static constexpr float DuckedBackgroundVolume = BackgroundVolume * 0.25f;
     static constexpr float VolumeFadeRate = 500.f;
+    static constexpr float PreviewStartSeconds = 10.f;
+    static constexpr float PreviewDurationSeconds = 7.f;
 };

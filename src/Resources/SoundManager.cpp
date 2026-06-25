@@ -41,6 +41,7 @@ void SoundManager::playBackgroundTrack(Sounds sound) {
 }
 
 void SoundManager::stopBackground() {
+    stopPreview();
     m_backgroundMusic.stop();
     m_backgroundDucked = false;
     m_currentBackgroundVolume = BackgroundVolume;
@@ -50,6 +51,7 @@ void SoundManager::stopBackground() {
 void SoundManager::disableSounds() {
     m_soundsEnabled = false;
     stopBackground();
+    m_previewMusic.stop();
     m_levelFinishedSound.stop();
     m_missionFailedSound.stop();
 }
@@ -59,6 +61,14 @@ void SoundManager::enableSounds() {
 }
 
 void SoundManager::update(float deltaTime) {
+    if (m_previewActive) {
+        m_previewElapsed += std::max(0.f, deltaTime);
+        if (m_previewElapsed >= PreviewDurationSeconds ||
+            m_previewMusic.getStatus() == sf::Music::Status::Stopped) {
+            stopPreview();
+        }
+    }
+
     restoreBackgroundVolumeIfEffectsFinished();
     changeVolume(m_targetBackgroundVolume, deltaTime);
 }
@@ -108,4 +118,40 @@ void SoundManager::playForegroundEffect(sf::Sound& sound) {
     sound.stop();
     sound.setPlayingOffset(sf::seconds(0.f));
     sound.play();
+}
+
+void SoundManager::playPreview(const std::string& path) {
+    if (!m_soundsEnabled)
+        return;
+
+    stopPreview();
+
+    m_resumeBackgroundAfterPreview =
+        m_backgroundMusic.getStatus() == sf::Music::Status::Playing;
+    if (m_resumeBackgroundAfterPreview)
+        m_backgroundMusic.pause();
+
+    if (!m_previewMusic.openFromFile(path))
+        throw std::runtime_error("Failed to open preview sound: " + path);
+
+    m_previewMusic.setLooping(false);
+    m_previewMusic.setVolume(BackgroundVolume);
+    m_previewMusic.setPlayingOffset(sf::seconds(PreviewStartSeconds));
+    m_previewElapsed = 0.f;
+    m_previewActive = true;
+    m_previewMusic.play();
+}
+
+void SoundManager::stopPreview() {
+    if (!m_previewActive)
+        return;
+
+    m_previewMusic.stop();
+    m_previewActive = false;
+    m_previewElapsed = 0.f;
+
+    if (m_resumeBackgroundAfterPreview && m_soundsEnabled)
+        m_backgroundMusic.play();
+
+    m_resumeBackgroundAfterPreview = false;
 }

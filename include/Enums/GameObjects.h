@@ -10,6 +10,7 @@ enum class GameObjects {
     Drone,
     Enemy,
     Gear,
+    Lock,
     SmallEnemy,
     StartBackground,
     XSquare,

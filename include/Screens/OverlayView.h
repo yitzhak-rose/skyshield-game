@@ -21,6 +21,8 @@ struct OverlayAction {
     OverlayActionType type = OverlayActionType::Default;
 
     std::function<void()> action;
+
+    bool enabled = true;
 };
 
 /// @brief Reusable modal-style overlay with text and action buttons.

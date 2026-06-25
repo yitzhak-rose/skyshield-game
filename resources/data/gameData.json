@@ -1,0 +1,98 @@
+{
+  "stages": [
+    {
+      "enemyCount": 10,
+      "tankChance": 0.3,
+      "spawnInterval": 2.5,
+      "batteryDrain": 1.5,
+      "startAmmo": 20
+    },
+    {
+      "enemyCount": 8,
+      "tankChance": 0.25,
+      "spawnInterval": 2.0,
+      "batteryDrain": 1.4,
+      "startAmmo": 16
+    },
+    {
+      "enemyCount": 12,
+      "tankChance": 0.4,
+      "spawnInterval": 1.6,
+      "batteryDrain": 1.6,
+      "startAmmo": 22
+    },
+    {
+      "enemyCount": 16,
+      "tankChance": 0.55,
+      "spawnInterval": 1.3,
+      "batteryDrain": 1.8,
+      "startAmmo": 28
+    }
+  ],
+  "shopAssets": [
+    {
+      "id": 1,
+      "type": "command_vehicle",
+      "name": "Default Command Vehicle",
+      "price": 0,
+      "file": "images/default/commandCar.png",
+      "default": true
+    },
+    {
+      "id": 2,
+      "type": "drone",
+      "name": "Default Drone",
+      "price": 0,
+      "file": "images/default/drone.png",
+      "default": true
+    },
+    {
+      "id": 3,
+      "type": "background",
+      "name": "Default Background",
+      "price": 0,
+      "file": "images/default/background.png",
+      "default": true
+    },
+    {
+      "id": 4,
+      "type": "background_music",
+      "name": "Default Music",
+      "price": 0,
+      "file": "sounds/default/background-sound.mp3",
+      "default": true
+    },
+    {
+      "id": 5,
+      "type": "command_vehicle",
+      "name": "Upgraded Command Vehicle",
+      "price": 60,
+      "file": "images/shop/UpgradedCommandCar.png",
+      "default": false
+    },
+    {
+      "id": 6,
+      "type": "drone",
+      "name": "Upgraded Drone",
+      "price": 45,
+      "file": "images/shop/UpgradedDrone.png",
+      "default": false
+    },
+    {
+      "id": 7,
+      "type": "font",
+      "name": "Stencil Force",
+      "price": 0,
+      "file": "fonts/StencilForce.otf",
+      "default": true
+    },
+    {
+      "id": 8,
+      "type": "font",
+      "name": "Battle Grid",
+      "price": 30,
+      "file": "fonts/BattleGridFree.ttf",
+      "default": false
+    }
+  ]
+}

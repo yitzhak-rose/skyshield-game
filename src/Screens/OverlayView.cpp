@@ -107,6 +107,8 @@ int OverlayView::buttonIndexAt(sf::Vector2f position) const {
 void OverlayView::activateAction(std::size_t actionIndex) {
     if (actionIndex >= m_actions.size())
         return;
+    if (!m_actions[actionIndex].enabled)
+        return;
 
     auto action = m_actions[actionIndex].action;
     m_dismissed = true;
@@ -179,6 +181,9 @@ void OverlayView::drawButtons(sf::RenderTarget& target, sf::RenderStates states)
 
 sf::Color OverlayView::buttonColor(const OverlayAction& action, bool selected) const {
     sf::Color color = OverlayViewConfig::DefaultButtonColor;
+
+    if (!action.enabled)
+        return OverlayViewConfig::DisabledButtonColor;
 
     if (action.type == OverlayActionType::Primary)
         color = OverlayViewConfig::PrimaryButtonColor;

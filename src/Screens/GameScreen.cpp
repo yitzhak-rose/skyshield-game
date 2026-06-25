@@ -1,15 +1,14 @@
 #include "Screens/GameScreen.h"
 
-#include "Gameplay/DataManager.h"
 #include "Resources/SoundManager.h"
 
 #include <string>
 #include <utility>
 #include <vector>
 
-GameScreen::GameScreen(GameState& gameState)
+GameScreen::GameScreen(GameState& gameState, const std::vector<LevelConfig>& stages)
     : m_gameState(gameState)
-    , m_stages(DataManager::loadLevels("stages.json"))
+    , m_stages(stages)
     , m_menuBar(std::make_unique<MenuBar>(MenuBarConfig::Height, gameState)) {
     startCurrentStage();
 }

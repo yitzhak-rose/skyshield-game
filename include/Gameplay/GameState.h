@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Enums/LevelResult.h"
+#include "Gameplay/ShopData.h"
+
+#include <map>
+#include <set>
 
 struct LevelConfig;
 
@@ -41,6 +45,15 @@ public:
     LevelResult getLevelResult() const { return m_levelResult; }
 
     void setLevelResult(LevelResult result) { m_levelResult = result; }
+    void setCoins(int coins);
+    void setUserData(const UserData& userData);
+    UserData getUserData() const;
+    bool ownsAsset(const ShopAsset& asset) const;
+    bool isAssetSelected(const ShopAsset& asset) const;
+    bool canAfford(const ShopAsset& asset) const;
+    bool buyAsset(const ShopAsset& asset);
+    bool selectAsset(const ShopAsset& asset);
+    int selectedAssetId(ShopAssetType type) const;
 
 private:
     int m_levelNumber = 1;
@@ -55,4 +68,6 @@ private:
     int m_enemiesRemaining = 0;
     int m_enemiesDefeated = 0;
     LevelResult m_levelResult = LevelResult::Running;
+    std::map<ShopAssetType, std::set<int>> m_ownedAssets;
+    std::map<ShopAssetType, int> m_selectedAssets;
 };

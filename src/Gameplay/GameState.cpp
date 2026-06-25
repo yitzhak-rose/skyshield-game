@@ -46,3 +46,63 @@ void GameState::recordEnemyDefeated(int coinReward) {
     m_enemiesRemaining = std::max(0, m_enemiesRemaining - 1);
 }
 
+void GameState::setCoins(int coins) {
+    m_coins = std::max(0, coins);
+}
+
+void GameState::setUserData(const UserData& userData) {
+    setCoins(userData.coins);
+    m_ownedAssets = userData.ownedAssets;
+    m_selectedAssets = userData.selectedAssets;
+}
+
+UserData GameState::getUserData() const {
+    UserData userData;
+    userData.coins = m_coins;
+    userData.ownedAssets = m_ownedAssets;
+    userData.selectedAssets = m_selectedAssets;
+    return userData;
+}
+
+bool GameState::ownsAsset(const ShopAsset& asset) const {
+    if (asset.isDefault)
+        return true;
+
+    const auto found = m_ownedAssets.find(asset.type);
+    return found != m_ownedAssets.end() && found->second.contains(asset.id);
+}
+
+bool GameState::isAssetSelected(const ShopAsset& asset) const {
+    return selectedAssetId(asset.type) == asset.id;
+}
+
+bool GameState::canAfford(const ShopAsset& asset) const {
+    return m_coins >= std::max(0, asset.price);
+}
+
+bool GameState::buyAsset(const ShopAsset& asset) {
+    if (ownsAsset(asset))
+        return selectAsset(asset);
+
+    if (!canAfford(asset))
+        return false;
+
+    m_coins -= std::max(0, asset.price);
+    m_ownedAssets[asset.type].insert(asset.id);
+    m_selectedAssets[asset.type] = asset.id;
+    return true;
+}
+
+bool GameState::selectAsset(const ShopAsset& asset) {
+    if (!ownsAsset(asset))
+        return false;
+
+    m_ownedAssets[asset.type].insert(asset.id);
+    m_selectedAssets[asset.type] = asset.id;
+    return true;
+}
+
+int GameState::selectedAssetId(ShopAssetType type) const {
+    const auto found = m_selectedAssets.find(type);
+    return found == m_selectedAssets.end() ? 0 : found->second;
+}
