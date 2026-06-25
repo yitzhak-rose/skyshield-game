@@ -8,6 +8,7 @@
 #include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
 #include "Enums/Sounds.h"
+#include "Gameplay/ShopData.h"
 #include "Resources.h"
 
 /// @brief Singleton class that manages the loading, storing, and retrieval of game resources.
@@ -35,6 +36,15 @@ public:
     /// @param sound The sound enum representing the desired sound asset.
     /// @return Path to the requested sound asset.
     const std::string& getSoundPath(Sounds sound) const;
+
+    /// @brief Applies the selected shop assets to the runtime texture and sound maps.
+    void applyShopSelections(const std::vector<ShopAsset>& catalog, const UserData& userData);
+
+    /// @brief Loads a standalone texture by file path for UI previews.
+    sf::Texture loadTextureFromFile(const std::string& path) const;
+
+    /// @brief Loads a standalone font by file path for UI previews.
+    sf::Font loadFontFromFile(const std::string& path) const;
 
 private:
     /// @brief Private constructor to enforce the singleton pattern.
@@ -68,6 +78,10 @@ private:
     /// @brief Stores sound asset paths and verifies they can be opened.
     /// @throws std::runtime_error If any sound file is missing.
     void loadSoundPaths();
+
+    void setImage(GameObjects image, const std::string& path);
+    void setSoundPath(Sounds sound, const std::string& path);
+    void setFont(Fonts font, const std::string& path);
 
     /// @brief Storage for loaded game object textures.
     std::map<GameObjects, sf::Texture> m_imageTextures;

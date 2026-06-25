@@ -160,6 +160,8 @@ void StartScreen::handleClick(sf::Vector2f position) {
             requestCommand(ScreenCommand::StartGame);
             break;
         case Button::Shop:
+            requestCommand(ScreenCommand::OpenShop);
+            break;
         case Button::Settings:
             showFeatureUnavailableOverlay();
             break;

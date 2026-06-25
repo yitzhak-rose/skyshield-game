@@ -1,13 +1,16 @@
 #include "Gameplay/DataManager.h"
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <limits>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -28,10 +31,14 @@ public:
     explicit JsonValue(Object value) : m_value(std::move(value)) {}
 
     bool isNumber() const { return std::holds_alternative<double>(m_value); }
+    bool isBool() const { return std::holds_alternative<bool>(m_value); }
+    bool isString() const { return std::holds_alternative<std::string>(m_value); }
     bool isArray() const { return std::holds_alternative<Array>(m_value); }
     bool isObject() const { return std::holds_alternative<Object>(m_value); }
 
     double number() const { return std::get<double>(m_value); }
+    bool boolean() const { return std::get<bool>(m_value); }
+    const std::string& string() const { return std::get<std::string>(m_value); }
     const Array& array() const { return std::get<Array>(m_value); }
     const Object& object() const { return std::get<Object>(m_value); }
 
@@ -326,6 +333,35 @@ float requireFloat(const JsonValue::Object& object,
     return static_cast<float>(number);
 }
 
+std::string requireString(const JsonValue::Object& object,
+                          const std::string& key,
+                          const std::string& context) {
+    const JsonValue& value = requireField(object, key, context);
+    if (!value.isString())
+        throw std::runtime_error("DataManager: \"" + key + "\" must be a string in " + context);
+
+    return value.string();
+}
+
+bool optionalBool(const JsonValue::Object& object,
+                  const std::string& key,
+                  bool fallback) {
+    const auto found = object.find(key);
+    if (found == object.end() || !found->second.isBool())
+        return fallback;
+
+    return found->second.boolean();
+}
+
+std::string optionalString(const JsonValue::Object& object,
+                           const std::string& key) {
+    const auto found = object.find(key);
+    if (found == object.end() || !found->second.isString())
+        return "";
+
+    return found->second.string();
+}
+
 LevelConfig parseLevel(const JsonValue& value, std::size_t stageIndex) {
     if (!value.isObject()) {
         throw std::runtime_error("DataManager: stage "
@@ -343,6 +379,167 @@ LevelConfig parseLevel(const JsonValue& value, std::size_t stageIndex) {
     };
 
     return config;
+}
+
+ShopAsset parseShopAsset(const JsonValue& value) {
+    if (!value.isObject())
+        throw std::runtime_error("DataManager: shop asset must be an object");
+
+    const JsonValue::Object& object = value.object();
+    const int id = requireInt(object, "id", "shop asset");
+    if (id <= 0)
+        throw std::runtime_error("DataManager: shop asset id must be positive");
+
+    ShopAssetType type = ShopAssetType::CommandVehicle;
+    const std::string typeKey = requireString(object, "type", "shop asset " + std::to_string(id));
+    if (!shopAssetTypeFromKey(typeKey, type))
+        throw std::runtime_error("DataManager: unknown shop asset type: " + typeKey);
+
+    ShopAsset asset;
+    asset.id = id;
+    asset.type = type;
+    asset.name = requireString(object, "name", "shop asset " + std::to_string(id));
+    asset.price = requireInt(object, "price", "shop asset " + std::to_string(id));
+    asset.file = requireString(object, "file", "shop asset " + std::to_string(id));
+    asset.isDefault = optionalBool(object, "default", false);
+    asset.description = optionalString(object, "description");
+
+    if (asset.price < 0)
+        throw std::runtime_error("DataManager: shop asset price cannot be negative");
+
+    if (!std::filesystem::exists(asset.file))
+        throw std::runtime_error("DataManager: missing shop asset file: " + asset.file);
+
+    return asset;
+}
+
+std::vector<ShopAsset> parseShopAssets(const JsonValue::Object& root) {
+    const JsonValue& assetsValue = requireField(root, "shopAssets", "game data root");
+    if (!assetsValue.isArray())
+        throw std::runtime_error("DataManager: \"shopAssets\" must be an array");
+
+    std::vector<ShopAsset> assets;
+    std::set<int> ids;
+    std::set<ShopAssetType> defaults;
+
+    for (const JsonValue& value : assetsValue.array()) {
+        ShopAsset asset = parseShopAsset(value);
+        if (!ids.insert(asset.id).second)
+            throw std::runtime_error("DataManager: duplicate shop asset id: " + std::to_string(asset.id));
+
+        if (asset.isDefault) {
+            if (asset.price != 0)
+                throw std::runtime_error("DataManager: default shop assets must be free");
+            defaults.insert(asset.type);
+        }
+
+        assets.push_back(std::move(asset));
+    }
+
+    for (ShopAssetType type : allShopAssetTypes()) {
+        if (!defaults.contains(type))
+            throw std::runtime_error("DataManager: missing default shop asset for " + shopAssetTypeToKey(type));
+    }
+
+    return assets;
+}
+
+int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
+    std::set<std::string> catalogFiles;
+    for (const ShopAsset& asset : catalog)
+        catalogFiles.insert(asset.file);
+
+    int count = 0;
+    const std::array<std::string, 2> folders = { "images/shop", "sounds/shop" };
+    for (const std::string& folder : folders) {
+        if (!std::filesystem::exists(folder))
+            continue;
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(folder)) {
+            if (!entry.is_regular_file())
+                continue;
+
+            const std::string path = entry.path().generic_string();
+            if (!catalogFiles.contains(path))
+                ++count;
+        }
+    }
+
+    return count;
+}
+
+const ShopAsset* findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type) {
+    for (const ShopAsset& asset : catalog) {
+        if (asset.type == type && asset.isDefault)
+            return &asset;
+    }
+
+    return nullptr;
+}
+
+void normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog) {
+    userData.coins = std::max(0, userData.coins);
+
+    for (ShopAssetType type : allShopAssetTypes()) {
+        const ShopAsset* defaultAsset = findDefaultAsset(catalog, type);
+        if (!defaultAsset)
+            continue;
+
+        std::set<int> validIds;
+        for (const ShopAsset& asset : catalog) {
+            if (asset.type == type)
+                validIds.insert(asset.id);
+        }
+
+        std::erase_if(userData.ownedAssets[type], [&validIds](int id) {
+            return !validIds.contains(id);
+        });
+
+        userData.ownedAssets[type].insert(defaultAsset->id);
+
+        const int selectedId = userData.selectedAssets.contains(type)
+            ? userData.selectedAssets[type]
+            : defaultAsset->id;
+
+        if (validIds.contains(selectedId) && userData.ownedAssets[type].contains(selectedId))
+            userData.selectedAssets[type] = selectedId;
+        else
+            userData.selectedAssets[type] = defaultAsset->id;
+    }
+}
+
+std::set<int> parseIdArray(const JsonValue::Object& object, const std::string& key) {
+    std::set<int> ids;
+    const auto found = object.find(key);
+    if (found == object.end() || !found->second.isArray())
+        return ids;
+
+    for (const JsonValue& value : found->second.array()) {
+        if (!value.isNumber())
+            continue;
+
+        const double number = value.number();
+        if (std::isfinite(number) && std::trunc(number) == number && number > 0.0 &&
+            number <= static_cast<double>(std::numeric_limits<int>::max())) {
+            ids.insert(static_cast<int>(number));
+        }
+    }
+
+    return ids;
+}
+
+std::string idsToJsonArray(const std::set<int>& ids) {
+    std::string result = "[";
+    bool first = true;
+    for (int id : ids) {
+        if (!first)
+            result += ", ";
+
+        result += std::to_string(id);
+        first = false;
+    }
+    result += "]";
+    return result;
 }
 }
 
@@ -369,6 +566,119 @@ std::vector<LevelConfig> DataManager::loadLevels(const std::string& path) {
         throw std::runtime_error("DataManager: no valid stages found in: " + path);
 
     return stages;
+}
+
+GameData DataManager::loadGameData(const std::string& path) {
+    const JsonValue root = JsonParser(readFile(path)).parse();
+    if (!root.isObject())
+        throw std::runtime_error("DataManager: game data JSON root must be an object");
+
+    GameData gameData;
+    const JsonValue& stagesValue = requireField(root.object(), "stages", "game data root");
+    if (!stagesValue.isArray())
+        throw std::runtime_error("DataManager: \"stages\" must be an array");
+
+    const JsonValue::Array& stageValues = stagesValue.array();
+    gameData.stages.reserve(stageValues.size());
+    for (std::size_t index = 0; index < stageValues.size(); ++index) {
+        LevelConfig config = parseLevel(stageValues[index], index);
+        validateLevel(config, index);
+        gameData.stages.push_back(config);
+    }
+
+    if (gameData.stages.empty())
+        throw std::runtime_error("DataManager: no valid stages found in: " + path);
+
+    gameData.shopAssets = parseShopAssets(root.object());
+    gameData.uncatalogedShopFiles = countUncatalogedShopFiles(gameData.shopAssets);
+
+    return gameData;
+}
+
+UserData DataManager::loadUserData(const std::string& path, const std::vector<ShopAsset>& catalog) {
+    UserData userData;
+
+    try {
+        const JsonValue root = JsonParser(readFile(path)).parse();
+        if (!root.isObject()) {
+            normalizeUserData(userData, catalog);
+            return userData;
+        }
+
+        const JsonValue::Object& rootObject = root.object();
+        const auto coins = rootObject.find("coins");
+        if (coins != rootObject.end() && coins->second.isNumber()) {
+            const double value = coins->second.number();
+            if (std::isfinite(value) && std::trunc(value) == value && value >= 0.0 &&
+                value <= static_cast<double>(std::numeric_limits<int>::max())) {
+                userData.coins = static_cast<int>(value);
+            }
+        }
+
+        const auto owned = rootObject.find("ownedAssets");
+        if (owned != rootObject.end() && owned->second.isObject()) {
+            for (ShopAssetType type : allShopAssetTypes()) {
+                const std::string key = shopAssetTypeToKey(type);
+                userData.ownedAssets[type] = parseIdArray(owned->second.object(), key);
+            }
+        }
+
+        const auto selected = rootObject.find("selectedAssets");
+        if (selected != rootObject.end() && selected->second.isObject()) {
+            const JsonValue::Object& selectedObject = selected->second.object();
+            for (ShopAssetType type : allShopAssetTypes()) {
+                const std::string key = shopAssetTypeToKey(type);
+                const auto found = selectedObject.find(key);
+                if (found == selectedObject.end() || !found->second.isNumber())
+                    continue;
+
+                const double value = found->second.number();
+                if (std::isfinite(value) && std::trunc(value) == value && value > 0.0 &&
+                    value <= static_cast<double>(std::numeric_limits<int>::max())) {
+                    userData.selectedAssets[type] = static_cast<int>(value);
+                }
+            }
+        }
+    } catch (const std::exception&) {
+        userData = UserData{};
+    }
+
+    normalizeUserData(userData, catalog);
+    return userData;
+}
+
+void DataManager::saveUserData(const std::string& path, const UserData& userData) {
+    std::ofstream file(path);
+    if (!file)
+        return;
+
+    file << "{\n";
+    file << "  \"coins\": " << std::max(0, userData.coins) << ",\n";
+    file << "  \"ownedAssets\": {\n";
+
+    const std::vector<ShopAssetType> types = allShopAssetTypes();
+    for (std::size_t index = 0; index < types.size(); ++index) {
+        const ShopAssetType type = types[index];
+        const auto found = userData.ownedAssets.find(type);
+        const std::set<int> empty;
+        const std::set<int>& ids = found == userData.ownedAssets.end() ? empty : found->second;
+        file << "    \"" << shopAssetTypeToKey(type) << "\": " << idsToJsonArray(ids);
+        file << (index + 1 < types.size() ? "," : "") << "\n";
+    }
+
+    file << "  },\n";
+    file << "  \"selectedAssets\": {\n";
+
+    for (std::size_t index = 0; index < types.size(); ++index) {
+        const ShopAssetType type = types[index];
+        const auto found = userData.selectedAssets.find(type);
+        const int id = found == userData.selectedAssets.end() ? 0 : found->second;
+        file << "    \"" << shopAssetTypeToKey(type) << "\": " << id;
+        file << (index + 1 < types.size() ? "," : "") << "\n";
+    }
+
+    file << "  }\n";
+    file << "}\n";
 }
 
 int DataManager::loadCoins(const std::string& path) {

@@ -94,3 +94,61 @@ const std::string& ResourceManager::getSoundPath(Sounds sound) const {
             + std::to_string(static_cast<int>(sound)) + ")");
     return it->second;
 }
+
+void ResourceManager::applyShopSelections(const std::vector<ShopAsset>& catalog, const UserData& userData) {
+    for (const ShopAsset& asset : catalog) {
+        const auto selected = userData.selectedAssets.find(asset.type);
+        if (selected == userData.selectedAssets.end() || selected->second != asset.id)
+            continue;
+
+        switch (asset.type) {
+            case ShopAssetType::CommandVehicle:
+                setImage(GameObjects::CommandCar, asset.file);
+                break;
+            case ShopAssetType::Drone:
+                setImage(GameObjects::Drone, asset.file);
+                break;
+            case ShopAssetType::Background:
+                setImage(GameObjects::Background, asset.file);
+                break;
+            case ShopAssetType::BackgroundMusic:
+                setSoundPath(Sounds::Background, asset.file);
+                break;
+            case ShopAssetType::Font:
+                setFont(Fonts::StencilForce, asset.file);
+                break;
+        }
+    }
+}
+
+sf::Texture ResourceManager::loadTextureFromFile(const std::string& path) const {
+    sf::Texture texture;
+    if (!texture.loadFromFile(path))
+        throw std::runtime_error("Failed to load texture from path: " + path);
+
+    return texture;
+}
+
+sf::Font ResourceManager::loadFontFromFile(const std::string& path) const {
+    sf::Font font;
+    if (!font.openFromFile(path))
+        throw std::runtime_error("Failed to load font from path: " + path);
+
+    return font;
+}
+
+void ResourceManager::setImage(GameObjects image, const std::string& path) {
+    m_imageTextures[image] = loadTextureFromFile(path);
+}
+
+void ResourceManager::setSoundPath(Sounds sound, const std::string& path) {
+    std::ifstream file(path);
+    if (!file)
+        throw std::runtime_error("Failed to find sound resource from path: " + path);
+
+    m_soundPaths[sound] = path;
+}
+
+void ResourceManager::setFont(Fonts font, const std::string& path) {
+    m_fonts[font] = loadFontFromFile(path);
+}

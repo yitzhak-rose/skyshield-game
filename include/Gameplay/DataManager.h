@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gameplay/LevelConfig.h"
+#include "Gameplay/ShopData.h"
 
 #include <string>
 #include <vector>
@@ -13,6 +14,22 @@ public:
     /// @return The validated level configurations in file order.
     /// @throws std::runtime_error if the file cannot be read or contains invalid level data.
     static std::vector<LevelConfig> loadLevels(const std::string& path);
+
+    /// @brief Loads stages and shop catalog from the app-owned game data file.
+    /// @param path Path to the JSON file that contains "stages" and "shopAssets".
+    /// @return Validated immutable game data.
+    static GameData loadGameData(const std::string& path);
+
+    /// @brief Loads user-owned state and normalizes default ownership from the catalog.
+    /// @param path Path to the JSON user data file.
+    /// @param catalog Shop assets used to guarantee default ownership.
+    /// @return User state, or defaults when the file is missing or invalid.
+    static UserData loadUserData(const std::string& path, const std::vector<ShopAsset>& catalog);
+
+    /// @brief Saves user-owned state, including coins, owned assets, and selections.
+    /// @param path Path to the user data file.
+    /// @param userData User state to persist.
+    static void saveUserData(const std::string& path, const UserData& userData);
 
     /// @brief Loads the saved coin total from a JSON save file.
     /// @param path Path to the JSON file that contains a top-level "coins" value.

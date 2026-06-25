@@ -1,5 +1,6 @@
 #include "App/Game.h"
 #include "Screens/GameScreen.h"
+#include "Screens/ShopScreen.h"
 #include "Screens/StartScreen.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
@@ -11,7 +12,14 @@
 #include <string>
 
 namespace {
-const std::string SaveFilePath = "save.json";
+const std::string GameDataPath = "data/gameData.json";
+const std::string UserDataPath = "userData.json";
+
+bool sameUserData(const UserData& lhs, const UserData& rhs) {
+    return lhs.coins == rhs.coins &&
+        lhs.ownedAssets == rhs.ownedAssets &&
+        lhs.selectedAssets == rhs.selectedAssets;
+}
 }
 
 Game::Game()
@@ -35,8 +43,12 @@ void Game::initBackground() {
 }
 
 void Game::loadSavedData() {
-   // m_gameState.setCoins(DataManager::loadCoins(SaveFilePath));
-    m_lastSavedCoins = m_gameState.getCoins();
+    m_gameData = DataManager::loadGameData(GameDataPath);
+    UserData userData = DataManager::loadUserData(UserDataPath, m_gameData.shopAssets);
+    m_gameState.setUserData(userData);
+    syncShopSelections();
+    m_lastSavedUserData = m_gameState.getUserData();
+    DataManager::saveUserData(UserDataPath, m_lastSavedUserData);
 }
 
 void Game::showStartScreen() {
@@ -47,17 +59,32 @@ void Game::showStartScreen() {
 
 void Game::showGameScreen() {
     m_activeScreen = ActiveScreen::Game;
+    syncShopSelections();
     SoundManager::instance().startBackground();
-    m_screen = std::make_unique<GameScreen>(m_gameState);
+    m_screen = std::make_unique<GameScreen>(m_gameState, m_gameData.stages);
+}
+
+void Game::showShopScreen() {
+    m_activeScreen = ActiveScreen::Shop;
+    m_screen = std::make_unique<ShopScreen>(
+        m_gameState,
+        m_gameData.shopAssets,
+        m_gameData.uncatalogedShopFiles);
 }
 
 Game::~Game() {
-    saveCoins();
+    saveUserData();
 }
 
-void Game::saveCoins() {
-    DataManager::saveCoins(SaveFilePath, m_gameState.getCoins());
-    m_lastSavedCoins = m_gameState.getCoins();
+void Game::saveUserData() {
+    DataManager::saveUserData(UserDataPath, m_gameState.getUserData());
+    m_lastSavedUserData = m_gameState.getUserData();
+}
+
+void Game::syncShopSelections() {
+    ResourceManager::instance().applyShopSelections(m_gameData.shopAssets, m_gameState.getUserData());
+    m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
+    initBackground();
 }
 
 void Game::run() {
@@ -116,8 +143,10 @@ bool Game::isCommandAllowed(ScreenCommand command) const {
     switch (command) {
         case ScreenCommand::StartGame:
             return m_activeScreen == ActiveScreen::Start;
+        case ScreenCommand::OpenShop:
+            return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::ReturnToStart:
-            return m_activeScreen == ActiveScreen::Game;
+            return m_activeScreen == ActiveScreen::Game || m_activeScreen == ActiveScreen::Shop;
         case ScreenCommand::Quit:
             return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::None:
@@ -132,7 +161,11 @@ void Game::applyScreenCommand(ScreenCommand command) {
         case ScreenCommand::StartGame:
             showGameScreen();
             break;
+        case ScreenCommand::OpenShop:
+            showShopScreen();
+            break;
         case ScreenCommand::ReturnToStart:
+            syncShopSelections();
             showStartScreen();
             break;
         case ScreenCommand::Quit:
@@ -145,16 +178,16 @@ void Game::applyScreenCommand(ScreenCommand command) {
 
 void Game::update(float dt) {
     m_screen->update(dt);
-    saveCoinsIfChanged();
+    saveUserDataIfChanged();
     SoundManager::instance().update(dt);
     handleScreenCommand();
 }
 
-void Game::saveCoinsIfChanged() {
-    if (m_lastSavedCoins == m_gameState.getCoins())
+void Game::saveUserDataIfChanged() {
+    if (sameUserData(m_lastSavedUserData, m_gameState.getUserData()))
         return;
 
-    saveCoins();
+    saveUserData();
 }
 
 void Game::render() {
