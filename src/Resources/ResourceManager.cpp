@@ -19,47 +19,6 @@ void ResourceManager::loadData() {
     loadSoundPaths();
 }
 
-std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
-    return m_imageTextures;
-}
-
-sf::Texture& ResourceManager::getImage(GameObjects image) {
-    auto it = m_imageTextures.find(image);
-    if (it == m_imageTextures.end())
-        throw std::runtime_error("Requested texture is not loaded (id "
-            + std::to_string(static_cast<int>(image)) + ")");
-    return it->second;
-}
-
-sf::Font& ResourceManager::getFont(Fonts font) {
-    auto it = m_fonts.find(font);
-    if (it == m_fonts.end())
-        throw std::runtime_error("Requested font is not loaded (id "
-            + std::to_string(static_cast<int>(font)) + ")");
-    return it->second;
-}
-
-const std::string& ResourceManager::getSoundPath(Sounds sound) const {
-    auto it = m_soundPaths.find(sound);
-    if (it == m_soundPaths.end())
-        throw std::runtime_error("Requested sound is not loaded (id "
-            + std::to_string(static_cast<int>(sound)) + ")");
-    return it->second;
-}
-
-// PRIVATE
-
-void ResourceManager::loadSoundPaths() {
-    for (const auto& resource : Resources::soundResources) {
-        std::ifstream file(resource.path);
-        if (!file)
-            throw std::runtime_error("Failed to find sound resource from path: " + resource.path);
-
-        if (resource.type != Sounds::Max)
-            m_soundPaths[resource.type] = resource.path;
-    }
-}
-
 template<typename Key, typename Value, std::size_t N>
 void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& resources, 
                                     std::map<Key, Value>& dataMap,
@@ -95,4 +54,43 @@ void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& reso
             dataMap[type] = val;
         }
     }
+}
+
+void ResourceManager::loadSoundPaths() {
+    for (const auto& resource : Resources::soundResources) {
+        std::ifstream file(resource.path);
+        if (!file)
+            throw std::runtime_error("Failed to find sound resource from path: " + resource.path);
+
+        if (resource.type != Sounds::Max)
+            m_soundPaths[resource.type] = resource.path;
+    }
+}
+
+std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
+    return m_imageTextures;
+}
+
+sf::Texture& ResourceManager::getImage(GameObjects image) {
+    auto it = m_imageTextures.find(image);
+    if (it == m_imageTextures.end())
+        throw std::runtime_error("Requested texture is not loaded (id "
+            + std::to_string(static_cast<int>(image)) + ")");
+    return it->second;
+}
+
+sf::Font& ResourceManager::getFont(Fonts font) {
+    auto it = m_fonts.find(font);
+    if (it == m_fonts.end())
+        throw std::runtime_error("Requested font is not loaded (id "
+            + std::to_string(static_cast<int>(font)) + ")");
+    return it->second;
+}
+
+const std::string& ResourceManager::getSoundPath(Sounds sound) const {
+    auto it = m_soundPaths.find(sound);
+    if (it == m_soundPaths.end())
+        throw std::runtime_error("Requested sound is not loaded (id "
+            + std::to_string(static_cast<int>(sound)) + ")");
+    return it->second;
 }

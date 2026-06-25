@@ -1,16 +1,20 @@
 #include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/Constants.h"
+#include "Gameplay/GameState.h"
 
-// Builds the bomb, then crops the sprite to one frame and centers its origin.
 Bomb::Bomb(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : MovingObject(texture, position, { 0.f, BombConfig::FallSpeed }, gameState)
     , m_animation(Animation::frameSize(texture, BombConfig::FrameCount),
         BombConfig::FrameCount, BombConfig::FrameDuration)
 {
     setupSprite(m_animation.getFrameRect(), BombConfig::Scale);
+    gameState.addActiveBomb();
 }
 
-// Falls, wobbles, and dies once it leaves the bottom of the screen.
+Bomb::~Bomb() {
+    gameState().removeActiveBomb();
+}
+
 void Bomb::update(float dt)
 {
     move(dt);

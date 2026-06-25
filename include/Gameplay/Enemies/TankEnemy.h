@@ -1,11 +1,15 @@
 #pragma once
 #include "Gameplay/Enemies/Enemy.h"
 
+class Drone;
+class CommandVehicle;
+
 /// @brief A slow, armored enemy: takes two hits — the first only wounds it.
 class TankEnemy : public Enemy {
 public:
-    /// @brief Constructs a tank enemy with a texture and a starting position.
-    TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);
+    /// @brief Constructs a tank enemy with a texture, position, and the live drone/vehicle refs.
+    TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
+        const Drone& drone, const CommandVehicle& vehicle);
 
     /// @brief First hit wounds (changes color); second hit kills.
     void onHit() override;

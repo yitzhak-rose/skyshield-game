@@ -83,7 +83,25 @@ void OverlayView::handleEvent(const sf::Event& event, const ScreenEventContext& 
     }
 }
 
-void OverlayView::update(float /*dt*/) {
+void OverlayView::updateSelectionFromMouse(sf::Vector2f mousePosition) {
+    const int actionIndex = buttonIndexAt(mousePosition);
+    if (actionIndex >= 0)
+        m_selectedAction = static_cast<std::size_t>(actionIndex);
+}
+
+int OverlayView::buttonIndexAt(sf::Vector2f position) const {
+    for (std::size_t i = 0; i < m_buttonBounds.size(); ++i) {
+        const sf::FloatRect& bounds = m_buttonBounds[i];
+        const bool insideX = position.x >= bounds.position.x &&
+            position.x <= bounds.position.x + bounds.size.x;
+        const bool insideY = position.y >= bounds.position.y &&
+            position.y <= bounds.position.y + bounds.size.y;
+
+        if (insideX && insideY)
+            return static_cast<int>(i);
+    }
+
+    return -1;
 }
 
 void OverlayView::activateAction(std::size_t actionIndex) {
@@ -107,25 +125,7 @@ void OverlayView::moveSelectionRight() {
         ++m_selectedAction;
 }
 
-void OverlayView::updateSelectionFromMouse(sf::Vector2f mousePosition) {
-    const int actionIndex = buttonIndexAt(mousePosition);
-    if (actionIndex >= 0)
-        m_selectedAction = static_cast<std::size_t>(actionIndex);
-}
-
-int OverlayView::buttonIndexAt(sf::Vector2f position) const {
-    for (std::size_t i = 0; i < m_buttonBounds.size(); ++i) {
-        const sf::FloatRect& bounds = m_buttonBounds[i];
-        const bool insideX = position.x >= bounds.position.x &&
-            position.x <= bounds.position.x + bounds.size.x;
-        const bool insideY = position.y >= bounds.position.y &&
-            position.y <= bounds.position.y + bounds.size.y;
-
-        if (insideX && insideY)
-            return static_cast<int>(i);
-    }
-
-    return -1;
+void OverlayView::update(float /*dt*/) {
 }
 
 void OverlayView::draw(sf::RenderTarget& target, sf::RenderStates states) const {

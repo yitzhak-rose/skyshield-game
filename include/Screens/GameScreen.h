@@ -35,23 +35,23 @@ private:
     /// @brief Shows the loss summary and restart/quit actions.
     void showGameOverOverlay();
 
-    /// @brief Shows the level-completed summary and continue action.
-    void showLevelCompletedOverlay();
+    /// @brief Returns true when the current stage is the last configured stage.
+    bool isFinalStage() const;
 
     /// @brief Shows the final completion summary and quit action.
     void showGameCompletedOverlay();
 
-    /// @brief Loads the current stage into a fresh world.
-    void startCurrentStage();
+    /// @brief Shows the level-completed summary and continue action.
+    void showLevelCompletedOverlay();
+
+    /// @brief Returns summary lines reused by completion overlays.
+    std::vector<std::string> makeLevelSummaryLines() const;
 
     /// @brief Advances to the next stage after the level-completed overlay.
     void advanceStage();
 
-    /// @brief Returns true when the current stage is the last configured stage.
-    bool isFinalStage() const;
-
-    /// @brief Returns summary lines reused by completion overlays.
-    std::vector<std::string> makeLevelSummaryLines() const;
+    /// @brief Loads the current stage into a fresh world.
+    void startCurrentStage();
 
     /// @brief Recreates the world for the current level.
     void restartLevel();

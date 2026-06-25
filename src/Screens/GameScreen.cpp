@@ -14,13 +14,6 @@ GameScreen::GameScreen(GameState& gameState)
     startCurrentStage();
 }
 
-void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Space)
-            m_world->dropBomb();
-    }
-}
-
 void GameScreen::update(float deltaTime) {
     if (updateOverlay(deltaTime))
         return;
@@ -38,12 +31,6 @@ void GameScreen::update(float deltaTime) {
         else
             showLevelCompletedOverlay();
     }
-}
-
-void GameScreen::draw(sf::RenderTarget& target) {
-    m_world->draw(target);
-    target.draw(*m_menuBar);
-    drawOverlay(target);
 }
 
 void GameScreen::handleInput() {
@@ -65,15 +52,8 @@ void GameScreen::showGameOverOverlay() {
         }));
 }
 
-void GameScreen::showLevelCompletedOverlay() {
-    m_completionOverlayShown = true;
-    SoundManager::instance().playLevelFinished();
-    showOverlay(std::make_unique<OverlayView>(
-        "Level Completed",
-        makeLevelSummaryLines(),
-        std::vector<OverlayAction>{
-            { "Next Level", OverlayActionType::Primary, [this]() { advanceStage(); } }
-        }));
+bool GameScreen::isFinalStage() const {
+    return m_currentStage + 1 >= static_cast<int>(m_stages.size());
 }
 
 void GameScreen::showGameCompletedOverlay() {
@@ -87,6 +67,29 @@ void GameScreen::showGameCompletedOverlay() {
         }));
 }
 
+void GameScreen::showLevelCompletedOverlay() {
+    m_completionOverlayShown = true;
+    SoundManager::instance().playLevelFinished();
+    showOverlay(std::make_unique<OverlayView>(
+        "Level Completed",
+        makeLevelSummaryLines(),
+        std::vector<OverlayAction>{
+            { "Next Level", OverlayActionType::Primary, [this]() { advanceStage(); } }
+        }));
+}
+
+std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
+    return {
+        "Enemies defeated: " + std::to_string(m_gameState.getEnemiesDefeated()),
+        "Coins earned: " + std::to_string(m_gameState.getLevelCoins())
+    };
+}
+
+void GameScreen::advanceStage() {
+    ++m_currentStage;
+    startCurrentStage();
+}
+
 void GameScreen::startCurrentStage() {
     m_world = std::make_unique<World>(
         m_stages[static_cast<std::size_t>(m_currentStage)],
@@ -95,20 +98,17 @@ void GameScreen::startCurrentStage() {
     m_completionOverlayShown = false;
 }
 
-void GameScreen::advanceStage() {
-    ++m_currentStage;
-    startCurrentStage();
+void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+        if (key->code == sf::Keyboard::Key::Space)
+            m_world->dropBomb();
+    }
 }
 
-bool GameScreen::isFinalStage() const {
-    return m_currentStage + 1 >= static_cast<int>(m_stages.size());
-}
-
-std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
-    return {
-        "Enemies defeated: " + std::to_string(m_gameState.getEnemiesDefeated()),
-        "Coins earned: " + std::to_string(m_gameState.getLevelCoins())
-    };
+void GameScreen::draw(sf::RenderTarget& target) {
+    m_world->draw(target);
+    target.draw(*m_menuBar);
+    drawOverlay(target);
 }
 
 void GameScreen::restartLevel() {

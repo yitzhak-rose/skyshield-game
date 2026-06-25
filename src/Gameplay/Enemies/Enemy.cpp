@@ -1,15 +1,23 @@
 #include "Gameplay/Enemies/Enemy.h"
+#include "Gameplay/Objects/Drone.h"
+#include "Gameplay/Objects/CommandVehicle.h"
+#include "Gameplay/Projectiles/Bullet.h"
 #include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
+#include "Resources/ResourceManager.h"
+#include "Enums/GameObjects.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <cmath>
 
 Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
     int frameCount, float frameDuration, float scale,
-    sf::Vector2f muzzleOffset, GameState& gameState)
+    sf::Vector2f muzzleOffset, GameState& gameState,
+    const Drone& drone, const CommandVehicle& vehicle)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
     , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
+    , m_drone(drone)
+    , m_vehicle(vehicle)
     , m_stopRange(Utils::randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
     , m_muzzleOffset(muzzleOffset)
 {
@@ -24,9 +32,14 @@ void Enemy::defeat() {
     gameState().recordEnemyDefeated(getReward());
 }
 
+// Live reads of the drone and vehicle, so the AI always sees their current state.
+float Enemy::vehicleX() const { return m_vehicle.getPosition().x; }
+float Enemy::vehicleHalfWidth() const { return m_vehicle.getBounds().size.x / 2.f; }
+float Enemy::droneX() const { return m_drone.getPosition().x; }
+
 // Returns the sign of the direction from the enemy toward the vehicle.
 float Enemy::directionToVehicle() const {
-    return (m_vehicleX < getPosition().x) ? -1.f : 1.f;
+    return (vehicleX() < getPosition().x) ? -1.f : 1.f;
 }
 
 // Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
@@ -42,13 +55,24 @@ float Enemy::getBulletVelocityX() const {
 void Enemy::update(float dt) {
     decideState();
     switch (m_state) {
-    case EnemyState::Advancing:  advance(dt);       break;
-    case EnemyState::Panicking:  panic(dt);         break;
-    case EnemyState::Firing:     updateFiring(dt);  break;
+    case EnemyState::Advancing: advance(dt);      break;
+    case EnemyState::Panicking: panic(dt);        break;
+    case EnemyState::Firing:    updateFiring(dt); break;
     }
     updateFacing();
     updateAnimation(dt);
     m_sprite.setTextureRect(m_animation.getFrameRect());
+}
+
+// When a shot is queued, the enemy itself builds the bullet and hands it to the World.
+std::unique_ptr<GameObject> Enemy::takeSpawn() {
+    if (!m_fireRequested)
+        return nullptr;
+
+    m_fireRequested = false;
+    return std::make_unique<Bullet>(
+        ResourceManager::instance().getImage(GameObjects::Bullet),
+        getMuzzlePosition(), getBulletVelocityX(), gameState());
 }
 
 // Default: animate continuously (used by the fast enemy's driving loop).
@@ -58,26 +82,31 @@ void Enemy::updateAnimation(float dt) {
 
 // Mirrors the sprite when moving left; the art faces right by default.
 void Enemy::updateFacing() {
-    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
-
     float flip;
-    if (m_velocity.x != 0.f)
-        flip = (m_velocity.x < 0.f) ? -1.f : 1.f;      // moving: face the travel direction
-    else if (isFiring())
-        flip = directionToVehicle();                    // stopped to fire: face the vehicle
-    else
-        return;                                          // otherwise keep current facing
+    if (m_velocity.x != 0.f)        flip = (m_velocity.x < 0.f) ? -1.f : 1.f;  // moving: face travel direction
+    else if (isFiring())            flip = directionToVehicle();               // stopped to fire: face vehicle
+    else                            return;                                    // otherwise keep current facing
 
+    float scale = m_sprite.getScale().y; // y never flips, so it holds the clean magnitude
     m_sprite.setScale({ flip * scale, scale });
 }
 
 void Enemy::decideState() {
-    if (isDroneInRange())
-        m_state = EnemyState::Panicking;
-    else if (isInFiringRange())
-        m_state = EnemyState::Firing;
-    else
-        m_state = EnemyState::Advancing;
+    m_state = isDroneInRange() ? EnemyState::Panicking
+        : isInFiringRange() ? EnemyState::Firing
+        : EnemyState::Advancing;
+}
+
+// Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
+bool Enemy::isDroneInRange() const {
+    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange : EnemyConfig::PanicRange;
+    return std::abs(droneX() - getPosition().x) < range;
+}
+
+bool Enemy::isInFiringRange() const {
+    float centerDist = std::abs(vehicleX() - getPosition().x);
+    float gap = centerDist - vehicleHalfWidth() - getBounds().size.x / 2.f;
+    return gap <= m_stopRange;
 }
 
 void Enemy::advance(float dt) {
@@ -87,20 +116,12 @@ void Enemy::advance(float dt) {
 
 void Enemy::panic(float dt) {
     float x = getPosition().x;
-
-    // Get the movement bounds, then how far we are from each.
     auto [leftWall, rightWall] = calculateWalls(x);
-    float distToLeft = x - leftWall;
-    float distToRight = rightWall - x;
+    updateUTurnState(x - leftWall, rightWall - x);
 
-    // Update the U-turn state.
-    updateUTurnState(distToLeft, distToRight);
-
-    // If not mid-U-turn, flee away from the drone.
     if (!m_isUTurning)
-        m_fleeDirection = (m_droneX < x) ? 1.f : -1.f;
+        m_fleeDirection = (droneX() < x) ? 1.f : -1.f;
 
-    // Move and clamp inside the bounds.
     m_velocity.x = m_fleeDirection * getSpeed() * EnemyConfig::PanicMultiplier;
     move(dt);
     setPosition({ std::clamp(getPosition().x, leftWall, rightWall), getPosition().y });
@@ -110,10 +131,10 @@ void Enemy::panic(float dt) {
 // inset by its own half-width so the whole body stays inside the bounds.
 std::pair<float, float> Enemy::calculateWalls(float x) const {
     float half = getBounds().size.x / 2.f;
-    float gap = m_vehicleHalfWidth + EnemyConfig::VehicleGap;
-    bool leftOfVehicle = (x < m_vehicleX);
-    float leftWall = leftOfVehicle ? half : m_vehicleX + gap + half;
-    float rightWall = leftOfVehicle ? m_vehicleX - gap - half : WindowConfig::Width - half;
+    float gap = vehicleHalfWidth() + EnemyConfig::VehicleGap;
+    bool leftOfVehicle = (x < vehicleX());
+    float leftWall = leftOfVehicle ? half : vehicleX() + gap + half;
+    float rightWall = leftOfVehicle ? vehicleX() - gap - half : WindowConfig::Width - half;
     return { leftWall, rightWall };
 }
 
@@ -143,17 +164,4 @@ void Enemy::updateFiring(float dt) {
         m_fireRequested = true;
         m_fireTimer = 0.f;
     }
-}
-
-// Hysteretic panic trigger: enter at PanicRange, leave only past PanicExitRange.
-bool Enemy::isDroneInRange() const {
-    float range = (m_state == EnemyState::Panicking) ? EnemyConfig::PanicExitRange
-        : EnemyConfig::PanicRange;
-    return std::abs(m_droneX - getPosition().x) < range;
-}
-
-bool Enemy::isInFiringRange() const {
-    float centerDist = std::abs(m_vehicleX - getPosition().x);
-    float gap = centerDist - m_vehicleHalfWidth - getBounds().size.x / 2.f;
-    return gap <= m_stopRange;
 }

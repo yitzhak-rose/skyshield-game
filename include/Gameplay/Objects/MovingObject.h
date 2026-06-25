@@ -1,9 +1,9 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
-#include "Interfaces/IUpdatable.h"
 
 /// @brief «abstract» base for objects that move; adds velocity on top of GameObject.
-class MovingObject : public GameObject, public IUpdatable {
+///        (update() is already part of GameObject's contract, so it is not re-declared here.)
+class MovingObject : public GameObject {
 public:
 
     /// @brief Constructs the object with a texture, position, and velocity.

@@ -21,9 +21,10 @@ private:
         Game
     };
 
-    void update(float dt);
-    void render();
     void initBackground();
+
+    /// @brief Loads saved persistent state before the first screen is shown.
+    void loadSavedData();
 
     /// @brief Replaces the current screen with the start screen and marks it active.
     void showStartScreen();
@@ -31,17 +32,14 @@ private:
     /// @brief Replaces the current screen with the gameplay screen and marks it active.
     void showGameScreen();
 
-    /// @brief Loads saved persistent state before the first screen is shown.
-    void loadSavedData();
-
-    /// @brief Saves coins when the total has changed since the last write.
-    void saveCoinsIfChanged();
-
     /// @brief Writes the current coin total to the save file.
     void saveCoins();
 
     /// @brief Polls SFML events, handles window-owned events, and dispatches safe context to screens.
     void handleEvents();
+
+    /// @brief Builds event data that screens need without exposing the mutable window.
+    ScreenEventContext makeEventContext(const sf::Event& event) const;
 
     /// @brief Executes a pending screen command only if the active screen is allowed to request it.
     void handleScreenCommand();
@@ -52,8 +50,12 @@ private:
     /// @brief Applies a command after it passes the active-screen policy check.
     void applyScreenCommand(ScreenCommand command);
 
-    /// @brief Builds event data that screens need without exposing the mutable window.
-    ScreenEventContext makeEventContext(const sf::Event& event) const;
+    void update(float dt);
+
+    /// @brief Saves coins when the total has changed since the last write.
+    void saveCoinsIfChanged();
+
+    void render();
 
     sf::RenderWindow window;
     sf::Clock m_clock;

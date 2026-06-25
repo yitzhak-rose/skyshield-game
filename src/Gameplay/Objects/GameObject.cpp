@@ -10,19 +10,16 @@ GameObject::GameObject(const sf::Texture& texture, sf::Vector2f position, GameSt
 
 GameObject::~GameObject() = default;
 
-// Draws the sprite to the window.
 void GameObject::draw(sf::RenderTarget& target) const {
     target.draw(m_sprite);
 }
 
-// Crops the sprite to one frame, centers its origin, and applies a scale.
 void GameObject::setupSprite(sf::IntRect frame, float scale) {
     m_sprite.setTextureRect(frame);
     m_sprite.setOrigin({ frame.size.x / 2.f, frame.size.y / 2.f });
     m_sprite.setScale({ scale, scale });
 }
 
-// Returns the sprite's on-screen rect as the collision box.
 sf::FloatRect GameObject::getBounds() const {
     return m_sprite.getGlobalBounds();
 }

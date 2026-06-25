@@ -25,10 +25,6 @@ Game::Game()
     showStartScreen();
 }
 
-Game::~Game() {
-    saveCoins();
-}
-
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
     const sf::Vector2u textureSize = texture.getSize();
@@ -38,10 +34,9 @@ void Game::initBackground() {
         });
 }
 
-void Game::showGameScreen() {
-    m_activeScreen = ActiveScreen::Game;
-    SoundManager::instance().startBackground();
-    m_screen = std::make_unique<GameScreen>(m_gameState);
+void Game::loadSavedData() {
+   // m_gameState.setCoins(DataManager::loadCoins(SaveFilePath));
+    m_lastSavedCoins = m_gameState.getCoins();
 }
 
 void Game::showStartScreen() {
@@ -50,15 +45,13 @@ void Game::showStartScreen() {
     m_screen = std::make_unique<StartScreen>(m_gameState);
 }
 
-void Game::loadSavedData() {
-    m_gameState.setCoins(DataManager::loadCoins(SaveFilePath));
-    m_lastSavedCoins = m_gameState.getCoins();
+void Game::showGameScreen() {
+    m_activeScreen = ActiveScreen::Game;
+    SoundManager::instance().startBackground();
+    m_screen = std::make_unique<GameScreen>(m_gameState);
 }
 
-void Game::saveCoinsIfChanged() {
-    if (m_lastSavedCoins == m_gameState.getCoins())
-        return;
-
+Game::~Game() {
     saveCoins();
 }
 
@@ -96,6 +89,17 @@ void Game::handleEvents() {
 
         m_screen->handleEvent(*event, makeEventContext(*event));
     }
+}
+
+ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
+    ScreenEventContext context;
+
+    if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>())
+        context.mousePosition = window.mapPixelToCoords(mouseMove->position, window.getDefaultView());
+    else if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>())
+        context.mousePosition = window.mapPixelToCoords(mousePress->position, window.getDefaultView());
+
+    return context;
 }
 
 void Game::handleScreenCommand() {
@@ -139,22 +143,18 @@ void Game::applyScreenCommand(ScreenCommand command) {
     }
 }
 
-ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
-    ScreenEventContext context;
-
-    if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>())
-        context.mousePosition = window.mapPixelToCoords(mouseMove->position, window.getDefaultView());
-    else if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>())
-        context.mousePosition = window.mapPixelToCoords(mousePress->position, window.getDefaultView());
-
-    return context;
-}
-
 void Game::update(float dt) {
     m_screen->update(dt);
     saveCoinsIfChanged();
     SoundManager::instance().update(dt);
     handleScreenCommand();
+}
+
+void Game::saveCoinsIfChanged() {
+    if (m_lastSavedCoins == m_gameState.getCoins())
+        return;
+
+    saveCoins();
 }
 
 void Game::render() {

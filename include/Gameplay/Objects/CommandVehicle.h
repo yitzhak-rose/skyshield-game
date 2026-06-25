@@ -1,11 +1,10 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
-#include "Interfaces/IUpdatable.h"
 #include "Graphics/Animation.h"
 #include "Gameplay/Constants.h"
 
 /// @brief The armored command vehicle the player protects. Stays in place but animates each frame.
-class CommandVehicle : public GameObject, public IUpdatable
+class CommandVehicle : public GameObject
 {
 public:
     /// @brief Constructs the vehicle with a texture and a starting position.
@@ -21,6 +20,12 @@ public:
     float getArmorPercent() const;
 
 private:
+    /// @brief Picks and shows the right beacon/burning frame for this moment.
+    void updateAnimationFrame(float dt);
+
+    /// @brief Drives the post-hit shake offset, or rests at the base position when idle.
+    void updateShake(float dt);
+
     /// @brief Provides the frame geometry of the vehicle sheet.
     Animation m_animation;
 

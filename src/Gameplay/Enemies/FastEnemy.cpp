@@ -1,10 +1,11 @@
 #include "Gameplay/Enemies/FastEnemy.h"
 #include "Gameplay/Constants.h"
 
-FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
+FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
+    const Drone& drone, const CommandVehicle& vehicle)
     : Enemy(texture, position, FastEnemyConfig::FrameCount,
         FastEnemyConfig::FrameDuration, FastEnemyConfig::Scale,
-        { FastEnemyConfig::MuzzleX, FastEnemyConfig::MuzzleY }, gameState)
+        { FastEnemyConfig::MuzzleX, FastEnemyConfig::MuzzleY }, gameState, drone, vehicle)
 {
 }
 

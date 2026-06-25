@@ -6,7 +6,7 @@ class Animation {
 public:
 
     /// @brief Constructs an animation from a uniform horizontal strip of frames.
-    Animation(sf::Vector2i frameSize, int frameCount, float frameDuration, bool loop = true);
+    Animation(sf::Vector2i frameSize, int frameCount, float frameDuration);
 
     /// @brief Advances the animation by one frame's worth of elapsed time.
     void update(float dt);
@@ -19,12 +19,6 @@ public:
 
     /// @brief Rewinds the animation to its first frame.
     void reset();
-
-    /// @brief Sets whether the animation restarts after its last frame.
-    void setLoop(bool loop) { m_loop = loop; }
-
-    /// @brief Returns true when a non-looping animation has shown its last frame.
-    bool isFinished() const { return m_finished; }
 
     /// @brief Splits a sprite-sheet texture into equal-width frames of full height.
     static sf::Vector2i frameSize(const sf::Texture& texture, int frameCount);
@@ -40,15 +34,9 @@ private:
     /// @brief How long each frame stays on screen, in seconds.
     float m_frameDuration;
 
-    /// @brief Whether the animation restarts after its last frame.
-    bool m_loop;
-
     /// @brief The frame currently being shown.
     int m_currentFrame = 0;
 
     /// @brief Time accumulated toward the next frame switch.
     float m_timer = 0.f;
-
-    /// @brief True once a non-looping animation reaches its last frame.
-    bool m_finished = false;
 };
