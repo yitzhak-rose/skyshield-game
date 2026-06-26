@@ -28,4 +28,7 @@ public:
 private:
     /// @brief Cycles the drone's rotor frames.
     Animation m_animation;
+
+    /// @brief Texture-specific scale that keeps every drone skin at the same on-screen height.
+    float m_displayScale = 1.f;
 };

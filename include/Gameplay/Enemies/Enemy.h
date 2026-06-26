@@ -6,6 +6,7 @@
 
 class Drone;
 class CommandVehicle;
+struct EnemyTypeConfig;
 
 /// @brief «abstract» base for all enemies. Holds the shared AI; subclasses set the params.
 ///        Reads the drone and the vehicle live through references, so there is no
@@ -13,11 +14,9 @@ class CommandVehicle;
 class Enemy : public MovingObject {
 public:
 
-    /// @brief Constructs an enemy with a texture, position, animation params, muzzle offset,
-    ///        and live references to the drone (the threat) and the vehicle (the target).
+    /// @brief Constructs an enemy with a texture, position, type config, and live target references.
     Enemy(const sf::Texture& texture, sf::Vector2f position,
-        int frameCount, float frameDuration, float scale,
-        sf::Vector2f muzzleOffset, GameState& gameState,
+        const EnemyTypeConfig& stats, GameState& gameState,
         const Drone& drone, const CommandVehicle& vehicle);
 
     /// @brief Updates the enemy for one frame (runs the AI: panic / fire / advance).

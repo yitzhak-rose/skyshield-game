@@ -42,9 +42,9 @@ void fitSpriteTo(sf::Sprite& sprite, sf::FloatRect bounds) {
 int shopPreviewFrameCount(ShopAssetType type) {
     switch (type) {
         case ShopAssetType::CommandVehicle:
-            return VehicleConfig::FrameCount;
+            return VehicleConfig::Sprite.frameCount;
         case ShopAssetType::Drone:
-            return DroneConfig::FrameCount;
+            return DroneConfig::Sprite.frameCount;
         case ShopAssetType::Background:
         case ShopAssetType::BackgroundMusic:
         case ShopAssetType::Font:

@@ -6,11 +6,11 @@
 CommandVehicle::CommandVehicle(
     const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : GameObject(texture, position, gameState)
-    , m_animation(Animation::frameSize(texture, VehicleConfig::FrameCount),
-        VehicleConfig::FrameCount, VehicleConfig::FrameDuration)
+    , m_animation(Animation::frameSize(texture, VehicleConfig::Sprite.frameCount),
+        VehicleConfig::Sprite.frameCount, VehicleConfig::Sprite.frameDuration)
     , m_basePosition(position)
 {
-    setupSprite(m_animation.getFrameRect(), VehicleConfig::Scale);
+    setupSprite(m_animation.getFrameRect(), VehicleConfig::Sprite.scale);
 }
 
 // Loops frames 0..3 (flashing beacon) while healthy, or 4..5 (burning) when critical, and runs the hit-shake.
@@ -21,11 +21,11 @@ void CommandVehicle::update(float dt) {
 
 void CommandVehicle::updateAnimationFrame(float dt) {
     m_frameTimer += dt;
-    int step = static_cast<int>(m_frameTimer / VehicleConfig::FrameDuration);
+    int step = static_cast<int>(m_frameTimer / VehicleConfig::Sprite.frameDuration);
 
     const int frame = (getArmorPercent() >= VehicleConfig::CriticalArmor)
         ? step % VehicleConfig::NormalFrames
-        : VehicleConfig::NormalFrames + step % (VehicleConfig::FrameCount - VehicleConfig::NormalFrames);
+        : VehicleConfig::NormalFrames + step % (VehicleConfig::Sprite.frameCount - VehicleConfig::NormalFrames);
 
     m_sprite.setTextureRect(m_animation.frameRect(frame));
 }

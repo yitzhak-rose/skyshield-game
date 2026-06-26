@@ -11,17 +11,17 @@
 #include <cmath>
 
 Enemy::Enemy(const sf::Texture& texture, sf::Vector2f position,
-    int frameCount, float frameDuration, float scale,
-    sf::Vector2f muzzleOffset, GameState& gameState,
+    const EnemyTypeConfig& stats, GameState& gameState,
     const Drone& drone, const CommandVehicle& vehicle)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
-    , m_animation(Animation::frameSize(texture, frameCount), frameCount, frameDuration)
+    , m_animation(Animation::frameSize(texture, stats.sprite.frameCount),
+        stats.sprite.frameCount, stats.sprite.frameDuration)
     , m_drone(drone)
     , m_vehicle(vehicle)
     , m_stopRange(Utils::randomFloat(EnemyConfig::StopRangeMin, EnemyConfig::StopRangeMax))
-    , m_muzzleOffset(muzzleOffset)
+    , m_muzzleOffset({ stats.muzzle.x, stats.muzzle.y })
 {
-    setupSprite(m_animation.getFrameRect(), scale);
+    setupSprite(m_animation.getFrameRect(), stats.sprite.scale);
 }
 
 void Enemy::defeat() {
