@@ -23,22 +23,22 @@ public:
     /// @brief Draws every live object in the world.
     void draw(sf::RenderWindow& target) const;
 
-    /// @brief Starts the drone moving left.
-    void moveDroneLeft() { m_drone.moveLeft(); }
-
-    /// @brief Starts the drone moving right.
-    void moveDroneRight() { m_drone.moveRight(); }
-
-    /// @brief Stops the drone's horizontal movement.
-    void stopDrone() { m_drone.stop(); }
-
     /// @brief Drops a bomb from the drone's current position, if ammo remains.
     void dropBomb();
+
+    /// @brief Handles a single discrete input event (currently: Space to drop a bomb).
+    void handleEvent(const sf::Event& event);
 
     /// @brief Returns whether the level is still running, won, or lost.
     LevelResult getResult() const { return m_gameState.getLevelResult(); }
 
+    /// @brief Returns the coins collected so far in the current level.
+    int getCoinsEarned() const { return m_gameState.getLevelCoins(); }
+
 private:
+    /// @brief Applies real-time keyboard input to the drone's movement.
+    void handleInput();
+
     /// @brief Spawns a new enemy once the spawn interval has elapsed, while any remain.
     void spawnEnemies(float dt);
 

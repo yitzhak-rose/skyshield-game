@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Screens/Screen.h"
 #include "Gameplay/World.h"
 #include "Gameplay/GameState.h"
@@ -27,9 +26,6 @@ public:
     void draw(sf::RenderWindow& target) override;
 
 private:
-    /// @brief Applies real-time movement input to the drone.
-    void handleInput();
-
     /// @brief Shows the loss summary and restart/quit actions.
     void showGameOverOverlay();
 
@@ -55,15 +51,11 @@ private:
     void restartLevel();
 
     GameState& m_gameState;
-
     bool m_completionOverlayShown = false;
-
     std::vector<LevelConfig> m_stages;
-
     int m_currentStage = 0;
 
     /// @brief Owned through unique_ptr so restart can replace the whole world cleanly.
     std::unique_ptr<World> m_world;
-
     std::unique_ptr<MenuBar> m_menuBar;
 };

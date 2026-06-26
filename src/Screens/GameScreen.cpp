@@ -1,7 +1,5 @@
 #include "Screens/GameScreen.h"
-
 #include "Resources/SoundManager.h"
-
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,7 +15,6 @@ void GameScreen::update(float deltaTime) {
     if (updateOverlay(deltaTime))
         return;
 
-    handleInput();
     m_world->update(deltaTime);
     m_menuBar->update(deltaTime);
 
@@ -32,15 +29,6 @@ void GameScreen::update(float deltaTime) {
     }
 }
 
-void GameScreen::handleInput() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-        m_world->moveDroneLeft();
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-        m_world->moveDroneRight();
-    else
-        m_world->stopDrone();
-}
-
 void GameScreen::showGameOverOverlay() {
     SoundManager::instance().playMissionFailed();
     showOverlay(std::make_unique<OverlayView>(
@@ -48,7 +36,7 @@ void GameScreen::showGameOverOverlay() {
         makeLevelSummaryLines(),
         std::vector<OverlayAction>{
             { "Go to Start", OverlayActionType::Primary, [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
-        }));
+    }));
 }
 
 bool GameScreen::isFinalStage() const {
@@ -63,7 +51,7 @@ void GameScreen::showGameCompletedOverlay() {
         makeLevelSummaryLines(),
         std::vector<OverlayAction>{
             { "Start Screen", OverlayActionType::Primary, [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
-        }));
+    }));
 }
 
 void GameScreen::showLevelCompletedOverlay() {
@@ -74,7 +62,7 @@ void GameScreen::showLevelCompletedOverlay() {
         makeLevelSummaryLines(),
         std::vector<OverlayAction>{
             { "Next Level", OverlayActionType::Primary, [this]() { advanceStage(); } }
-        }));
+    }));
 }
 
 std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
@@ -98,10 +86,7 @@ void GameScreen::startCurrentStage() {
 }
 
 void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Space)
-            m_world->dropBomb();
-    }
+    m_world->handleEvent(event);
 }
 
 void GameScreen::draw(sf::RenderWindow& target) {

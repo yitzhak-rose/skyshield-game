@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <memory>
 #include "Gameplay/Factory.h" 
+#include <SFML/Window/Keyboard.hpp>
 
 // Builds the level: creates the vehicle and drone (into m_objects), applies the config.
 World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
@@ -15,7 +16,7 @@ World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     , m_objects()
     , m_vehicle(Factory::createAndAdd<CommandVehicle>(GameObjects::CommandCar,
         sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState, m_objects))
-    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone, 
+    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone,
         sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState, m_objects))
     , m_enemiesToSpawn(config.enemyCount)
 {
@@ -26,6 +27,7 @@ void World::update(float dt) {
     if (m_gameState.getLevelResult() != LevelResult::Running)
         return;
 
+    handleInput();
     spawnEnemies(dt);
     for (const auto& object : m_objects)
         object->update(dt);
@@ -33,6 +35,22 @@ void World::update(float dt) {
     handleCollisions();
     processDead();
     checkResult();
+}
+
+void World::handleInput() {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+        m_drone.moveLeft();
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+        m_drone.moveRight();
+    else
+        m_drone.stop();
+}
+
+void World::handleEvent(const sf::Event& event) {
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+        if (key->code == sf::Keyboard::Key::Space)
+            dropBomb();
+    }
 }
 
 void World::spawnEnemies(float dt) {

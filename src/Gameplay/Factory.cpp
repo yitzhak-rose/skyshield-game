@@ -8,6 +8,7 @@
 #include "Gameplay/Objects/CommandVehicle.h"
 #include "Gameplay/Objects/Drone.h"
 #include "Gameplay/Projectiles/Bomb.h"
+#include "Gameplay/Projectiles/Bullet.h"
 #include "Gameplay/Enemies/TankEnemy.h"
 #include "Gameplay/Enemies/FastEnemy.h"
 #include "Resources/ResourceManager.h"
@@ -51,4 +52,9 @@ std::unique_ptr<GameObject> Factory::createEnemy(EnemyType type, sf::Vector2f po
         throw std::invalid_argument("Factory::createEnemy - Unknown EnemyType!");
     }
     return it->second(position, gameState, drone, vehicle);
+}
+
+std::unique_ptr<GameObject> Factory::createBullet(sf::Vector2f position, float velocityX, GameState& gameState) {
+    return std::make_unique<Bullet>(
+        ResourceManager::instance().getImage(GameObjects::Bullet), position, velocityX, gameState);
 }

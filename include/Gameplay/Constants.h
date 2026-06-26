@@ -155,7 +155,7 @@ namespace ShopScreenConfig {
 namespace EnemyConfig {
     inline constexpr float SpawnY = 575.f; // ground level (all enemies on this line)
     inline constexpr float StopRangeMin = 150.f; // min stopping distance from vehicle
-    inline constexpr float StopRangeMax = 230.f; // max stopping distance from vehicle
+    inline constexpr float StopRangeMax = 330.f; // max stopping distance from vehicle
     inline constexpr float PanicMultiplier = 2.f;   // flee speed = base speed × this
     inline constexpr float TelegraphTime = 1.5f;  // seconds between shots (per design doc)
     inline constexpr float UTurnTrigger = 5.f;  // distance from a wall that starts a U-turn
