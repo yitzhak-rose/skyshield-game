@@ -5,14 +5,14 @@
 
 // Crops the sprite to one spin frame and centers its origin so it rotates in place.
 Coin::Coin(const sf::Texture& texture, const sf::Font& font)
-    : m_animation(Animation::frameSize(texture, CoinConfig::FrameCount),
-        CoinConfig::FrameCount, CoinConfig::FrameDuration)
+    : m_animation(Animation::frameSize(texture, CoinConfig::Sprite.frameCount),
+        CoinConfig::Sprite.frameCount, CoinConfig::Sprite.frameDuration)
     , m_sprite(texture)
     , m_font(font)
 {
     m_sprite.setTextureRect(m_animation.getFrameRect());
     GraphicsUtils::centerOrigin(m_sprite);
-    m_sprite.setScale({ CoinConfig::Scale, CoinConfig::Scale });
+    m_sprite.setScale({ CoinConfig::Sprite.scale, CoinConfig::Sprite.scale });
 }
 
 // Spins the icon every frame; the pop timer (if any) counts down toward rest.

@@ -4,10 +4,10 @@
 
 Bomb::Bomb(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : MovingObject(texture, position, { 0.f, BombConfig::FallSpeed }, gameState)
-    , m_animation(Animation::frameSize(texture, BombConfig::FrameCount),
-        BombConfig::FrameCount, BombConfig::FrameDuration)
+    , m_animation(Animation::frameSize(texture, BombConfig::Sprite.frameCount),
+        BombConfig::Sprite.frameCount, BombConfig::Sprite.frameDuration)
 {
-    setupSprite(m_animation.getFrameRect(), BombConfig::Scale);
+    setupSprite(m_animation.getFrameRect(), BombConfig::Sprite.scale);
     gameState.addActiveBomb();
 }
 

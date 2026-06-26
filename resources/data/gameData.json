@@ -33,65 +33,109 @@
     {
       "id": 1,
       "type": "command_vehicle",
-      "name": "Default Command Vehicle",
+      "title": "Default Command Vehicle",
       "price": 0,
       "file": "images/default/commandCar.png",
+      "extra": 0,
       "default": true
     },
     {
       "id": 2,
       "type": "drone",
-      "name": "Default Drone",
+      "title": "Default Drone",
       "price": 0,
       "file": "images/default/drone.png",
+      "extra": 0,
       "default": true
     },
     {
       "id": 3,
       "type": "background",
-      "name": "Default Background",
+      "title": "Default Background",
       "price": 0,
       "file": "images/default/background.png",
+      "extra": 0,
       "default": true
     },
     {
       "id": 4,
       "type": "background_music",
-      "name": "Default Music",
+      "title": "Default Music",
       "price": 0,
       "file": "sounds/default/background-sound.mp3",
+      "extra": 0,
       "default": true
     },
     {
       "id": 5,
       "type": "command_vehicle",
-      "name": "Upgraded Command Vehicle",
+      "title": "Upgraded Command Vehicle",
       "price": 60,
       "file": "images/shop/UpgradedCommandCar.png",
+      "extra": 25,
       "default": false
     },
     {
       "id": 6,
       "type": "drone",
-      "name": "Upgraded Drone",
-      "price": 45,
-      "file": "images/shop/UpgradedDrone.png",
+      "title": "Drone Helicopter",
+      "price": 70,
+      "file": "images/shop/DroneHelicopter.png",
+      "extra": 50,
       "default": false
     },
     {
       "id": 7,
       "type": "font",
-      "name": "Stencil Force",
+      "title": "Stencil Force",
       "price": 0,
       "file": "fonts/StencilForce.otf",
+      "extra": 0,
       "default": true
     },
     {
       "id": 8,
       "type": "font",
-      "name": "Battle Grid",
+      "title": "Battle Grid",
       "price": 30,
       "file": "fonts/BattleGridFree.ttf",
+      "extra": 0,
+      "default": false
+    },
+    {
+      "id": 9,
+      "type": "drone",
+      "title": "Drone Scorpion",
+      "price": 90,
+      "file": "images/shop/DroneScorpion.png",
+      "extra": 75,
+      "default": false
+    },
+    {
+      "id": 10,
+      "type": "background",
+      "title": "Canyon Outpost",
+      "price": 35,
+      "file": "images/shop/background2.png",
+      "extra": 0,
+      "default": false
+    },
+    {
+      "id": 11,
+      "type": "background",
+      "title": "Frozen Ruins",
+      "price": 35,
+      "file": "images/shop/background3.png",
+      "extra": 0,
+      "default": false
+    },
+    {
+      "id": 12,
+      "type": "background",
+      "title": "Dustfall City",
+      "price": 35,
+      "file": "images/shop/background5.png",
+      "extra": 0,
       "default": false
     }
   ]

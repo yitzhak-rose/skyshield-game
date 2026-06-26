@@ -3,9 +3,7 @@
 
 TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
     const Drone& drone, const CommandVehicle& vehicle)
-    : Enemy(texture, position, TankEnemyConfig::FrameCount,
-        TankEnemyConfig::FrameDuration, TankEnemyConfig::Scale,
-        { TankEnemyConfig::MuzzleX, TankEnemyConfig::MuzzleY }, gameState, drone, vehicle)
+    : Enemy(texture, position, TankEnemyConfig::Stats, gameState, drone, vehicle)
 {
 }
 
@@ -20,11 +18,11 @@ void TankEnemy::onHit() {
 }
 
 int TankEnemy::getReward() const {
-    return TankEnemyConfig::Reward;
+    return TankEnemyConfig::Stats.reward;
 }
 
 float TankEnemy::getSpeed() const {
-    return TankEnemyConfig::Speed;
+    return TankEnemyConfig::Stats.speed;
 }
 
 // The 5 frames run across the telegraph window via dt; firing resets them for the next cycle.

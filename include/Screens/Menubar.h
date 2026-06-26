@@ -4,7 +4,7 @@
 
 class GameState;
 
-/// \brief A drawable component showing the player's bombs, coins, title, and battery status.
+/// \brief A drawable component showing the player's bombs, coins, vehicle armor, title, and battery status.
 class MenuBar : public sf::Drawable, sf::Transformable {
 public:
     /// @brief Constructs the MenuBar.
@@ -40,6 +40,13 @@ private:
     sf::Text makeBombCounterText() const;
     void drawTitle(sf::RenderTarget& target, sf::RenderStates states) const;
     sf::Text makeTitleText() const;
+    void drawVehicleArmorBar(sf::RenderTarget& target, sf::RenderStates states) const;
+    sf::Vector2f vehicleArmorBarPosition() const;
+    sf::RectangleShape makeVehicleArmorTrack() const;
+    sf::RectangleShape makeVehicleArmorFill(float armorPercent) const;
+    sf::RectangleShape makeVehicleArmorOutline() const;
+    sf::Color vehicleArmorFillColor(float armorPercent) const;
+    sf::Text makeVehicleArmorText(float armorPercent) const;
     void drawBattery(sf::RenderTarget& target, sf::RenderStates states) const;
     void updateBatterySpriteForView(const sf::View& view) const;
     sf::IntRect batteryFrameRect() const;

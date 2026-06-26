@@ -27,7 +27,7 @@ namespace Resources {
     { GameObjects::Gear, "images/game/gear.png" },
     { GameObjects::Lock, "images/game/lock.png" },
     { GameObjects::SmallEnemy, "images/game/smallEnemy.png" },
-    { GameObjects::StartBackground, "images/game/start-background.png" },
+    { GameObjects::StartBackground, "images/default/start-background.png" },
     { GameObjects::XSquare, "images/game/x.square.png" },
 
 } };

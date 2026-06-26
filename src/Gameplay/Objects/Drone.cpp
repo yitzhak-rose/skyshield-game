@@ -6,9 +6,14 @@
 // Builds the drone, then crops the sprite to one frame and centers its origin.
 Drone::Drone(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)
     : MovingObject(texture, position, { 0.f, 0.f }, gameState)
-    , m_animation(Animation::frameSize(texture, DroneConfig::FrameCount), DroneConfig::FrameCount, DroneConfig::FrameDuration)
+    , m_animation(Animation::frameSize(texture, DroneConfig::Sprite.frameCount),
+        DroneConfig::Sprite.frameCount, DroneConfig::Sprite.frameDuration)
 {
-    setupSprite(m_animation.getFrameRect(), DroneConfig::Scale);
+    const sf::IntRect frame = m_animation.getFrameRect();
+    m_displayScale = std::min(
+        DroneConfig::DisplayWidth / static_cast<float>(frame.size.x),
+        DroneConfig::DisplayHeight / static_cast<float>(frame.size.y));
+    setupSprite(frame, m_displayScale);
 }
 
 // Moves, advances the rotor animation, then drains the battery.
@@ -34,13 +39,13 @@ bool Drone::consumeAmmo() {
 void Drone::moveLeft()
 {
     m_velocity.x = -DroneConfig::Speed;
-    m_sprite.setScale({ -DroneConfig::Scale, DroneConfig::Scale }); // mirror to face left
+    m_sprite.setScale({ -m_displayScale, m_displayScale }); // mirror to face left
 }
 
 void Drone::moveRight()
 {
     m_velocity.x = DroneConfig::Speed;
-    m_sprite.setScale({ DroneConfig::Scale, DroneConfig::Scale }); // normal, facing right
+    m_sprite.setScale({ m_displayScale, m_displayScale }); // normal, facing right
 }
 
 void Drone::stop()

@@ -1,8 +1,17 @@
 #include "Resources/ResourceManager.h"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <type_traits>
+
+namespace {
+std::string matchingStartBackgroundPath(const std::string& backgroundPath) {
+    const std::filesystem::path path(backgroundPath);
+    const std::filesystem::path startFilename = "start-" + path.filename().string();
+    return (path.parent_path() / startFilename).generic_string();
+}
+}
 
 ResourceManager& ResourceManager::instance() {
     static ResourceManager _instance;
@@ -110,6 +119,7 @@ void ResourceManager::applyShopSelections(const std::vector<ShopAsset>& catalog,
                 break;
             case ShopAssetType::Background:
                 setImage(GameObjects::Background, asset.file);
+                setImage(GameObjects::StartBackground, matchingStartBackgroundPath(asset.file));
                 break;
             case ShopAssetType::BackgroundMusic:
                 setSoundPath(Sounds::Background, asset.file);
