@@ -60,9 +60,19 @@ namespace MenuBarConfig {
     inline constexpr float BatteryHeight = 46.f;
     inline constexpr float BombTextGap = 14.f;
     inline constexpr float LevelBatteryGap = 24.f;
+    inline constexpr float VehicleArmorBarX = 390.f;
+    inline constexpr float VehicleArmorBarWidth = 260.f;
+    inline constexpr float VehicleArmorBarHeight = 18.f;
+    inline constexpr float VehicleArmorBarOutlineThickness = 2.f;
+    inline constexpr unsigned int VehicleArmorTextSize = 18;
     inline const sf::Color BackgroundColor(16, 20, 28, 220);
     inline const sf::Color TitleColor(244, 232, 178);
     inline const sf::Color LevelTextColor(235, 238, 245);
+    inline const sf::Color VehicleArmorTrackColor(42, 48, 58, 230);
+    inline const sf::Color VehicleArmorOutlineColor(235, 238, 245, 180);
+    inline const sf::Color VehicleArmorHealthyColor(67, 176, 113);
+    inline const sf::Color VehicleArmorWarningColor(235, 168, 66);
+    inline const sf::Color VehicleArmorCriticalColor(211, 77, 83);
     inline constexpr float Height = 76.f; // menu bar height in pixels
     inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter
 }

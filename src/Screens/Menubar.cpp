@@ -71,6 +71,7 @@ void MenuBar::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
 void MenuBar::drawContent(sf::RenderTarget& target, sf::RenderStates states) const {
     drawBombCounter(target, states);
+    drawVehicleArmorBar(target, states);
     drawTitle(target, states);
     drawBattery(target, states);
     drawLevelIndicator(target, states);
@@ -102,6 +103,80 @@ sf::Text MenuBar::makeTitleText() const {
     GraphicsUtils::centerOrigin(title);
     title.setPosition({ m_width / 2.f, m_height / 2.f });
     return title;
+}
+
+void MenuBar::drawVehicleArmorBar(sf::RenderTarget& target, sf::RenderStates states) const {
+    const float armorPercent = std::clamp(m_state.getVehicleArmorPercent(), 0.f, VehicleConfig::StartArmor);
+
+    target.draw(makeVehicleArmorTrack(), states);
+    target.draw(makeVehicleArmorFill(armorPercent), states);
+    target.draw(makeVehicleArmorOutline(), states);
+    target.draw(makeVehicleArmorText(armorPercent), states);
+}
+
+sf::Vector2f MenuBar::vehicleArmorBarPosition() const {
+    return {
+        MenuBarConfig::VehicleArmorBarX,
+        (m_height - MenuBarConfig::VehicleArmorBarHeight) / 2.f
+    };
+}
+
+sf::RectangleShape MenuBar::makeVehicleArmorTrack() const {
+    sf::RectangleShape track({
+        MenuBarConfig::VehicleArmorBarWidth,
+        MenuBarConfig::VehicleArmorBarHeight
+        });
+    track.setPosition(vehicleArmorBarPosition());
+    track.setFillColor(MenuBarConfig::VehicleArmorTrackColor);
+    return track;
+}
+
+sf::RectangleShape MenuBar::makeVehicleArmorFill(float armorPercent) const {
+    sf::RectangleShape fill({
+        MenuBarConfig::VehicleArmorBarWidth * (armorPercent / VehicleConfig::StartArmor),
+        MenuBarConfig::VehicleArmorBarHeight
+        });
+    fill.setPosition(vehicleArmorBarPosition());
+    fill.setFillColor(vehicleArmorFillColor(armorPercent));
+    return fill;
+}
+
+sf::RectangleShape MenuBar::makeVehicleArmorOutline() const {
+    sf::RectangleShape outline({
+        MenuBarConfig::VehicleArmorBarWidth,
+        MenuBarConfig::VehicleArmorBarHeight
+        });
+    outline.setPosition(vehicleArmorBarPosition());
+    outline.setFillColor(sf::Color::Transparent);
+    outline.setOutlineColor(MenuBarConfig::VehicleArmorOutlineColor);
+    outline.setOutlineThickness(MenuBarConfig::VehicleArmorBarOutlineThickness);
+    return outline;
+}
+
+sf::Color MenuBar::vehicleArmorFillColor(float armorPercent) const {
+    if (armorPercent <= VehicleConfig::CriticalArmor)
+        return MenuBarConfig::VehicleArmorCriticalColor;
+
+    if (armorPercent <= VehicleConfig::StartArmor / 2.f)
+        return MenuBarConfig::VehicleArmorWarningColor;
+
+    return MenuBarConfig::VehicleArmorHealthyColor;
+}
+
+sf::Text MenuBar::makeVehicleArmorText(float armorPercent) const {
+    sf::Text text(m_levelFont, "HP " + std::to_string(static_cast<int>(std::round(armorPercent))) + "%", MenuBarConfig::VehicleArmorTextSize);
+    text.setFillColor(sf::Color::White);
+
+    const sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin({
+        textBounds.position.x + textBounds.size.x / 2.f,
+        textBounds.position.y + textBounds.size.y / 2.f
+        });
+    text.setPosition({
+        MenuBarConfig::VehicleArmorBarX + MenuBarConfig::VehicleArmorBarWidth / 2.f,
+        m_height / 2.f - 1.f
+        });
+    return text;
 }
 
 void MenuBar::drawBattery(sf::RenderTarget& target, sf::RenderStates states) const {
