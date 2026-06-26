@@ -177,11 +177,4 @@ void Enemy::defeat() {
     destroy();
     gameState().recordEnemyDefeated(getReward());
 }
-void Enemy::updateFiring(float dt) {
-    m_velocity.x = 0.f;
-    m_fireTimer += dt;
-    if (m_fireTimer >= EnemyConfig::TelegraphTime) {
-        m_fireRequested = true;
-        m_fireTimer = 0.f;
-    }
-}
+
