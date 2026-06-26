@@ -10,7 +10,7 @@ GameObject::GameObject(const sf::Texture& texture, sf::Vector2f position, GameSt
 
 GameObject::~GameObject() = default;
 
-void GameObject::draw(sf::RenderTarget& target) const {
+void GameObject::draw(sf::RenderWindow& target) const {
     target.draw(m_sprite);
 }
 

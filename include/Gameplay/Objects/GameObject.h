@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include <functional>
 #include "Interfaces/IDrawable.h"
 #include "Interfaces/IUpdatable.h"
 
@@ -20,10 +19,7 @@ public:
     virtual ~GameObject() = 0;
 
     /// @brief Draws the object's sprite to the window.
-    void draw(sf::RenderTarget& target) const override;
-
-    /// @brief Advances the object's state by one frame. (declared by IUpdatable)
-    // void update(float dt) override;  // each concrete object implements this.
+    void draw(sf::RenderWindow& target) const override;
 
     /// @brief Hands the World an object this one wants to spawn this frame
     ///        (e.g. an enemy's bullet). Returns nullptr when there is nothing

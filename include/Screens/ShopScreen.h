@@ -16,7 +16,7 @@ public:
 
     void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;
     void update(float deltaTime) override;
-    void draw(sf::RenderTarget& target) override;
+    void draw(sf::RenderWindow& target) override;
 
 private:
     enum class PreviewAction {

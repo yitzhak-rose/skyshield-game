@@ -104,7 +104,7 @@ void World::checkResult() {
         m_gameState.setLevelResult(LevelResult::Won);
 }
 
-void World::draw(sf::RenderTarget& target) const {
+void World::draw(sf::RenderWindow& target) const {
     for (const auto& object : m_objects)
         object->draw(target);
 }

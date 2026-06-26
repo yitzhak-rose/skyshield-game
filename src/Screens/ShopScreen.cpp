@@ -114,7 +114,7 @@ void ShopScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
 void ShopScreen::update(float /*deltaTime*/) {
 }
 
-void ShopScreen::draw(sf::RenderTarget& target) {
+void ShopScreen::draw(sf::RenderWindow& target) {
     target.draw(m_background);
     drawHeader(target);
     drawCategories(target);

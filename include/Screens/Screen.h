@@ -42,7 +42,7 @@ public:
 
     /// @brief Draws the screen content.
     /// @param target The render target.
-    virtual void draw(sf::RenderTarget& target) = 0;
+    virtual void draw(sf::RenderWindow& target) = 0;
 
     /// @brief Routes one event to an overlay or this screen.
     /// @param event The event to handle.
@@ -85,7 +85,7 @@ protected:
     bool updateOverlay(float deltaTime);
 
     /// @brief Draws the overlay above this screen's content.
-    void drawOverlay(sf::RenderTarget& target) const;
+    void drawOverlay(sf::RenderWindow& target) const;
 
     /// @brief Removes the overlay after it dismisses itself.
     void clearDismissedOverlay();

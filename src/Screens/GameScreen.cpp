@@ -104,7 +104,7 @@ void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
     }
 }
 
-void GameScreen::draw(sf::RenderTarget& target) {
+void GameScreen::draw(sf::RenderWindow& target) {
     m_world->draw(target);
     target.draw(*m_menuBar);
     drawOverlay(target);
