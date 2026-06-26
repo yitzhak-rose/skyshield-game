@@ -364,7 +364,7 @@ void ShopScreen::drawTile(sf::RenderTarget& target,
     }
 
     drawWrappedTileName(target,
-        asset.name,
+        asset.title,
         { bounds.position.x + 22.f, bounds.position.y + 266.f },
         bounds.size.x - 44.f);
 
@@ -530,7 +530,7 @@ void ShopScreen::drawPreview(sf::RenderTarget& target) const {
     panel.setOutlineThickness(OverlayViewConfig::PanelOutlineThickness);
     target.draw(panel);
 
-    sf::Text title = makeText(m_previewAsset->name, OverlayViewConfig::TitleTextSize,
+    sf::Text title = makeText(m_previewAsset->title, OverlayViewConfig::TitleTextSize,
         { WindowConfig::Width / 2.f, panelBounds.position.y + 56.f }, OverlayViewConfig::TitleColor);
     GraphicsUtils::centerOrigin(title);
     target.draw(title);

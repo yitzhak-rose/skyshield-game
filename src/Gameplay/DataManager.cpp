@@ -362,6 +362,15 @@ std::string optionalString(const JsonValue::Object& object,
     return found->second.string();
 }
 
+std::string requireTitle(const JsonValue::Object& object,
+                         const std::string& context) {
+    const std::string title = optionalString(object, "title");
+    if (!title.empty())
+        return title;
+
+    return requireString(object, "name", context);
+}
+
 LevelConfig parseLevel(const JsonValue& value, std::size_t stageIndex) {
     if (!value.isObject()) {
         throw std::runtime_error("DataManager: stage "
@@ -398,14 +407,18 @@ ShopAsset parseShopAsset(const JsonValue& value) {
     ShopAsset asset;
     asset.id = id;
     asset.type = type;
-    asset.name = requireString(object, "name", "shop asset " + std::to_string(id));
+    asset.title = requireTitle(object, "shop asset " + std::to_string(id));
     asset.price = requireInt(object, "price", "shop asset " + std::to_string(id));
     asset.file = requireString(object, "file", "shop asset " + std::to_string(id));
+    asset.extra = requireInt(object, "extra", "shop asset " + std::to_string(id));
     asset.isDefault = optionalBool(object, "default", false);
     asset.description = optionalString(object, "description");
 
     if (asset.price < 0)
         throw std::runtime_error("DataManager: shop asset price cannot be negative");
+
+    if (asset.extra < 0)
+        throw std::runtime_error("DataManager: shop asset extra cannot be negative");
 
     if (!std::filesystem::exists(asset.file))
         throw std::runtime_error("DataManager: missing shop asset file: " + asset.file);
@@ -444,6 +457,10 @@ std::vector<ShopAsset> parseShopAssets(const JsonValue::Object& root) {
     return assets;
 }
 
+bool isHiddenShopCompanionFile(const std::filesystem::path& path) {
+    return path.filename().generic_string().starts_with("start-background");
+}
+
 int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
     std::set<std::string> catalogFiles;
     for (const ShopAsset& asset : catalog)
@@ -457,6 +474,9 @@ int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
 
         for (const auto& entry : std::filesystem::recursive_directory_iterator(folder)) {
             if (!entry.is_regular_file())
+                continue;
+
+            if (isHiddenShopCompanionFile(entry.path()))
                 continue;
 
             const std::string path = entry.path().generic_string();
