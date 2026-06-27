@@ -199,7 +199,7 @@ namespace FastEnemyConfig {
 
 namespace TankEnemyConfig {
     inline constexpr EnemyTypeConfig Stats{
-        60.f, 20, { 5, 0.3f, 0.6f }, { 101.f, -17.f }
+        80.f, 20, { 5, 0.3f, 0.6f }, { 101.f, -17.f }
     }; // slow but armored, firing frames in enemy.png
 }
 
