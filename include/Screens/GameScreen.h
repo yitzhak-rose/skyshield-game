@@ -50,6 +50,15 @@ private:
     /// @brief Recreates the world for the current level.
     void restartLevel();
 
+    /// @brief Drives the post-hit screen shake (drops to 0 when idle).
+    void updateShake(float dt);
+
+    /// @brief How much time is left in the current screen shake.
+    float m_shakeTimer = 0.f;
+
+    /// @brief The damage value seen last frame — a rise means a fresh hit.
+    float m_lastDamageTaken = 0.f;
+
     GameState& m_gameState;
     bool m_completionOverlayShown = false;
     std::vector<LevelConfig> m_stages;
