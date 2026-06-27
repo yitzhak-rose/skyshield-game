@@ -124,4 +124,7 @@ private:
 
     /// @brief True while committed to a U-turn.
     bool  m_isUTurning = false;
+
+    /// @brief True for the one frame an explosion should be spawned (set on death).
+    bool m_explosionRequested = false;
 };

@@ -14,5 +14,6 @@ enum class GameObjects {
     SmallEnemy,
     StartBackground,
     XSquare,
+    Explosion,
     Max
 };

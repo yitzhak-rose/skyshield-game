@@ -12,6 +12,7 @@
 #include "Gameplay/Enemies/TankEnemy.h"
 #include "Gameplay/Enemies/FastEnemy.h"
 #include "Resources/ResourceManager.h"
+#include "Gameplay/Objects/Explosion.h"
 
 std::unique_ptr<GameObject> Factory::create(GameObjects type, sf::Vector2f position, GameState& gameState) {
     static const std::map<GameObjects, CreatorFunc> creators = {
@@ -23,7 +24,11 @@ std::unique_ptr<GameObject> Factory::create(GameObjects type, sf::Vector2f posit
         }},
         { GameObjects::Bomb, [](sf::Vector2f pos, GameState& state) {
             return std::make_unique<Bomb>(ResourceManager::instance().getImage(GameObjects::Bomb), pos, state);
+        }},
+        { GameObjects::Explosion, [](sf::Vector2f pos, GameState& state) {
+            return std::make_unique<Explosion>(ResourceManager::instance().getImage(GameObjects::Explosion), pos, state);
         }}
+
     };
 
     auto it = creators.find(type);

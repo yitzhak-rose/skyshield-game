@@ -31,8 +31,8 @@ void World::update(float dt) {
     spawnEnemies(dt);
     for (const auto& object : m_objects)
         object->update(dt);
-    collectSpawned();
     handleCollisions();
+    collectSpawned();
     processDead();
     checkResult();
 }
@@ -78,14 +78,14 @@ void World::spawnEnemy() {
 void World::collectSpawned() {
     auto spawned = std::vector<std::unique_ptr<GameObject>>{};
 
-    // 1. Collect every newly spawned child from this frame
+    //  Collect every newly spawned child from this frame
     for (auto& obj : m_objects) {
         if (auto child = obj->takeSpawn()) {
             spawned.push_back(std::move(child));
         }
     }
 
-    // 2. Move the collected children into the main object list
+    //  Move the collected children into the main object list
     m_objects.insert(
         m_objects.end(),
         std::make_move_iterator(spawned.begin()),

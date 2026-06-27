@@ -18,13 +18,6 @@ void GameScreen::update(float deltaTime) {
     m_world->update(deltaTime);
     m_menuBar->update(deltaTime);
 
-    // Trigger a screen shake whenever the vehicle takes fresh damage.
-    float damage = m_gameState.getDamageTaken();
-    if (damage > m_lastDamageTaken)
-        m_shakeTimer = 0.3f;          // shake lasts 0.3 seconds
-    m_lastDamageTaken = damage;
-
-    updateShake(deltaTime);
     if (m_world->getResult() == LevelResult::Lost)
         showGameOverOverlay();
 
@@ -97,20 +90,7 @@ void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
 }
 
 void GameScreen::draw(sf::RenderWindow& target) {
-    sf::View original = target.getView();
-
-    if (m_shakeTimer > 0.f) {
-        float decay = m_shakeTimer / 0.3f;                       // 1 -> 0
-        float dx = (std::rand() / (float)RAND_MAX * 2.f - 1.f) * 12.f * decay;
-        float dy = (std::rand() / (float)RAND_MAX * 2.f - 1.f) * 12.f * decay;
-        sf::View shaken = original;
-        shaken.move({ dx, dy });
-        target.setView(shaken);
-    }
-
-    m_world->draw(target);          // the world shakes
-
-    target.setView(original);       // restore: HUD + overlay stay steady
+    m_world->draw(target);
     target.draw(*m_menuBar);
     drawOverlay(target);
 }
@@ -119,7 +99,3 @@ void GameScreen::restartLevel() {
     startCurrentStage();
 }
 
-void GameScreen::updateShake(float dt) {
-    if (m_shakeTimer > 0.f)
-        m_shakeTimer -= dt;
-}

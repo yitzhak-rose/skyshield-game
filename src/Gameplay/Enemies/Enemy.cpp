@@ -152,13 +152,17 @@ void Enemy::updateUTurnState(float distToLeft, float distToRight) {
 #pragma region WEAPON
 // When a shot is queued, the enemy computes the velocity and hands the World a bullet from the Factory.
 std::unique_ptr<GameObject> Enemy::takeSpawn() {
+    if (m_explosionRequested) {
+        m_explosionRequested = false;
+        return Factory::create(GameObjects::Explosion, getPosition(), gameState());
+    }
+
     if (!m_fireRequested)
         return nullptr;
 
     m_fireRequested = false;
     return Factory::createBullet(getMuzzlePosition(), getBulletVelocityX(), gameState());
 }
-
 // Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
 sf::Vector2f Enemy::getMuzzlePosition() const {
     return getPosition() + sf::Vector2f{ directionToVehicle() * m_muzzleOffset.x, m_muzzleOffset.y };
@@ -176,5 +180,7 @@ void Enemy::defeat() {
 
     destroy();
     gameState().recordEnemyDefeated(getReward());
+    m_explosionRequested = true;    
+
 }
 
