@@ -15,11 +15,9 @@ Bomb::~Bomb() {
     gameState().removeActiveBomb();
 }
 
-void Bomb::update(float dt)
-{
+void Bomb::update(float dt) {
+    m_animation.apply(m_sprite, dt);
     move(dt);
-    m_animation.update(dt);
-    m_sprite.setTextureRect(m_animation.getFrameRect());
-    if (getPosition().y > WindowConfig::Height)
+    if (getPosition().y > WindowConfig::Height + getBounds().size.y)
         destroy();
 }

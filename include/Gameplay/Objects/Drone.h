@@ -13,6 +13,22 @@ public:
     /// @brief Updates the drone for one frame (movement, animation, battery drain).
     void update(float dt) override;
 
+    /// @brief Consumes one bomb from the ammo count.
+    bool consumeAmmo();
+
+    /// @brief Marks the drone as the player (receives input and drops bombs).
+    bool isPlayer() const override { return true; }
+
+    /// @brief Hands the World a bomb when one was requested this frame.
+    std::unique_ptr<GameObject> takeSpawn() override;
+
+private:
+    /// @brief Reads keyboard arrows and sets the drone's velocity.
+    void handleInput();
+
+    /// @brief Reads Space (edge-triggered) and queues a bomb if ammo allows.
+    void handleBombDrop();
+
     /// @brief Starts moving the drone left.
     void moveLeft();
 
@@ -22,13 +38,15 @@ public:
     /// @brief Stops the drone's horizontal movement.
     void stop();
 
-    /// @brief Consumes one bomb from the ammo count.
-    bool consumeAmmo();
-
-private:
     /// @brief Cycles the drone's rotor frames.
     Animation m_animation;
 
     /// @brief Texture-specific scale that keeps every drone skin at the same on-screen height.
     float m_displayScale = 1.f;
+
+    /// @brief True for the one frame a bomb should be created.
+    bool m_bombRequested = false;
+
+    /// @brief Tracks last frame's Space state for edge detection.
+    bool m_spaceWasPressed = true;
 };

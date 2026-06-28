@@ -41,6 +41,12 @@ public:
     /// @brief Marks the object as dead.
     void destroy() { m_alive = false; }
 
+    /// @brief Returns true if this object represents the player (receives input).
+    virtual bool isPlayer() const { return false; }
+
+    /// @brief Returns true if this object is a target enemies should aim at.
+    virtual bool isTarget() const { return false; }
+
 protected:
 
     /// @brief Crops the sprite to one frame, centers its origin, and applies a scale.

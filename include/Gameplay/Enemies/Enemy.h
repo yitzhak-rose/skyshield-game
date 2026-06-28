@@ -4,8 +4,6 @@
 #include "Enums/EnemyState.h"
 #include <memory>
 
-class Drone;
-class CommandVehicle;
 struct EnemyTypeConfig;
 
 /// @brief «abstract» base for all enemies. Holds the shared AI; subclasses set the params.
@@ -17,7 +15,7 @@ public:
     /// @brief Constructs an enemy with a texture, position, type config, and live target references.
     Enemy(const sf::Texture& texture, sf::Vector2f position,
         const EnemyTypeConfig& stats, GameState& gameState,
-        const Drone& drone, const CommandVehicle& vehicle);
+        const GameObject& player, const GameObject& target);
 
     /// @brief Updates the enemy for one frame (runs the AI: panic / fire / advance).
     void update(float dt) override;
@@ -60,13 +58,13 @@ private:
     float getBulletVelocityX() const;
 
     /// @brief Returns the vehicle's current x-position.
-    float vehicleX() const;
+    float targetX() const;
 
     /// @brief Returns the vehicle's current half-width (measured from its center).
-    float vehicleHalfWidth() const;
+    float targetHalfWidth() const;
 
     /// @brief Returns the drone's current x-position.
-    float droneX() const;
+    float playerX() const;
 
     /// @brief Returns -1 when the vehicle is to the left, +1 when to the right.
     float directionToVehicle() const;
@@ -102,10 +100,10 @@ private:
     EnemyState m_state = EnemyState::Advancing;
 
     /// @brief The drone the enemy flees from (read live, never owned).
-    const Drone& m_drone;
+    const GameObject& m_player;
 
     /// @brief The vehicle the enemy advances on and fires at (read live, never owned).
-    const CommandVehicle& m_vehicle;
+    const GameObject& m_target;
 
     /// @brief This enemy's randomized stopping distance from the vehicle.
     float m_stopRange = 0.f;

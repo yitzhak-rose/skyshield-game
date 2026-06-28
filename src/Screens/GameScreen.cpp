@@ -1,5 +1,6 @@
 #include "Screens/GameScreen.h"
 #include "Resources/SoundManager.h"
+#include "Gameplay/Constants.h"
 #include <string>
 #include <utility>
 #include <vector>
@@ -66,12 +67,18 @@ void GameScreen::showLevelCompletedOverlay() {
 }
 
 void GameScreen::showPauseOverlay() {
+    SoundManager::instance().duckBackgroundVolume();
     showOverlay(std::make_unique<OverlayView>(
         "Paused",
         std::vector<std::string>{ "Game is paused" },
         std::vector<OverlayAction>{
-            { "Resume", OverlayActionType::Primary, []() {} },
-            { "Go to Start",  OverlayActionType::Danger,  [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
+            { "Resume", OverlayActionType::Primary,
+                []() { SoundManager::instance().restoreBackgroundVolume(); } },
+            { "Go to Start", OverlayActionType::Danger,
+              [this]() {
+                  SoundManager::instance().restoreBackgroundVolume();
+                  requestCommand(ScreenCommand::ReturnToStart);
+              } }
     }));
 }
 
@@ -102,7 +109,6 @@ void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
             return;
         }
     }
-    m_world->handleEvent(event);
 }
 
 void GameScreen::draw(sf::RenderWindow& target) {

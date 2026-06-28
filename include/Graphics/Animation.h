@@ -17,6 +17,9 @@ public:
     /// @brief Returns the texture sub-rectangle of a specific frame index.
     sf::IntRect frameRect(int index) const;
 
+    /// @brief Advances the animation and applies the current frame to a sprite.
+    void apply(sf::Sprite& sprite, float dt);
+
     /// @brief Rewinds the animation to its first frame.
     void reset();
 

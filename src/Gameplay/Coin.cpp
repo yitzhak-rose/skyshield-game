@@ -17,8 +17,7 @@ Coin::Coin(const sf::Texture& texture, const sf::Font& font)
 
 // Spins the icon every frame; the pop timer (if any) counts down toward rest.
 void Coin::update(float dt) {
-    m_animation.update(dt);
-    m_sprite.setTextureRect(m_animation.getFrameRect());
+    m_animation.apply(m_sprite, dt);
 
     if (m_popTimer > 0.f)
         m_popTimer = std::max(0.f, m_popTimer - dt);
