@@ -1,10 +1,8 @@
 #include "Gameplay/DataManager.h"
-
-#include <nlohmann/json.hpp>
+#include "Utilities/JsonUtils.h"
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <limits>
@@ -13,94 +11,17 @@
 #include <string>
 #include <utility>
 
-namespace {
-using json = nlohmann::json;
+// Private DataManager helpers for the game-specific JSON schema.
 
-json readJsonFile(const std::string& path) {
-    std::ifstream file(path);
-    if (!file)
-        throw std::runtime_error("DataManager: cannot open JSON file: " + path);
-
-    try {
-        return json::parse(file);
-    } catch (const json::parse_error& error) {
-        throw std::runtime_error("DataManager: JSON parse error in " + path + ": " + error.what());
-    }
-}
-
-const json& requireField(const json& object, const std::string& key, const std::string& context) {
-    if (!object.is_object())
-        throw std::runtime_error("DataManager: expected object in " + context);
-
-    const auto found = object.find(key);
-    if (found == object.end())
-        throw std::runtime_error("DataManager: missing \"" + key + "\" in " + context);
-
-    return *found;
-}
-
-int requireInt(const json& object, const std::string& key, const std::string& context) {
-    const json& value = requireField(object, key, context);
-    if (!value.is_number_integer())
-        throw std::runtime_error("DataManager: \"" + key + "\" must be an integer in " + context);
-
-    const long long number = value.get<long long>();
-    if (number < static_cast<long long>(std::numeric_limits<int>::min()) ||
-        number > static_cast<long long>(std::numeric_limits<int>::max())) {
-        throw std::runtime_error("DataManager: \"" + key + "\" is outside integer range in " + context);
-    }
-
-    return static_cast<int>(number);
-}
-
-float requireFloat(const json& object, const std::string& key, const std::string& context) {
-    const json& value = requireField(object, key, context);
-    if (!value.is_number())
-        throw std::runtime_error("DataManager: \"" + key + "\" must be a number in " + context);
-
-    const double number = value.get<double>();
-    if (!std::isfinite(number) ||
-        number < -static_cast<double>(std::numeric_limits<float>::max()) ||
-        number > static_cast<double>(std::numeric_limits<float>::max())) {
-        throw std::runtime_error("DataManager: \"" + key + "\" is outside float range in " + context);
-    }
-
-    return static_cast<float>(number);
-}
-
-std::string requireString(const json& object, const std::string& key, const std::string& context) {
-    const json& value = requireField(object, key, context);
-    if (!value.is_string())
-        throw std::runtime_error("DataManager: \"" + key + "\" must be a string in " + context);
-
-    return value.get<std::string>();
-}
-
-std::string optionalString(const json& object, const std::string& key) {
-    const auto found = object.find(key);
-    if (found == object.end() || !found->is_string())
-        return "";
-
-    return found->get<std::string>();
-}
-
-bool optionalBool(const json& object, const std::string& key, bool fallback) {
-    const auto found = object.find(key);
-    if (found == object.end() || !found->is_boolean())
-        return fallback;
-
-    return found->get<bool>();
-}
-
-std::string requireTitle(const json& object, const std::string& context) {
-    const std::string title = optionalString(object, "title");
+std::string DataManager::requireTitle(const JsonUtils::Json& object, const std::string& context) {
+    const std::string title = JsonUtils::optionalString(object, "title");
     if (!title.empty())
         return title;
 
-    return requireString(object, "name", context);
+    return JsonUtils::requireString(object, "name", context);
 }
 
-LevelConfig parseLevel(const json& value, std::size_t stageIndex) {
+LevelConfig DataManager::parseLevel(const JsonUtils::Json& value, std::size_t stageIndex) {
     if (!value.is_object()) {
         throw std::runtime_error("DataManager: stage "
             + std::to_string(stageIndex + 1) + " must be an object");
@@ -108,24 +29,24 @@ LevelConfig parseLevel(const json& value, std::size_t stageIndex) {
 
     const std::string context = "stage " + std::to_string(stageIndex + 1);
     return {
-        requireInt(value, "enemyCount", context),
-        requireFloat(value, "tankChance", context),
-        requireFloat(value, "spawnInterval", context),
-        requireFloat(value, "batteryDrain", context),
-        requireInt(value, "startAmmo", context)
+        JsonUtils::requireInt(value, "enemyCount", context),
+        JsonUtils::requireFloat(value, "tankChance", context),
+        JsonUtils::requireFloat(value, "spawnInterval", context),
+        JsonUtils::requireFloat(value, "batteryDrain", context),
+        JsonUtils::requireInt(value, "startAmmo", context)
     };
 }
 
-ShopAsset parseShopAsset(const json& value) {
+ShopAsset DataManager::parseShopAsset(const JsonUtils::Json& value) {
     if (!value.is_object())
         throw std::runtime_error("DataManager: shop asset must be an object");
 
-    const int id = requireInt(value, "id", "shop asset");
+    const int id = JsonUtils::requireInt(value, "id", "shop asset");
     if (id <= 0)
         throw std::runtime_error("DataManager: shop asset id must be positive");
 
     ShopAssetType type = ShopAssetType::CommandVehicle;
-    const std::string typeKey = requireString(value, "type", "shop asset " + std::to_string(id));
+    const std::string typeKey = JsonUtils::requireString(value, "type", "shop asset " + std::to_string(id));
     if (!shopAssetTypeFromKey(typeKey, type))
         throw std::runtime_error("DataManager: unknown shop asset type: " + typeKey);
 
@@ -133,11 +54,11 @@ ShopAsset parseShopAsset(const json& value) {
     asset.id = id;
     asset.type = type;
     asset.title = requireTitle(value, "shop asset " + std::to_string(id));
-    asset.price = requireInt(value, "price", "shop asset " + std::to_string(id));
-    asset.file = requireString(value, "file", "shop asset " + std::to_string(id));
-    asset.extra = requireInt(value, "extra", "shop asset " + std::to_string(id));
-    asset.isDefault = optionalBool(value, "default", false);
-    asset.description = optionalString(value, "description");
+    asset.price = JsonUtils::requireInt(value, "price", "shop asset " + std::to_string(id));
+    asset.file = JsonUtils::requireString(value, "file", "shop asset " + std::to_string(id));
+    asset.extra = JsonUtils::requireInt(value, "extra", "shop asset " + std::to_string(id));
+    asset.isDefault = JsonUtils::optionalBool(value, "default", false);
+    asset.description = JsonUtils::optionalString(value, "description");
 
     if (asset.price < 0)
         throw std::runtime_error("DataManager: shop asset price cannot be negative");
@@ -149,8 +70,8 @@ ShopAsset parseShopAsset(const json& value) {
     return asset;
 }
 
-std::vector<LevelConfig> parseLevels(const json& root, const std::string& context) {
-    const json& stagesValue = requireField(root, "stages", context);
+std::vector<LevelConfig> DataManager::parseLevels(const JsonUtils::Json& root, const std::string& context) {
+    const JsonUtils::Json& stagesValue = JsonUtils::requireField(root, "stages", context);
     if (!stagesValue.is_array())
         throw std::runtime_error("DataManager: \"stages\" must be an array");
 
@@ -163,8 +84,8 @@ std::vector<LevelConfig> parseLevels(const json& root, const std::string& contex
     return stages;
 }
 
-std::vector<ShopAsset> parseShopAssets(const json& root) {
-    const json& assetsValue = requireField(root, "shopAssets", "game data root");
+std::vector<ShopAsset> DataManager::parseShopAssets(const JsonUtils::Json& root) {
+    const JsonUtils::Json& assetsValue = JsonUtils::requireField(root, "shopAssets", "game data root");
     if (!assetsValue.is_array())
         throw std::runtime_error("DataManager: \"shopAssets\" must be an array");
 
@@ -172,7 +93,7 @@ std::vector<ShopAsset> parseShopAssets(const json& root) {
     std::set<int> ids;
     std::set<ShopAssetType> defaults;
 
-    for (const json& value : assetsValue) {
+    for (const JsonUtils::Json& value : assetsValue) {
         ShopAsset asset = parseShopAsset(value);
         if (!ids.insert(asset.id).second)
             throw std::runtime_error("DataManager: duplicate shop asset id: " + std::to_string(asset.id));
@@ -194,11 +115,11 @@ std::vector<ShopAsset> parseShopAssets(const json& root) {
     return assets;
 }
 
-bool isHiddenShopCompanionFile(const std::filesystem::path& path) {
+bool DataManager::isHiddenShopCompanionFile(const std::filesystem::path& path) {
     return path.filename().generic_string().starts_with("start-background");
 }
 
-int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
+int DataManager::countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
     std::set<std::string> catalogFiles;
     for (const ShopAsset& asset : catalog)
         catalogFiles.insert(asset.file);
@@ -224,7 +145,7 @@ int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
     return count;
 }
 
-const ShopAsset* findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type) {
+const ShopAsset* DataManager::findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type) {
     for (const ShopAsset& asset : catalog) {
         if (asset.type == type && asset.isDefault)
             return &asset;
@@ -233,7 +154,7 @@ const ShopAsset* findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAss
     return nullptr;
 }
 
-void normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog) {
+void DataManager::normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog) {
     userData.coins = std::max(0, userData.coins);
 
     for (ShopAssetType type : allShopAssetTypes()) {
@@ -264,13 +185,13 @@ void normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog
     }
 }
 
-std::set<int> parseIdArray(const json& object, const std::string& key) {
+std::set<int> DataManager::parseIdArray(const JsonUtils::Json& object, const std::string& key) {
     std::set<int> ids;
     const auto found = object.find(key);
     if (found == object.end() || !found->is_array())
         return ids;
 
-    for (const json& value : *found) {
+    for (const JsonUtils::Json& value : *found) {
         if (!value.is_number_integer())
             continue;
 
@@ -282,17 +203,17 @@ std::set<int> parseIdArray(const json& object, const std::string& key) {
     return ids;
 }
 
-json userDataToJson(const UserData& userData) {
-    json ownedAssets = json::object();
-    json selectedAssets = json::object();
+JsonUtils::Json DataManager::userDataToJson(const UserData& userData) {
+    JsonUtils::Json ownedAssets = JsonUtils::Json::object();
+    JsonUtils::Json selectedAssets = JsonUtils::Json::object();
 
     for (ShopAssetType type : allShopAssetTypes()) {
         const std::string key = shopAssetTypeToKey(type);
 
         const auto owned = userData.ownedAssets.find(type);
         ownedAssets[key] = owned == userData.ownedAssets.end()
-            ? json::array()
-            : json(owned->second);
+            ? JsonUtils::Json::array()
+            : JsonUtils::Json(owned->second);
 
         const auto selected = userData.selectedAssets.find(type);
         selectedAssets[key] = selected == userData.selectedAssets.end() ? 0 : selected->second;
@@ -305,7 +226,7 @@ json userDataToJson(const UserData& userData) {
     };
 }
 
-UserData parseUserData(const json& root) {
+UserData DataManager::parseUserData(const JsonUtils::Json& root) {
     UserData userData;
     if (!root.is_object())
         return userData;
@@ -338,7 +259,8 @@ UserData parseUserData(const json& root) {
 
     return userData;
 }
-}
+
+// Public DataManager API.
 
 DataManager& DataManager::instance() {
     static DataManager manager;
@@ -388,7 +310,7 @@ void DataManager::saveUserData() {
 }
 
 std::vector<LevelConfig> DataManager::loadLevels(const std::string& path) const {
-    const json root = readJsonFile(path);
+    const JsonUtils::Json root = JsonUtils::readJsonFile(path);
     std::vector<LevelConfig> stages = parseLevels(root, "level JSON root");
     for (std::size_t index = 0; index < stages.size(); ++index)
         validateLevel(stages[index], index);
@@ -400,7 +322,7 @@ std::vector<LevelConfig> DataManager::loadLevels(const std::string& path) const 
 }
 
 GameData DataManager::loadGameData(const std::string& path) const {
-    const json root = readJsonFile(path);
+    const JsonUtils::Json root = JsonUtils::readJsonFile(path);
     if (!root.is_object())
         throw std::runtime_error("DataManager: game data JSON root must be an object");
 
@@ -422,7 +344,7 @@ UserData DataManager::loadUserData(const std::string& path, const std::vector<Sh
     UserData userData;
 
     try {
-        userData = parseUserData(readJsonFile(path));
+        userData = parseUserData(JsonUtils::readJsonFile(path));
     } catch (const std::exception&) {
         userData = UserData{};
     }
@@ -441,7 +363,7 @@ void DataManager::saveUserData(const std::string& path, const UserData& userData
 
 int DataManager::loadCoins(const std::string& path) const {
     try {
-        const json root = readJsonFile(path);
+        const JsonUtils::Json root = JsonUtils::readJsonFile(path);
         const auto coins = root.find("coins");
         if (coins == root.end() || !coins->is_number_integer())
             return 0;
@@ -463,8 +385,10 @@ void DataManager::saveCoins(const std::string& path, int coins) {
     if (!file)
         return;
 
-    file << json{ { "coins", std::max(0, coins) } }.dump(2) << '\n';
+    file << JsonUtils::Json{ { "coins", std::max(0, coins) } }.dump(2) << '\n';
 }
+
+// Private DataManager helpers.
 
 void DataManager::validateLevel(const LevelConfig& config, std::size_t stageIndex) {
     const auto fail = [stageIndex](const std::string& why) {
