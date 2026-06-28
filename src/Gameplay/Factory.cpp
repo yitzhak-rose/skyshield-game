@@ -14,6 +14,7 @@
 #include "Resources/ResourceManager.h"
 #include "Gameplay/Objects/Explosion.h"
 
+
 std::unique_ptr<GameObject> Factory::create(GameObjects type, sf::Vector2f position, GameState& gameState) {
     static const std::map<GameObjects, CreatorFunc> creators = {
         { GameObjects::CommandCar, [](sf::Vector2f pos, GameState& state) {

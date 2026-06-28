@@ -12,8 +12,6 @@
 #include <string>
 
 namespace {
-const std::string UserDataPath = "userData.json";
-
 bool contains(const sf::FloatRect& bounds, sf::Vector2f position) {
     return position.x >= bounds.position.x &&
         position.x <= bounds.position.x + bounds.size.x &&
@@ -186,7 +184,8 @@ void ShopScreen::activatePreviewAction(PreviewAction action) {
 }
 
 void ShopScreen::saveUserData() const {
-    DataManager::saveUserData(UserDataPath, m_gameState.getUserData());
+    DataManager::instance().setUserData(m_gameState.getUserData());
+    DataManager::instance().saveUserData();
 }
 
 bool ShopScreen::isMusicAsset(const ShopAsset& asset) const {

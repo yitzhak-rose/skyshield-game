@@ -63,6 +63,9 @@ private:
     /// @brief Saves user data when coins or shop selections have changed since the last write.
     void saveUserDataIfChanged();
 
+    /// @brief Reloads JSON-backed data if its files changed on disk.
+    void refreshDataIfChanged();
+
     void render();
 
     sf::RenderWindow window;
@@ -70,7 +73,6 @@ private:
     sf::Sprite m_backgroundSprite;
 
     GameState m_gameState;
-    GameData m_gameData;
     UserData m_lastSavedUserData;
     ActiveScreen m_activeScreen = ActiveScreen::Start;
 

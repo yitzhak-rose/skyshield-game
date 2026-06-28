@@ -43,12 +43,13 @@ void Game::initBackground() {
 }
 
 void Game::loadSavedData() {
-    m_gameData = DataManager::loadGameData(GameDataPath);
-    UserData userData = DataManager::loadUserData(UserDataPath, m_gameData.shopAssets);
-    m_gameState.setUserData(userData);
+    DataManager::instance().configure(GameDataPath, UserDataPath);
+    DataManager::instance().load();
+    m_gameState.setUserData(DataManager::instance().userData());
     syncShopSelections();
     m_lastSavedUserData = m_gameState.getUserData();
-    DataManager::saveUserData(UserDataPath, m_lastSavedUserData);
+    DataManager::instance().setUserData(m_lastSavedUserData);
+    DataManager::instance().saveUserData();
 }
 
 void Game::showStartScreen() {
@@ -61,15 +62,16 @@ void Game::showGameScreen() {
     m_activeScreen = ActiveScreen::Game;
     syncShopSelections();
     SoundManager::instance().startBackground();
-    m_screen = std::make_unique<GameScreen>(m_gameState, m_gameData.stages);
+    m_screen = std::make_unique<GameScreen>(m_gameState, DataManager::instance().gameData().stages);
 }
 
 void Game::showShopScreen() {
+    const GameData& gameData = DataManager::instance().gameData();
     m_activeScreen = ActiveScreen::Shop;
     m_screen = std::make_unique<ShopScreen>(
         m_gameState,
-        m_gameData.shopAssets,
-        m_gameData.uncatalogedShopFiles);
+        gameData.shopAssets,
+        gameData.uncatalogedShopFiles);
 }
 
 Game::~Game() {
@@ -77,12 +79,15 @@ Game::~Game() {
 }
 
 void Game::saveUserData() {
-    DataManager::saveUserData(UserDataPath, m_gameState.getUserData());
+    DataManager::instance().setUserData(m_gameState.getUserData());
+    DataManager::instance().saveUserData();
     m_lastSavedUserData = m_gameState.getUserData();
 }
 
 void Game::syncShopSelections() {
-    ResourceManager::instance().applyShopSelections(m_gameData.shopAssets, m_gameState.getUserData());
+    ResourceManager::instance().applyShopSelections(
+        DataManager::instance().gameData().shopAssets,
+        m_gameState.getUserData());
     m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
     initBackground();
 }
@@ -177,6 +182,7 @@ void Game::applyScreenCommand(ScreenCommand command) {
 }
 
 void Game::update(float dt) {
+    refreshDataIfChanged();
     m_screen->update(dt);
     saveUserDataIfChanged();
     SoundManager::instance().update(dt);
@@ -188,6 +194,18 @@ void Game::saveUserDataIfChanged() {
         return;
 
     saveUserData();
+}
+
+void Game::refreshDataIfChanged() {
+    if (!DataManager::instance().refreshIfChanged())
+        return;
+
+    m_gameState.setUserData(DataManager::instance().userData());
+    m_lastSavedUserData = m_gameState.getUserData();
+    syncShopSelections();
+
+    if (m_activeScreen == ActiveScreen::Shop)
+        showShopScreen();
 }
 
 void Game::render() {
