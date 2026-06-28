@@ -65,6 +65,16 @@ void GameScreen::showLevelCompletedOverlay() {
     }));
 }
 
+void GameScreen::showPauseOverlay() {
+    showOverlay(std::make_unique<OverlayView>(
+        "Paused",
+        std::vector<std::string>{ "Game is paused" },
+        std::vector<OverlayAction>{
+            { "Resume", OverlayActionType::Primary, []() {} },
+            { "Go to Start",  OverlayActionType::Danger,  [this]() { requestCommand(ScreenCommand::ReturnToStart); } }
+    }));
+}
+
 std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
     return {
         "Enemies defeated: " + std::to_string(m_gameState.getEnemiesDefeated()),
@@ -86,6 +96,12 @@ void GameScreen::startCurrentStage() {
 }
 
 void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
+        if (key->code == sf::Keyboard::Key::Escape) {
+            showPauseOverlay();
+            return;
+        }
+    }
     m_world->handleEvent(event);
 }
 
