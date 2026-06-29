@@ -135,7 +135,3 @@ void GameScreen::draw(sf::RenderWindow& target) {
     target.draw(*m_menuBar);
     drawOverlay(target);
 }
-
-void GameScreen::restartLevel() {
-    startCurrentStage();
-}

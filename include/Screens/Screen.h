@@ -69,12 +69,6 @@ public:
     /// @param deltaTime Time elapsed since last frame.
     virtual void update(float /*deltaTime*/) {}
 
-    /// @brief Returns true once the screen is done and wants to be replaced.
-    virtual bool isFinished() const { return false; }
-
-    /// @brief Reports the screen's outcome (defaults to Running for screens with no result).
-    virtual LevelResult getResult() const { return LevelResult::Running; }
-
     /// @brief Returns the command requested by this screen.
     ScreenCommand getCommand() const { return m_command; }
 

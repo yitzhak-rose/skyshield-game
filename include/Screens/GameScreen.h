@@ -62,9 +62,6 @@ private:
     /// @brief Loads the current stage into a fresh world.
     void startCurrentStage();
 
-    /// @brief Recreates the world for the current level.
-    void restartLevel();
-
     GameState& m_gameState;
     bool m_completionOverlayShown = false;
     std::vector<LevelConfig> m_stages;

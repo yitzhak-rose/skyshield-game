@@ -21,12 +21,6 @@ public:
     /// @brief Stops whichever background track is currently playing.
     void stopBackground();
 
-    /// @brief Disables all sounds and stops active playback.
-    void disableSounds();
-
-    /// @brief Enables sounds after they were disabled.
-    void enableSounds();
-
     /// @brief Updates time-sensitive sound state such as temporary volume changes.
     void update(float deltaTime);
 
