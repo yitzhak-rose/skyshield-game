@@ -94,8 +94,8 @@ namespace MenuBarConfig {
     inline const sf::Color VehicleArmorHealthyColor(67, 176, 113);
     inline const sf::Color VehicleArmorWarningColor(235, 168, 66);
     inline const sf::Color VehicleArmorCriticalColor(211, 77, 83);
-    inline const sf::Color PauseButtonColor(16, 20, 28, 175);
-    inline const sf::Color PauseButtonOutlineColor(244, 232, 178, 215);
+    inline const sf::Color PauseButtonColor(67, 176, 113, 220);
+    inline const sf::Color PauseButtonOutlineColor(154, 230, 180, 235);
     inline const sf::Color PauseIconColor(255, 255, 255);
     inline constexpr float Height = 76.f; // menu bar height in pixels
     inline constexpr float CoinIconX = 260.f; // coin counter slot, just right of the bomb counter

@@ -8,6 +8,7 @@
 #include "Gameplay/DataManager.h"
 #include "Enums/LevelResult.h"
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -20,12 +21,18 @@ bool sameUserData(const UserData& lhs, const UserData& rhs) {
         lhs.ownedAssets == rhs.ownedAssets &&
         lhs.selectedAssets == rhs.selectedAssets;
 }
+
+sf::Vector2u initialWindowSize() {
+    const sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+    return {
+        std::min(static_cast<unsigned int>(WindowConfig::Width), desktopMode.size.x),
+        std::min(static_cast<unsigned int>(WindowConfig::Height), desktopMode.size.y)
+    };
+}
 }
 
 Game::Game()
-    : window(sf::VideoMode({ static_cast<unsigned int>(WindowConfig::Width),
-                            static_cast<unsigned int>(WindowConfig::Height) }),
-        "SkyShield")
+    : window(sf::VideoMode(initialWindowSize()), "SkyShield")
     , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
     window.setFramerateLimit(60);
     initBackground();
@@ -119,17 +126,30 @@ void Game::handleEvents() {
             break;
         }
 
+        if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+            const sf::FloatRect visibleArea(
+                { 0.f, 0.f },
+                { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
+            window.setView(sf::View(visibleArea));
+        }
+
         m_screen->handleEvent(*event, makeEventContext(*event));
     }
 }
 
 ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
     ScreenEventContext context;
+    const sf::View& view = window.getView();
+    context.viewBounds = {
+        { view.getCenter().x - view.getSize().x / 2.f,
+          view.getCenter().y - view.getSize().y / 2.f },
+        view.getSize()
+    };
 
     if (const auto* mouseMove = event.getIf<sf::Event::MouseMoved>())
-        context.mousePosition = window.mapPixelToCoords(mouseMove->position, window.getDefaultView());
+        context.mousePosition = window.mapPixelToCoords(mouseMove->position, view);
     else if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>())
-        context.mousePosition = window.mapPixelToCoords(mousePress->position, window.getDefaultView());
+        context.mousePosition = window.mapPixelToCoords(mousePress->position, view);
 
     return context;
 }
