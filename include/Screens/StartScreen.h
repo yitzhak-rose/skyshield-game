@@ -23,12 +23,6 @@ public:
     /// @brief Draws the background, buttons, and modal overlay.
     void draw(sf::RenderWindow& target) override;
 
-    /// @brief Returns true once Start Game has been chosen.
-    bool isFinished() const override { return getCommand() == ScreenCommand::StartGame; }
-
-    /// @brief Reports completion to Game so it can enter stage 0.
-    LevelResult getResult() const override;
-
 private:
     enum class Button {
         None,

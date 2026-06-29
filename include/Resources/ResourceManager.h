@@ -18,10 +18,6 @@ public:
     /// @return Reference to the singleton ResourceManager instance.
     static ResourceManager& instance();
 
-    /// @brief Gets all loaded game object textures.
-    /// @return Reference to the map of GameObject enums to sf::Texture.
-    std::map<GameObjects, sf::Texture>& getImages();
-
     /// @brief Retrieves a specific texture by its GameObject enum key.
     /// @param image The GameObject enum representing the desired texture.
     /// @return Reference to the requested sf::Texture.

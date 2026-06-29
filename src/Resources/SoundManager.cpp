@@ -48,18 +48,6 @@ void SoundManager::stopBackground() {
     m_targetBackgroundVolume = BackgroundVolume;
 }
 
-void SoundManager::disableSounds() {
-    m_soundsEnabled = false;
-    stopBackground();
-    m_previewMusic.stop();
-    m_levelFinishedSound.stop();
-    m_missionFailedSound.stop();
-}
-
-void SoundManager::enableSounds() {
-    m_soundsEnabled = true;
-}
-
 void SoundManager::update(float deltaTime) {
     if (m_previewActive) {
         m_previewElapsed += std::max(0.f, deltaTime);

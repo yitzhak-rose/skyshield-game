@@ -248,7 +248,3 @@ void StartScreen::updateQuitButtonForTarget(const sf::RenderWindow& target) cons
         });
     m_quitSprite.setPosition(centerOf(m_quitButton));
 }
-
-LevelResult StartScreen::getResult() const {
-    return getCommand() == ScreenCommand::StartGame ? LevelResult::Won : LevelResult::Running;
-}

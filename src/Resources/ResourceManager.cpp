@@ -76,10 +76,6 @@ void ResourceManager::loadSoundPaths() {
     }
 }
 
-std::map<GameObjects, sf::Texture>& ResourceManager::getImages() {
-    return m_imageTextures;
-}
-
 sf::Texture& ResourceManager::getImage(GameObjects image) {
     auto it = m_imageTextures.find(image);
     if (it == m_imageTextures.end())
