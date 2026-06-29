@@ -1,6 +1,6 @@
 #include "Gameplay/Objects/Drone.h"
-#include "Gameplay/Constants.h"
-#include "Gameplay/GameState.h"
+#include "App/Constants.h"
+#include "App/State/GameState.h"
 #include "Gameplay/Factory.h"
 #include <SFML/Window/Keyboard.hpp>
 #include <algorithm>

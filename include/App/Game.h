@@ -2,9 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include "Gameplay/GameState.h"
-#include "Gameplay/ShopData.h"
-#include "Screens/Screen.h"
+#include "App/State/GameState.h"
+#include "Shop/ShopData.h"
+#include "Screens/Core/Screen.h"
 
 class Game {
 public:

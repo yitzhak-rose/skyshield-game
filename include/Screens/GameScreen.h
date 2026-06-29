@@ -1,9 +1,9 @@
 #pragma once
-#include "Screens/Screen.h"
+#include "Screens/Core/Screen.h"
 #include "Gameplay/World.h"
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 #include "Gameplay/LevelConfig.h"
-#include "Screens/Menubar.h"             
+#include "Screens/Components/Menubar.h"             
 #include "Enums/LevelResult.h"
 #include <SFML/Graphics.hpp>
 #include <functional>

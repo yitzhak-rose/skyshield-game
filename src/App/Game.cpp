@@ -4,8 +4,8 @@
 #include "Screens/StartScreen.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
-#include "Gameplay/Constants.h"
-#include "Gameplay/DataManager.h"
+#include "App/Constants.h"
+#include "Resources/DataManager.h"
 #include "Enums/LevelResult.h"
 
 #include <algorithm>

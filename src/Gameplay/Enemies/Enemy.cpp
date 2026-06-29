@@ -1,7 +1,7 @@
 #include "Gameplay/Enemies/Enemy.h"
 #include "Gameplay/Factory.h"
-#include "Gameplay/Constants.h"
-#include "Gameplay/GameState.h"
+#include "App/Constants.h"
+#include "App/State/GameState.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <cmath>

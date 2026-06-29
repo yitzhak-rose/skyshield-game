@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Enums/LevelResult.h"
-#include "Gameplay/ShopData.h"
+#include "Shop/ShopData.h"
 
 #include <map>
 #include <set>

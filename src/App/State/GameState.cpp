@@ -1,6 +1,6 @@
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 #include "Gameplay/LevelConfig.h"
 
 #include <algorithm>

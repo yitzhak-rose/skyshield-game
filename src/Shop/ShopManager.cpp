@@ -1,7 +1,7 @@
-#include "Gameplay/ShopManager.h"
+#include "Shop/ShopManager.h"
 
-#include "Gameplay/Constants.h"
-#include "Gameplay/DataManager.h"
+#include "App/Constants.h"
+#include "Resources/DataManager.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
 #include "Utilities/Utils.h"

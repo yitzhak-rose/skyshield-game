@@ -1,7 +1,7 @@
 #include "Screens/StartScreen.h"
 
-#include "Gameplay/Constants.h"
-#include "Gameplay/GameState.h"
+#include "App/Constants.h"
+#include "App/State/GameState.h"
 #include "Resources/ResourceManager.h"
 #include "Utilities/Utils.h"
 

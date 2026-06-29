@@ -1,6 +1,6 @@
 #include "Screens/ShopScreen.h"
 
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 #include "Resources/ResourceManager.h"
 
 #include <sstream>

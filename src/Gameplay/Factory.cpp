@@ -3,7 +3,7 @@
 #include <map>
 #include <stdexcept>
 
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 #include "Gameplay/Objects/GameObject.h"
 #include "Gameplay/Objects/CommandVehicle.h"
 #include "Gameplay/Objects/Drone.h"

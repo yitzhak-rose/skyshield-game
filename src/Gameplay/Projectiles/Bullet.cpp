@@ -1,5 +1,5 @@
 #include "Gameplay/Projectiles/Bullet.h"
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 
 // Faces the flash along its travel direction; the sheet's flame points right by default.
 Bullet::Bullet(const sf::Texture& texture, sf::Vector2f position,

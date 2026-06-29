@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Enums/LevelResult.h"
-#include "Screens/OverlayView.h"
+#include "Screens/Components/OverlayView.h"
 
 #include <SFML/Graphics.hpp>
 #include <initializer_list>

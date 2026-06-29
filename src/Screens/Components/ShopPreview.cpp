@@ -1,6 +1,6 @@
-#include "Screens/ShopPreview.h"
+#include "Screens/Components/ShopPreview.h"
 
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 #include "Utilities/Utils.h"
 
 ShopPreview::ShopPreview(GameState& gameState,

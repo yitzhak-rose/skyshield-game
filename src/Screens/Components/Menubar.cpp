@@ -1,6 +1,6 @@
-#include "Screens/Menubar.h"
-#include "Gameplay/Constants.h"
-#include "Gameplay/GameState.h"
+#include "Screens/Components/Menubar.h"
+#include "App/Constants.h"
+#include "App/State/GameState.h"
 #include "Resources/ResourceManager.h"
 #include "Utilities/Utils.h"
 

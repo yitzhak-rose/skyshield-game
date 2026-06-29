@@ -1,5 +1,5 @@
 #include "Gameplay/Enemies/TankEnemy.h"
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 
 TankEnemy::TankEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
     const GameObject& player, const GameObject& target)

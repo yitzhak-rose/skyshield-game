@@ -1,5 +1,5 @@
 #include "Gameplay/Objects/CommandVehicle.h"
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 #include <cmath>
 
 // Builds the vehicle, then crops the sprite to one frame and centers its origin.
