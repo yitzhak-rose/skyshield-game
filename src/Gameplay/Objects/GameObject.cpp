@@ -15,7 +15,6 @@ void GameObject::draw(sf::RenderWindow& target) const {
 }
 
 void GameObject::setupSprite(sf::IntRect frame, float scale) {
-    m_sprite.setTextureRect(frame);
     m_sprite.setOrigin({ frame.size.x / 2.f, frame.size.y / 2.f });
     m_sprite.setScale({ scale, scale });
 }

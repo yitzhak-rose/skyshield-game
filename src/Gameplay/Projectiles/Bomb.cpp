@@ -8,6 +8,7 @@ Bomb::Bomb(const sf::Texture& texture, sf::Vector2f position, GameState& gameSta
         BombConfig::Sprite.frameCount, BombConfig::Sprite.frameDuration)
 {
     setupSprite(m_animation.getFrameRect(), BombConfig::Sprite.scale);
+    m_animation.applyInitialFrame(m_sprite);
     gameState.addActiveBomb();
 }
 

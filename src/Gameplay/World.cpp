@@ -13,9 +13,9 @@ World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     , m_gameState(gameState)
     , m_objects()
     , m_enemiesToSpawn(config.enemyCount) {
-    m_objects.push_back(Factory::create(GameObjects::CommandCar,
+    m_objects.push_back(Factory::instance().create(GameObjects::CommandCar,
         sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState));
-    m_objects.push_back(Factory::create(GameObjects::Drone,
+    m_objects.push_back(Factory::instance().create(GameObjects::Drone,
         sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState));
     m_gameState.startLevel(config, levelNumber);
 }
@@ -63,7 +63,7 @@ void World::spawnEnemy() {
 
     EnemyType type = (Utils::randomFloat(0.f, 1.f) < m_config.tankChance)
         ? EnemyType::Tank : EnemyType::Fast;
-    m_objects.push_back(Factory::createEnemy(type, position, m_gameState, *player, *target));
+    m_objects.push_back(Factory::instance().createEnemy(type, position, m_gameState, *player, *target));
 }
 
 void World::collectSpawned() {
@@ -87,9 +87,8 @@ void World::collectSpawned() {
 void World::handleCollisions() {
     for (std::size_t i = 0; i < m_objects.size(); i++)
         for (std::size_t j = i + 1; j < m_objects.size(); j++) {
-            if (!m_objects[i]->isDead() && !m_objects[j]->isDead() &&
-                m_objects[i]->getBounds().findIntersection(m_objects[j]->getBounds()))
-                processCollision(*m_objects[i], *m_objects[j]);
+            if (m_objects[i]->getBounds().findIntersection(m_objects[j]->getBounds()))
+               processCollision(*m_objects[i], *m_objects[j]);
         }
 }
 

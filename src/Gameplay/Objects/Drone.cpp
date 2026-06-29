@@ -16,6 +16,7 @@ Drone::Drone(const sf::Texture& texture, sf::Vector2f position, GameState& gameS
         DroneConfig::DisplayWidth / static_cast<float>(frame.size.x),
         DroneConfig::DisplayHeight / static_cast<float>(frame.size.y));
     setupSprite(frame, m_displayScale);
+    m_animation.applyInitialFrame(m_sprite);
 }
 
 // Moves, advances the rotor animation, then drains the battery.
@@ -54,7 +55,7 @@ std::unique_ptr<GameObject> Drone::takeSpawn() {
     if (!m_bombRequested)
         return nullptr;
     m_bombRequested = false;
-    return Factory::create(GameObjects::Bomb, getPosition(), gameState());
+    return Factory::instance().create(GameObjects::Bomb, getPosition(), gameState());
 }
 
 bool Drone::consumeAmmo() {

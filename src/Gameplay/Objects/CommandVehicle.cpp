@@ -11,6 +11,7 @@ CommandVehicle::CommandVehicle(
     , m_basePosition(position)
 {
     setupSprite(m_animation.getFrameRect(), VehicleConfig::Sprite.scale);
+    m_animation.applyInitialFrame(m_sprite);
 }
 
 // Loops frames 0..3 (flashing beacon) while healthy, or 4..5 (burning) when critical, and runs the hit-shake.
