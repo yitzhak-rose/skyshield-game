@@ -24,6 +24,9 @@ public:
 
     /// @brief Saves the cached user data to the configured user data file.
     void saveUserData();
+
+    /// @brief Returns a normalized save file containing only default user-owned data.
+    UserData defaultUserData() const;
 #pragma endregion
 
 private:

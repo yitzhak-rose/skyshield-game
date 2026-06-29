@@ -144,7 +144,7 @@ void StartScreen::handleClick(sf::Vector2f position) {
             requestCommand(ScreenCommand::OpenShop);
             break;
         case StartScreenButton::Settings:
-            showFeatureUnavailableOverlay();
+            requestCommand(ScreenCommand::OpenSettings);
             break;
         case StartScreenButton::Quit:
             requestCommand(ScreenCommand::Quit);
@@ -168,15 +168,6 @@ StartScreenButton StartScreen::buttonAt(sf::Vector2f position) const {
         return StartScreenButton::Shop;
 
     return StartScreenButton::None;
-}
-
-void StartScreen::showFeatureUnavailableOverlay() {
-    showOverlay(std::make_unique<OverlayView>(
-        "Feature Unavailable",
-        std::vector<std::string>{ "This feature is not available yet." },
-        std::vector<OverlayAction>{
-            { "OK", OverlayActionType::Primary, []() {} }
-        }));
 }
 
 void StartScreen::update(float deltaTime) {

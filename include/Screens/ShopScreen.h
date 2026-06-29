@@ -6,7 +6,6 @@
 
 #include <SFML/Graphics.hpp>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -91,25 +90,6 @@ private:
                         sf::Vector2f position,
                         float maxWidth,
                         sf::Color color) const;
-
-    /// @brief Splits a text string into lines that fit a maximum width.
-    std::vector<std::string> wrapTextLines(const std::string& text,
-                                           unsigned int size,
-                                           float maxWidth,
-                                           std::size_t maxLines) const;
-
-    /// @brief Adds words to wrapped lines until the max line count is reached.
-    void collectWrappedLines(std::istringstream& stream,
-                             std::vector<std::string>& lines,
-                             unsigned int size,
-                             float maxWidth,
-                             std::size_t maxLines) const;
-
-    /// @brief Appends any remaining words to the last wrapped line.
-    static void appendRemainingWords(std::istringstream& stream, std::vector<std::string>& lines);
-
-    /// @brief Trims the last line with an ellipsis until it fits.
-    void trimLastLine(std::vector<std::string>& lines, unsigned int size, float maxWidth) const;
 
     /// @brief Player state reference used only for drawing current coins and ownership labels.
     GameState& m_gameState;

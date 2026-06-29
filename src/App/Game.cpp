@@ -17,7 +17,8 @@
 #pragma region Public
 Game::Game()
     : window(sf::VideoMode(AppUtils::initialWindowSize()), "SkyShield")
-    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
+    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background))
+    , m_settingsScreenManager(m_gameState) {
     window.setFramerateLimit(60);
     initBackground();
     loadSavedData();
@@ -78,28 +79,33 @@ void Game::loadSavedData() {
     DataManager::instance().load();
     m_gameState.setUserData(DataManager::instance().getUserData());
     syncShopSelections();
+    syncAudioSettings();
     m_lastSavedUserData = m_gameState.getUserData();
     DataManager::instance().updateUserData(m_lastSavedUserData);
     DataManager::instance().saveUserData();
 }
 
 void Game::showStartScreen() {
-    m_activeScreen = ActiveScreen::Start;
     SoundManager::instance().startStartBackground();
-    m_screen = std::make_unique<StartScreen>(m_gameState);
+    replaceScreen(ActiveScreen::Start, std::make_unique<StartScreen>(m_gameState));
 }
 
 void Game::showGameScreen() {
-    m_activeScreen = ActiveScreen::Game;
     syncShopSelections();
     SoundManager::instance().startBackground();
-    m_screen = std::make_unique<GameScreen>(m_gameState, DataManager::instance().getGameData().stages);
+    replaceScreen(
+        ActiveScreen::Game,
+        std::make_unique<GameScreen>(m_gameState, DataManager::instance().getGameData().stages));
 }
 
 void Game::showShopScreen() {
     const GameData& gameData = DataManager::instance().getGameData();
-    m_activeScreen = ActiveScreen::Shop;
-    m_screen = std::make_unique<ShopScreen>(m_gameState, gameData.shopAssets);
+    replaceScreen(ActiveScreen::Shop, std::make_unique<ShopScreen>(m_gameState, gameData.shopAssets));
+}
+
+void Game::replaceScreen(ActiveScreen activeScreen, std::unique_ptr<Screen> screen) {
+    m_activeScreen = activeScreen;
+    m_screen = std::move(screen);
 }
 
 void Game::saveUserData() {
@@ -109,11 +115,26 @@ void Game::saveUserData() {
 }
 
 void Game::syncShopSelections() {
+    const auto& catalog = DataManager::instance().getGameData().shopAssets;
     ResourceManager::instance().applyShopSelections(
-        DataManager::instance().getGameData().shopAssets,
+        catalog,
         m_gameState.getUserData());
+    m_gameState.setSelectedAssetExtras(catalog);
     m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
     initBackground();
+}
+
+void Game::syncAudioSettings() {
+    SoundManager::instance().applyUserSettings(
+        m_gameState.isMuted(),
+        m_gameState.getMaxVolume());
+}
+
+void Game::resetUserData() {
+    m_gameState.setUserData(DataManager::instance().defaultUserData());
+    syncShopSelections();
+    syncAudioSettings();
+    saveUserData();
 }
 #pragma endregion
 
@@ -149,6 +170,8 @@ ScreenEventContext Game::makeEventContext(const sf::Event& event) const {
         context.mousePosition = window.mapPixelToCoords(mouseMove->position, view);
     else if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>())
         context.mousePosition = window.mapPixelToCoords(mousePress->position, view);
+    else if (const auto* mouseRelease = event.getIf<sf::Event::MouseButtonReleased>())
+        context.mousePosition = window.mapPixelToCoords(mouseRelease->position, view);
 
     return context;
 }
@@ -169,8 +192,18 @@ bool Game::isCommandAllowed(ScreenCommand command) const {
             return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::OpenShop:
             return m_activeScreen == ActiveScreen::Start;
+        case ScreenCommand::OpenSettings:
+            return m_activeScreen == ActiveScreen::Start;
+        case ScreenCommand::OpenHelp:
+            return m_activeScreen == ActiveScreen::Settings;
+        case ScreenCommand::ReturnToSettings:
+            return m_activeScreen == ActiveScreen::Help;
         case ScreenCommand::ReturnToStart:
-            return m_activeScreen == ActiveScreen::Game || m_activeScreen == ActiveScreen::Shop;
+            return m_activeScreen == ActiveScreen::Game ||
+                m_activeScreen == ActiveScreen::Shop ||
+                m_activeScreen == ActiveScreen::Settings;
+        case ScreenCommand::ResetUserData:
+            return m_activeScreen == ActiveScreen::Settings;
         case ScreenCommand::Quit:
             return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::None:
@@ -188,9 +221,23 @@ void Game::applyScreenCommand(ScreenCommand command) {
         case ScreenCommand::OpenShop:
             showShopScreen();
             break;
+        case ScreenCommand::OpenSettings:
+            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
+            break;
+        case ScreenCommand::OpenHelp:
+            replaceScreen(ActiveScreen::Help, m_settingsScreenManager.createHelpScreen());
+            break;
+        case ScreenCommand::ReturnToSettings:
+            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
+            break;
         case ScreenCommand::ReturnToStart:
             syncShopSelections();
+            syncAudioSettings();
             showStartScreen();
+            break;
+        case ScreenCommand::ResetUserData:
+            resetUserData();
+            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
             break;
         case ScreenCommand::Quit:
             window.close();
@@ -246,6 +293,7 @@ void Game::saveUserDataIfChanged() {
     if (AppUtils::sameUserData(m_lastSavedUserData, m_gameState.getUserData()))
         return;
 
+    syncAudioSettings();
     saveUserData();
 }
 #pragma endregion

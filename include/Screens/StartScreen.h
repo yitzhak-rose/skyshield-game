@@ -58,9 +58,6 @@ private:
     /// @brief Returns the button under a point, or None.
     StartScreenButton buttonAt(sf::Vector2f position) const;
 
-    /// @brief Shows the shared feature-unavailable dialog.
-    void showFeatureUnavailableOverlay();
-
     /// @brief Draws the settings button and gear icon.
     void drawSettingsButton(sf::RenderWindow& target) const;
 

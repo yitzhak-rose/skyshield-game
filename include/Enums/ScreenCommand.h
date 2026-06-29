@@ -5,6 +5,10 @@ enum class ScreenCommand {
     None,
     StartGame,
     OpenShop,
+    OpenSettings,
+    OpenHelp,
+    ReturnToSettings,
     ReturnToStart,
+    ResetUserData,
     Quit
 };

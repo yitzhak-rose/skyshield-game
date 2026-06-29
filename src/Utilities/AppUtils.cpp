@@ -4,12 +4,19 @@
 
 #include <SFML/Window/VideoMode.hpp>
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 
 bool AppUtils::sameUserData(const UserData& lhs, const UserData& rhs) {
     return lhs.coins == rhs.coins &&
+        lhs.muted == rhs.muted &&
+        sameFloat(lhs.maxVolume, rhs.maxVolume) &&
         lhs.ownedAssets == rhs.ownedAssets &&
         lhs.selectedAssets == rhs.selectedAssets;
+}
+
+bool AppUtils::sameFloat(float lhs, float rhs) {
+    return std::abs(lhs - rhs) <= 0.001f;
 }
 
 sf::Vector2u AppUtils::initialWindowSize() {

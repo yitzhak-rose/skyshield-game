@@ -203,7 +203,11 @@ sf::IntRect MenuBar::batteryFrameRect() const {
     const sf::Vector2u textureSize = m_batterySprite.getTexture().getSize();
     const int frameWidth = static_cast<int>(textureSize.x) / BatteryConfig::FrameCount;
     const int frameHeight = static_cast<int>(textureSize.y);
-    const float batteryPercent = std::clamp(m_state.getBatteryPercent(), 0.f, BatteryConfig::FullPercent);
+    const float maxBattery = std::max(m_state.getMaxBatteryPercent(), BatteryConfig::FullPercent);
+    const float batteryPercent = std::clamp(
+        m_state.getBatteryPercent() / maxBattery * BatteryConfig::FullPercent,
+        0.f,
+        BatteryConfig::FullPercent);
     const float emptyPercent = BatteryConfig::FullPercent - batteryPercent;
     const float frameStep = BatteryConfig::FullPercent / static_cast<float>(BatteryConfig::FrameCount - 1);
     const int frameIndex = std::clamp(static_cast<int>(std::round(emptyPercent / frameStep)),

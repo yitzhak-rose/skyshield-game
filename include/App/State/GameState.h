@@ -5,6 +5,7 @@
 
 #include <map>
 #include <set>
+#include <vector>
 
 struct LevelConfig;
 
@@ -38,6 +39,7 @@ public:
     int getBombsAvailable() const { return m_bombsAvailable; }
     int getActiveBombs() const { return m_activeBombs; }
     float getBatteryPercent() const { return m_batteryPercent; }
+    float getMaxBatteryPercent() const { return m_maxBatteryPercent; }
     float getVehicleArmorPercent() const { return m_vehicleArmorPercent; }
     float getDamageTaken() const { return m_damageTaken; }
     int getEnemiesRemaining() const { return m_enemiesRemaining; }
@@ -46,14 +48,21 @@ public:
 
     void setLevelResult(LevelResult result) { m_levelResult = result; }
     void setCoins(int coins);
+    void setMuted(bool muted);
+    void setMaxVolume(float maxVolume);
     void setUserData(const UserData& userData);
     UserData getUserData() const;
+    bool isMuted() const { return m_muted; }
+    float getMaxVolume() const { return m_maxVolume; }
     bool ownsAsset(const ShopAsset& asset) const;
     bool isAssetSelected(const ShopAsset& asset) const;
     bool canAfford(const ShopAsset& asset) const;
     bool buyAsset(const ShopAsset& asset);
     bool selectAsset(const ShopAsset& asset);
     int selectedAssetId(ShopAssetType type) const;
+    void setSelectedAssetExtras(const std::vector<ShopAsset>& catalog);
+    int selectedAssetExtra(ShopAssetType type) const;
+    float adjustedVehicleDamage(float amount) const;
 
 private:
     int m_levelNumber = 1;
@@ -62,12 +71,16 @@ private:
     int m_bombsAvailable = 0;
     int m_activeBombs = 0;
     float m_batteryPercent = 0.f;
+    float m_maxBatteryPercent = 0.f;
     float m_batteryDrainRate = 0.f;
     float m_vehicleArmorPercent = 0.f;
     float m_damageTaken = 0.f;
     int m_enemiesRemaining = 0;
     int m_enemiesDefeated = 0;
     LevelResult m_levelResult = LevelResult::Running;
+    bool m_muted = false;
+    float m_maxVolume = 100.f;
     std::map<ShopAssetType, std::set<int>> m_ownedAssets;
     std::map<ShopAssetType, int> m_selectedAssets;
+    std::map<ShopAssetType, int> m_selectedExtras;
 };

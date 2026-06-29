@@ -109,6 +109,8 @@ void from_json(const Json& json, UserData& userData) {
     }
 
     userData.coins = json.value("coins", 0);
+    userData.muted = json.value("muted", false);
+    userData.maxVolume = json.value("maxVolume", 100.f);
 
     const auto owned = json.find("ownedAssets");
     if (owned != json.end() && owned->is_object()) {
@@ -146,6 +148,8 @@ void to_json(Json& json, const UserData& userData) {
 
     json = {
         { "coins", std::max(0, userData.coins) },
+        { "muted", userData.muted },
+        { "maxVolume", std::clamp(userData.maxVolume, 0.f, 100.f) },
         { "ownedAssets", ownedAssets },
         { "selectedAssets", selectedAssets }
     };
@@ -168,6 +172,10 @@ void DataManager::updateUserData(const UserData& userData) {
 
 void DataManager::saveUserData() {
     writeUserData(m_userData);
+}
+
+UserData DataManager::defaultUserData() const {
+    return normalizeUserData(UserData{});
 }
 #pragma endregion
 
@@ -200,6 +208,7 @@ UserData DataManager::fetchUserData() const {
 UserData DataManager::normalizeUserData(const UserData& userData) const {
     UserData normalized = userData;
     normalized.coins    = std::max(0, normalized.coins);
+    normalized.maxVolume = std::clamp(normalized.maxVolume, 0.f, 100.f);
 
     for (ShopAssetType type : allShopAssetTypes()) {
         const ShopAsset* defaultAsset = findDefaultAsset(m_gameData.shopAssets, type);

@@ -3,8 +3,8 @@
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
+#include "Utilities/Utils.h"
 
-#include <sstream>
 #include <string>
 
 ShopScreen::ShopScreen(GameState& gameState, const std::vector<ShopAsset>& catalog)
@@ -203,7 +203,8 @@ void ShopScreen::drawWrappedTileName(sf::RenderTarget& target,
                                      const std::string& name,
                                      sf::Vector2f position,
                                      float maxWidth) const {
-    const std::vector<std::string> lines = wrapTextLines(
+    const std::vector<std::string> lines = TextUtils::wrapTextLines(
+        m_font,
         name,
         ShopScreenConfig::TileNameSize,
         maxWidth,
@@ -231,63 +232,5 @@ void ShopScreen::drawFittedText(sf::RenderTarget& target,
     while (text.getLocalBounds().size.x > maxWidth && text.getCharacterSize() > minSize)
         text.setCharacterSize(text.getCharacterSize() - 1u);
     target.draw(text);
-}
-#pragma endregion
-
-#pragma region Utilities
-std::vector<std::string> ShopScreen::wrapTextLines(const std::string& text,
-                                                   unsigned int size,
-                                                   float maxWidth,
-                                                   std::size_t maxLines) const {
-    std::vector<std::string> lines;
-    std::istringstream stream(text);
-    collectWrappedLines(stream, lines, size, maxWidth, maxLines);
-    appendRemainingWords(stream, lines);
-    trimLastLine(lines, size, maxWidth);
-    return lines;
-}
-
-void ShopScreen::collectWrappedLines(std::istringstream& stream,
-                                     std::vector<std::string>& lines,
-                                     unsigned int size,
-                                     float maxWidth,
-                                     std::size_t maxLines) const {
-    std::string word;
-    std::string current;
-    while (lines.size() + 1 < maxLines && stream >> word) {
-        const std::string candidate = current.empty() ? word : current + " " + word;
-        sf::Text candidateText(m_font, candidate, size);
-        if (candidateText.getLocalBounds().size.x <= maxWidth || current.empty())
-            current = candidate;
-        else {
-            lines.push_back(current);
-            current = word;
-        }
-    }
-
-    if (!current.empty())
-        lines.push_back(current);
-}
-
-void ShopScreen::appendRemainingWords(std::istringstream& stream, std::vector<std::string>& lines) {
-    std::string word;
-    while (stream >> word) {
-        if (lines.empty())
-            lines.push_back(word);
-        else
-            lines.back() += " " + word;
-    }
-}
-
-void ShopScreen::trimLastLine(std::vector<std::string>& lines, unsigned int size, float maxWidth) const {
-    if (lines.empty())
-        return;
-
-    sf::Text lastLine(m_font, lines.back(), size);
-    while (lastLine.getLocalBounds().size.x > maxWidth && lines.back().size() > 3) {
-        lines.back().erase(lines.back().size() - 4);
-        lines.back() += "...";
-        lastLine.setString(lines.back());
-    }
 }
 #pragma endregion

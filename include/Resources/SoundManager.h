@@ -42,6 +42,9 @@ public:
     /// @brief Restores the background music volume to normal.
     void restoreBackgroundVolume();
 
+    /// @brief Applies persisted user audio settings to all active audio.
+    void applyUserSettings(bool muted, float maxVolume);
+
 private:
     SoundManager();
     ~SoundManager() = default;
@@ -61,6 +64,12 @@ private:
     /// @brief Plays a foreground effect and lowers background volume until effects finish.
     void playForegroundEffect(sf::Sound& sound);
 
+    /// @brief Converts an internal 0..100 volume into the user-limited effective volume.
+    float effectiveVolume(float volume) const;
+
+    /// @brief Reapplies effective volume to all active sound sources.
+    void refreshActiveVolumes();
+
     sf::Music m_backgroundMusic;
     sf::Music m_previewMusic;
     sf::SoundBuffer m_levelFinishedBuffer;
@@ -68,7 +77,7 @@ private:
     sf::Sound m_levelFinishedSound;
     sf::Sound m_missionFailedSound;
 
-    bool m_soundsEnabled = true;
+    bool m_muted = false;
     bool m_backgroundDucked = false;
     bool m_previewActive = false;
     bool m_resumeBackgroundAfterPreview = false;
@@ -76,6 +85,7 @@ private:
     float m_targetBackgroundVolume = BackgroundVolume;
     float m_previewElapsed = 0.f;
     bool m_manuallyDucked = false;
+    float m_maxVolume = BackgroundVolume;
 
     static constexpr float BackgroundVolume = 100.f;
     static constexpr float DuckedBackgroundVolume = BackgroundVolume * 0.25f;

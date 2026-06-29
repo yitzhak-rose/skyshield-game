@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <cstddef>
+#include <string>
 
 namespace MenuBarConfig {
     inline constexpr unsigned int TextSize = 32;
@@ -89,6 +90,152 @@ namespace StartScreenConfig {
     inline const sf::Color QuitButtonColor(145, 61, 65, 225);
     inline const sf::Color QuitButtonHoverColor(210, 62, 70, 245);
     inline const sf::Color QuitIconColor(255, 255, 255);
+}
+
+namespace SettingsScreenConfig {
+    inline constexpr float Padding = 36.f;
+    inline constexpr float BackButtonSize = 64.f;
+    inline constexpr float ButtonOutlineThickness = 2.f;
+    inline constexpr float ActiveButtonOutlineThickness = 4.f;
+    inline constexpr float TitleY = 64.f;
+    inline constexpr float PanelX = 350.f;
+    inline constexpr float PanelY = 112.f;
+    inline constexpr float PanelWidth = 1100.f;
+    inline constexpr float PanelHeight = 560.f;
+    inline constexpr float ButtonWidth = 330.f;
+    inline constexpr float ButtonHeight = 62.f;
+    inline constexpr float PairedButtonWidth = 300.f;
+    inline constexpr float ButtonGap = 34.f;
+    inline constexpr float AudioButtonWidth = 260.f;
+    inline constexpr float AudioButtonHeight = 96.f;
+    inline constexpr float AudioIconSize = 44.f;
+    inline constexpr float AudioIconOffsetX = 26.f;
+    inline constexpr float AudioIconOffsetY = 22.f;
+    inline constexpr float AudioLabelOffsetX = 28.f;
+    inline constexpr float AudioButtonY = 155.f;
+    inline constexpr float SliderX = 595.f;
+    inline constexpr float SliderY = 335.f;
+    inline constexpr float SliderWidth = 610.f;
+    inline constexpr float SliderHeight = 14.f;
+    inline constexpr float SliderKnobRadius = 18.f;
+    inline constexpr float VolumeIconGap = 30.f;
+    inline constexpr float VolumeValueOffsetY = 58.f;
+    inline constexpr float MaxVolume = 100.f;
+    inline constexpr float VolumeIconSize = 46.f;
+    inline constexpr float PairedButtonsY = 455.f;
+    inline constexpr float ResetButtonY = 555.f;
+    inline constexpr unsigned int TitleTextSize = 52;
+    inline constexpr unsigned int LabelTextSize = 24;
+    inline constexpr unsigned int ButtonTextSize = 26;
+    inline constexpr unsigned int VolumeTextSize = 22;
+    inline const sf::Color BackgroundColor(8, 12, 18, 220);
+    inline const sf::Color PanelColor(16, 20, 28, 215);
+    inline const sf::Color PanelOutlineColor(244, 232, 178, 210);
+    inline const sf::Color ButtonColor(58, 68, 86, 230);
+    inline const sf::Color ButtonHoverColor(49, 119, 88, 235);
+    inline const sf::Color DangerColor(145, 61, 65, 235);
+    inline const sf::Color DangerHoverColor(195, 70, 76, 245);
+    inline const sf::Color TextColor(245, 247, 252);
+    inline const sf::Color MutedTextColor(155, 163, 174);
+    inline const sf::Color InactiveAudioButtonHoverColor(76, 88, 108, 235);
+    inline const sf::Color SliderTrackColor(70, 80, 96);
+    inline const sf::Color SliderFillColor(67, 176, 113);
+    inline const sf::Color DisabledColor(92, 96, 104, 175);
+    inline const std::string AttributionText =
+        "Game Credits\n"
+        "Story\n"
+        "Yithak Rose\n"
+        "\n"
+        "Design\n"
+        "Yitzhak Rose\n"
+        "Benji Mandel\n"
+        "\n"
+        "Development\n"
+        "Yithak Rose\n"
+        "Benji Mandel\n"
+        "\n"
+        "Sounds\n"
+        "YouTube\n"
+        "Gaming Sound FX, Alec Koff Label\n"
+        "Pixabay\n"
+        "HitsLab sounds, Tuomas_Data, floraphonic\n"
+        "\n"
+        "Assets\n"
+        "Gemini, ChatGPT, Claude";
+}
+
+namespace HelpScreenConfig {
+    inline constexpr float Padding = 32.f;
+    inline constexpr float BackButtonSize = 64.f;
+    inline constexpr float TextPanelX = 180.f;
+    inline constexpr float TextPanelY = 82.f;
+    inline constexpr float TextPanelWidth = 1440.f;
+    inline constexpr float TextPanelHeight = 590.f;
+    inline constexpr float PanelOutlineThickness = 2.f;
+    inline constexpr float CardOutlineThickness = 1.f;
+    inline constexpr float IconSize = 52.f;
+    inline constexpr float TitleY = 125.f;
+    inline constexpr float GoalY = 172.f;
+    inline constexpr float SectionHeadingY = 220.f;
+    inline constexpr float LeftHeadingX = 510.f;
+    inline constexpr float LeftIconX = 250.f;
+    inline constexpr float LeftTextX = 430.f;
+    inline constexpr float LeftIconSlotWidth = 118.f;
+    inline constexpr float LeftTextWidth = 430.f;
+    inline constexpr float LeftRowStartY = 250.f;
+    inline constexpr float LeftRowGap = 65.f;
+    inline constexpr float LeftTextOffsetY = 14.f;
+    inline constexpr float HelpTextLineSpacing = 24.f;
+    inline constexpr float IconGap = 12.f;
+    inline constexpr float SpacebarExtraWidth = 14.f;
+    inline constexpr float RightCardX = 1000.f;
+    inline constexpr float RightCardWidth = 500.f;
+    inline constexpr float RightHeadingX = RightCardX + RightCardWidth / 2.f;
+    inline constexpr float RightTitleOffsetX = 28.f;
+    inline constexpr float RightBodyOffsetX = 170.f;
+    inline constexpr float RightTitleOffsetY = 25.f;
+    inline constexpr float RightBodyOffsetY = 18.f;
+    inline constexpr float RightBodyLineSpacing = 23.f;
+    inline constexpr float GameFlowHeadingY = 220.f;
+    inline constexpr float PauseCardY = 245.f;
+    inline constexpr float ResetCardY = 338.f;
+    inline constexpr float OutcomeHeadingY = 430.f;
+    inline constexpr float WinCardY = 455.f;
+    inline constexpr float LoseCardY = 548.f;
+    inline constexpr float OutcomeCardHeight = 78.f;
+    inline constexpr float LoseCardHeight = 96.f;
+    inline constexpr float LoseHeadingOffsetY = 14.f;
+    inline constexpr float LoseTextOffsetX = 34.f;
+    inline constexpr float LoseTextStartY = 41.f;
+    inline constexpr float LoseTextLineSpacing = 16.f;
+    inline constexpr unsigned int TitleTextSize = 44;
+    inline constexpr unsigned int SectionTextSize = 23;
+    inline constexpr unsigned int BodyTextSize = 20;
+    inline constexpr unsigned int LoseConditionTextSize = 15;
+    inline const sf::Color DimColor(0, 0, 0, 118);
+    inline const sf::Color PanelColor(10, 14, 20, 200);
+    inline const sf::Color OutcomeCardColor(20, 27, 37, 170);
+    inline const sf::Color LoseCardColor(37, 23, 28, 172);
+    inline const sf::Color PanelOutlineColor(244, 232, 178, 185);
+    inline const sf::Color TitleColor(244, 232, 178);
+    inline const sf::Color TextColor(245, 247, 252);
+    inline const sf::Color AccentColor(154, 230, 180);
+    inline const sf::Color DangerColor(255, 179, 186);
+}
+
+namespace ScrollableOverlayConfig {
+    inline constexpr float PanelWidth = 980.f;
+    inline constexpr float PanelHeight = 540.f;
+    inline constexpr float TextWidth = 820.f;
+    inline constexpr float TextHeight = 318.f;
+    inline constexpr float CloseButtonWidth = 220.f;
+    inline constexpr float CloseButtonHeight = 54.f;
+    inline constexpr float ScrollStep = 36.f;
+    inline constexpr unsigned int TitleTextSize = 40;
+    inline constexpr unsigned int BodyTextSize = 20;
+    inline constexpr unsigned int HeadingTextSize = 28;
+    inline constexpr unsigned int SubheadingTextSize = 22;
+    inline constexpr unsigned int ButtonTextSize = 26;
 }
 
 namespace ShopScreenConfig {

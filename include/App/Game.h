@@ -4,6 +4,7 @@
 #include "Enums/ActiveScreen.h"
 #include "Shop/ShopData.h"
 #include "Screens/Core/Screen.h"
+#include "Screens/SettingsScreenManager.h"
 
 #include <SFML/Graphics.hpp>
 #include <memory>
@@ -32,11 +33,20 @@ private:
     /// @brief Replaces the current screen with the shop screen and marks it active.
     void showShopScreen();
 
+    /// @brief Stores the active screen enum and takes ownership of the new screen instance.
+    void replaceScreen(ActiveScreen activeScreen, std::unique_ptr<Screen> screen);
+
     /// @brief Writes the current user data to the save file.
     void saveUserData();
 
+    /// @brief Resets persistent user state to defaults, saves it, and reapplies runtime settings.
+    void resetUserData();
+
     /// @brief Applies selected shop assets to the runtime resource maps.
     void syncShopSelections();
+
+    /// @brief Applies persisted audio settings to SoundManager.
+    void syncAudioSettings();
 
     /// @brief Polls SFML events, handles window-owned events, and dispatches safe context to screens.
     void handleEvents();
@@ -74,6 +84,7 @@ private:
     sf::Sprite m_backgroundSprite;
 
     GameState m_gameState;
+    SettingsScreenManager m_settingsScreenManager;
     UserData m_lastSavedUserData;
     ActiveScreen m_activeScreen = ActiveScreen::Start;
     bool m_fatalMode = false;

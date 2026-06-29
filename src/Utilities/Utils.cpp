@@ -1,4 +1,5 @@
 #include "Utilities/Utils.h"
+#include <sstream>
 #include <random>
 
 float Utils::randomFloat(float min, float max) {
@@ -30,4 +31,65 @@ void GraphicsUtils::centerOrigin(sf::Text& text) {
     const sf::FloatRect bounds = text.getLocalBounds();
     text.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
                      bounds.position.y + bounds.size.y / 2.f });
+}
+
+std::vector<std::string> TextUtils::wrapTextLines(const sf::Font& font,
+                                                  const std::string& text,
+                                                  unsigned int size,
+                                                  float maxWidth,
+                                                  std::size_t maxLines) {
+    std::vector<std::string> lines;
+    std::istringstream stream(text);
+    std::string word;
+    std::string current;
+
+    while (stream >> word) {
+        const std::string candidate = current.empty() ? word : current + " " + word;
+        sf::Text candidateText(font, candidate, size);
+        if (candidateText.getLocalBounds().size.x <= maxWidth || current.empty()) {
+            current = candidate;
+            continue;
+        }
+
+        if (maxLines > 0 && lines.size() + 1 >= maxLines) {
+            current += " " + word;
+            break;
+        }
+
+        lines.push_back(current);
+        current = word;
+    }
+
+    if (!current.empty())
+        lines.push_back(current);
+
+    if (maxLines > 0 && lines.size() > maxLines) {
+        lines.resize(maxLines);
+    }
+
+    if (maxLines > 0 && lines.size() == maxLines) {
+        sf::Text lastLine(font, lines.back(), size);
+        while (lastLine.getLocalBounds().size.x > maxWidth && lines.back().size() > 3) {
+            lines.back().erase(lines.back().size() - 4);
+            lines.back() += "...";
+            lastLine.setString(lines.back());
+        }
+    }
+
+    return lines;
+}
+
+void TextUtils::drawMultiline(sf::RenderTarget& target,
+                              const sf::Font& font,
+                              const std::vector<std::string>& lines,
+                              unsigned int size,
+                              sf::Vector2f position,
+                              sf::Color color,
+                              float lineSpacing) {
+    for (std::size_t index = 0; index < lines.size(); ++index) {
+        sf::Text line(font, lines[index], size);
+        line.setFillColor(color);
+        line.setPosition({ position.x, position.y + static_cast<float>(index) * lineSpacing });
+        target.draw(line);
+    }
 }

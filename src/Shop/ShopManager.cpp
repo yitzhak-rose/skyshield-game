@@ -84,6 +84,7 @@ void ShopManager::activatePreviewAction(PreviewAction action) {
         m_gameState.buyAsset(*m_previewAsset);
 
     ResourceManager::instance().applyShopSelections(m_catalog, m_gameState.getUserData());
+    m_gameState.setSelectedAssetExtras(m_catalog);
     saveUserData();
     closePreview();
 }

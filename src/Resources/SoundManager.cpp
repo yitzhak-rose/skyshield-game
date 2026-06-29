@@ -28,15 +28,12 @@ void SoundManager::startStartBackground() {
 }
 
 void SoundManager::playBackgroundTrack(Sounds sound) {
-    if (!m_soundsEnabled)
-        return;
-
     m_backgroundMusic.stop();
     if (!m_backgroundMusic.openFromFile(ResourceManager::instance().getSoundPath(sound)))
         throw std::runtime_error("Failed to open background sound");
 
     m_backgroundMusic.setLooping(true);
-    m_backgroundMusic.setVolume(m_currentBackgroundVolume);
+    m_backgroundMusic.setVolume(effectiveVolume(m_currentBackgroundVolume));
     m_backgroundMusic.play();
 }
 
@@ -88,7 +85,7 @@ void SoundManager::changeVolume(float targetVolume, float deltaTime) {
         m_currentBackgroundVolume -= maxChange;
     }
 
-    m_backgroundMusic.setVolume(m_currentBackgroundVolume);
+    m_backgroundMusic.setVolume(effectiveVolume(m_currentBackgroundVolume));
 }
 
 void SoundManager::playLevelFinished() {
@@ -100,21 +97,16 @@ void SoundManager::playMissionFailed() {
 }
 
 void SoundManager::playForegroundEffect(sf::Sound& sound) {
-    if (!m_soundsEnabled)
-        return;
-
     m_backgroundDucked = true;
     m_targetBackgroundVolume = DuckedBackgroundVolume;
 
     sound.stop();
+    sound.setVolume(effectiveVolume(BackgroundVolume));
     sound.setPlayingOffset(sf::seconds(0.f));
     sound.play();
 }
 
 void SoundManager::playPreview(const std::string& path) {
-    if (!m_soundsEnabled)
-        return;
-
     stopPreview();
 
     m_resumeBackgroundAfterPreview =
@@ -126,7 +118,7 @@ void SoundManager::playPreview(const std::string& path) {
         throw std::runtime_error("Failed to open preview sound: " + path);
 
     m_previewMusic.setLooping(false);
-    m_previewMusic.setVolume(BackgroundVolume);
+    m_previewMusic.setVolume(effectiveVolume(BackgroundVolume));
     m_previewMusic.setPlayingOffset(sf::seconds(PreviewStartSeconds));
     m_previewElapsed = 0.f;
     m_previewActive = true;
@@ -141,7 +133,7 @@ void SoundManager::stopPreview() {
     m_previewActive = false;
     m_previewElapsed = 0.f;
 
-    if (m_resumeBackgroundAfterPreview && m_soundsEnabled)
+    if (m_resumeBackgroundAfterPreview)
         m_backgroundMusic.play();
 
     m_resumeBackgroundAfterPreview = false;
@@ -155,4 +147,25 @@ void SoundManager::reduceBackgroundVolume() {
 void SoundManager::restoreBackgroundVolume() {
     m_manuallyDucked = false;
     m_targetBackgroundVolume = BackgroundVolume;
+}
+
+void SoundManager::applyUserSettings(bool muted, float maxVolume) {
+    m_muted = muted;
+    m_maxVolume = std::clamp(maxVolume, 0.f, BackgroundVolume);
+    refreshActiveVolumes();
+}
+
+float SoundManager::effectiveVolume(float volume) const {
+    if (m_muted)
+        return 0.f;
+
+    const float clampedVolume = std::clamp(volume, 0.f, BackgroundVolume);
+    return clampedVolume * (m_maxVolume / BackgroundVolume);
+}
+
+void SoundManager::refreshActiveVolumes() {
+    m_backgroundMusic.setVolume(effectiveVolume(m_currentBackgroundVolume));
+    m_previewMusic.setVolume(effectiveVolume(BackgroundVolume));
+    m_levelFinishedSound.setVolume(effectiveVolume(BackgroundVolume));
+    m_missionFailedSound.setVolume(effectiveVolume(BackgroundVolume));
 }
