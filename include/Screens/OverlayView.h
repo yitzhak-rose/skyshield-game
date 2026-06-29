@@ -83,12 +83,6 @@ private:
     /// @brief Resolves a button color from its action type and selection state.
     sf::Color buttonColor(const OverlayAction& action, bool selected) const;
 
-    /// @brief Creates centered text using the overlay font.
-    sf::Text makeCenteredText(const std::string& value,
-                              unsigned int size,
-                              sf::Vector2f position,
-                              sf::Color color) const;
-
     std::string m_title;
     std::vector<std::string> m_bodyLines;
     std::vector<OverlayAction> m_actions;

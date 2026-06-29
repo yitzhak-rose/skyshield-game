@@ -2,7 +2,6 @@
 #include "Gameplay/Constants.h"
 #include "Resources/ResourceManager.h"
 #include "Screens/Screen.h"
-#include "Utilities/Utils.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -33,9 +32,10 @@ void OverlayView::validateActions() const {
 void OverlayView::configureLayout() {
     m_scrim.setFillColor(OverlayViewConfig::ScrimColor);
 
-    m_panel.setFillColor(OverlayViewConfig::PanelColor);
-    m_panel.setOutlineColor(OverlayViewConfig::PanelOutlineColor);
-    m_panel.setOutlineThickness(OverlayViewConfig::PanelOutlineThickness);
+    Screen::styleRectangle(m_panel,
+        OverlayViewConfig::PanelColor,
+        OverlayViewConfig::PanelOutlineColor,
+        OverlayViewConfig::PanelOutlineThickness);
     m_panel.setOrigin({ OverlayViewConfig::PanelWidth / 2.f,
                         OverlayViewConfig::PanelHeight / 2.f });
     m_panel.setPosition({ WindowConfig::Width / 2.f, WindowConfig::Height / 2.f });
@@ -59,28 +59,21 @@ void OverlayView::configureLayout() {
 }
 
 void OverlayView::handleEvent(const sf::Event& event, const ScreenEventContext& context) {
-    if (event.is<sf::Event::MouseMoved>()) {
+    if (Screen::isMouseMoved(event))
         updateSelectionFromMouse(context.mousePosition);
-    }
 
-    if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
-        if (mousePress->button != sf::Mouse::Button::Left)
-            return;
-
+    if (Screen::isLeftMousePressed(event)) {
         const int actionIndex = buttonIndexAt(context.mousePosition);
         if (actionIndex >= 0)
             activateAction(static_cast<std::size_t>(actionIndex));
     }
 
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Left)
-            moveSelectionLeft();
-        else if (key->code == sf::Keyboard::Key::Right)
-            moveSelectionRight();
-        else if (key->code == sf::Keyboard::Key::Enter ||
-                 key->code == sf::Keyboard::Key::Space)
-            activateAction(m_selectedAction);
-    }
+    if (Screen::isKeyPressed(event, sf::Keyboard::Key::Left))
+        moveSelectionLeft();
+    else if (Screen::isKeyPressed(event, sf::Keyboard::Key::Right))
+        moveSelectionRight();
+    else if (Screen::isAnyKeyPressed(event, { sf::Keyboard::Key::Enter, sf::Keyboard::Key::Space }))
+        activateAction(m_selectedAction);
 }
 
 void OverlayView::updateSelectionFromMouse(sf::Vector2f mousePosition) {
@@ -92,12 +85,7 @@ void OverlayView::updateSelectionFromMouse(sf::Vector2f mousePosition) {
 int OverlayView::buttonIndexAt(sf::Vector2f position) const {
     for (std::size_t i = 0; i < m_buttonBounds.size(); ++i) {
         const sf::FloatRect& bounds = m_buttonBounds[i];
-        const bool insideX = position.x >= bounds.position.x &&
-            position.x <= bounds.position.x + bounds.size.x;
-        const bool insideY = position.y >= bounds.position.y &&
-            position.y <= bounds.position.y + bounds.size.y;
-
-        if (insideX && insideY)
+        if (Screen::contains(bounds, position))
             return static_cast<int>(i);
     }
 
@@ -141,18 +129,20 @@ void OverlayView::draw(sf::RenderTarget& target, sf::RenderStates states) const 
 void OverlayView::drawText(sf::RenderTarget& target, sf::RenderStates states) const {
     const sf::Vector2f center{ WindowConfig::Width / 2.f, WindowConfig::Height / 2.f };
 
-    target.draw(makeCenteredText(m_title,
-                                 OverlayViewConfig::TitleTextSize,
-                                 { center.x, center.y + OverlayViewConfig::TitleTopOffset },
-                                 OverlayViewConfig::TitleColor),
+    target.draw(Screen::makeCenteredText(m_font,
+                                         m_title,
+                                         OverlayViewConfig::TitleTextSize,
+                                         { center.x, center.y + OverlayViewConfig::TitleTopOffset },
+                                         OverlayViewConfig::TitleColor),
                 states);
 
     float bodyY = center.y + OverlayViewConfig::BodyTopOffset;
     for (const auto& line : m_bodyLines) {
-        target.draw(makeCenteredText(line,
-                                     OverlayViewConfig::BodyTextSize,
-                                     { center.x, bodyY },
-                                     OverlayViewConfig::BodyColor),
+        target.draw(Screen::makeCenteredText(m_font,
+                                             line,
+                                             OverlayViewConfig::BodyTextSize,
+                                             { center.x, bodyY },
+                                             OverlayViewConfig::BodyColor),
                     states);
         bodyY += OverlayViewConfig::BodyLineSpacing;
     }
@@ -163,18 +153,21 @@ void OverlayView::drawButtons(sf::RenderTarget& target, sf::RenderStates states)
         const sf::FloatRect& bounds = m_buttonBounds[i];
         sf::RectangleShape button(bounds.size);
         button.setPosition(bounds.position);
-        button.setFillColor(buttonColor(m_actions[i], i == m_selectedAction));
-        button.setOutlineColor(OverlayViewConfig::ButtonOutlineColor);
-        button.setOutlineThickness(i == m_selectedAction
+        const float outlineThickness = i == m_selectedAction
             ? OverlayViewConfig::SelectedButtonOutlineThickness
-            : OverlayViewConfig::ButtonOutlineThickness);
+            : OverlayViewConfig::ButtonOutlineThickness;
+        Screen::styleRectangle(button,
+            buttonColor(m_actions[i], i == m_selectedAction),
+            OverlayViewConfig::ButtonOutlineColor,
+            outlineThickness);
 
         target.draw(button, states);
-        target.draw(makeCenteredText(m_actions[i].label,
-                                     OverlayViewConfig::ButtonTextSize,
-                                     { bounds.position.x + bounds.size.x / 2.f,
-                                       bounds.position.y + bounds.size.y / 2.f - 2.f },
-                                     OverlayViewConfig::ButtonTextColor),
+        target.draw(Screen::makeCenteredText(m_font,
+                                             m_actions[i].label,
+                                             OverlayViewConfig::ButtonTextSize,
+                                             { bounds.position.x + bounds.size.x / 2.f,
+                                               bounds.position.y + bounds.size.y / 2.f - 2.f },
+                                             OverlayViewConfig::ButtonTextColor),
                     states);
     }
 }
@@ -197,15 +190,4 @@ sf::Color OverlayView::buttonColor(const OverlayAction& action, bool selected) c
     }
 
     return color;
-}
-
-sf::Text OverlayView::makeCenteredText(const std::string& value,
-                                       unsigned int size,
-                                       sf::Vector2f position,
-                                       sf::Color color) const {
-    sf::Text text(m_font, value, size);
-    text.setFillColor(color);
-    GraphicsUtils::centerOrigin(text);
-    text.setPosition(position);
-    return text;
 }

@@ -9,23 +9,6 @@
 #include <memory>
 #include <vector>
 
-namespace {
-bool contains(const sf::FloatRect& bounds, sf::Vector2f position) {
-    return position.x >= bounds.position.x &&
-        position.x <= bounds.position.x + bounds.size.x &&
-        position.y >= bounds.position.y &&
-        position.y <= bounds.position.y + bounds.size.y;
-}
-
-sf::Vector2f centerOf(const sf::RectangleShape& shape) {
-    const sf::FloatRect bounds = shape.getGlobalBounds();
-    return {
-        bounds.position.x + bounds.size.x / 2.f,
-        bounds.position.y + bounds.size.y / 2.f
-    };
-}
-}
-
 StartScreen::StartScreen(const GameState& gameState)
     : m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::StartBackground))
     , m_settingsButton({ StartScreenConfig::SettingsButtonSize, StartScreenConfig::SettingsButtonSize })
@@ -68,9 +51,10 @@ void StartScreen::configureSettingsButton() {
         StartScreenConfig::SettingsPadding,
         StartScreenConfig::SettingsPadding
         });
-    m_settingsButton.setFillColor(StartScreenConfig::SettingsButtonColor);
-    m_settingsButton.setOutlineColor(StartScreenConfig::ButtonOutlineColor);
-    m_settingsButton.setOutlineThickness(StartScreenConfig::ButtonOutlineThickness);
+    styleRectangle(m_settingsButton,
+        StartScreenConfig::SettingsButtonColor,
+        StartScreenConfig::ButtonOutlineColor,
+        StartScreenConfig::ButtonOutlineThickness);
 
     const sf::Vector2u settingsSize = m_settingsSprite.getTexture().getSize();
     const float settingsScale = StartScreenConfig::SettingsIconSize /
@@ -91,9 +75,10 @@ void StartScreen::configureCoinCounter() {
 }
 
 void StartScreen::configureQuitButtonStyle() {
-    m_quitButton.setFillColor(StartScreenConfig::QuitButtonColor);
-    m_quitButton.setOutlineColor(StartScreenConfig::ButtonOutlineColor);
-    m_quitButton.setOutlineThickness(StartScreenConfig::ButtonOutlineThickness);
+    styleRectangle(m_quitButton,
+        StartScreenConfig::QuitButtonColor,
+        StartScreenConfig::ButtonOutlineColor,
+        StartScreenConfig::ButtonOutlineThickness);
 
     const sf::Vector2u quitSize = m_quitSprite.getTexture().getSize();
     const float quitScale = StartScreenConfig::QuitIconSize /
@@ -119,9 +104,10 @@ void StartScreen::configureMainButtons() {
 }
 
 void StartScreen::configureMenuButton(sf::RectangleShape& button) {
-    button.setFillColor(StartScreenConfig::ButtonColor);
-    button.setOutlineColor(StartScreenConfig::ButtonOutlineColor);
-    button.setOutlineThickness(StartScreenConfig::ButtonOutlineThickness);
+    styleRectangle(button,
+        StartScreenConfig::ButtonColor,
+        StartScreenConfig::ButtonOutlineColor,
+        StartScreenConfig::ButtonOutlineThickness);
 }
 
 void StartScreen::configureButtonText() {
@@ -134,20 +120,14 @@ void StartScreen::configureButtonText() {
 }
 
 void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
-    if (event.is<sf::Event::MouseMoved>()) {
+    if (isMouseMoved(event))
         updateHover(context.mousePosition);
-    }
 
-    if (const auto* mousePress = event.getIf<sf::Event::MouseButtonPressed>()) {
-        if (mousePress->button == sf::Mouse::Button::Left)
-            handleClick(context.mousePosition);
-    }
+    if (isLeftMousePressed(event))
+        handleClick(context.mousePosition);
 
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Enter ||
-            key->code == sf::Keyboard::Key::Space)
-            requestCommand(ScreenCommand::StartGame);
-    }
+    if (isAnyKeyPressed(event, { sf::Keyboard::Key::Enter, sf::Keyboard::Key::Space }))
+        requestCommand(ScreenCommand::StartGame);
 }
 
 void StartScreen::updateHover(sf::Vector2f position) {

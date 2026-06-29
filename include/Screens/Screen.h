@@ -1,8 +1,12 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+
 #include "Enums/LevelResult.h"
 #include "Screens/OverlayView.h"
+
+#include <SFML/Graphics.hpp>
+#include <initializer_list>
 #include <memory>
+#include <string>
 
 /// @brief App-level command requested by a screen.
 ///
@@ -49,6 +53,18 @@ public:
     /// @param context Event data derived by Game.
     void handleEvent(const sf::Event& event, const ScreenEventContext& context);
 
+    /// @brief Returns true when the event is a mouse-move event.
+    static bool isMouseMoved(const sf::Event& event);
+
+    /// @brief Returns true when the event is a left mouse-button press.
+    static bool isLeftMousePressed(const sf::Event& event);
+
+    /// @brief Returns true when the event is a press of the requested key.
+    static bool isKeyPressed(const sf::Event& event, sf::Keyboard::Key key);
+
+    /// @brief Returns true when the event is a press of any requested key.
+    static bool isAnyKeyPressed(const sf::Event& event, std::initializer_list<sf::Keyboard::Key> keys);
+
     /// @brief Updates the screen logic.
     /// @param deltaTime Time elapsed since last frame.
     virtual void update(float /*deltaTime*/) {}
@@ -64,6 +80,38 @@ public:
 
     /// @brief Clears the pending command after Game handles it.
     void clearCommand() { m_command = ScreenCommand::None; }
+
+    /// @brief Checks whether a point lies inside a rectangle.
+    static bool contains(sf::FloatRect bounds, sf::Vector2f position);
+
+    /// @brief Returns the center point of a rectangle.
+    static sf::Vector2f centerOf(sf::FloatRect bounds);
+
+    /// @brief Returns the center point of a rectangle shape's global bounds.
+    static sf::Vector2f centerOf(const sf::RectangleShape& shape);
+
+    /// @brief Scales and centers a sprite inside a rectangle.
+    static void fitSpriteTo(sf::Sprite& sprite, sf::FloatRect bounds);
+
+    /// @brief Applies fill, outline color, and outline thickness to a rectangle.
+    static void styleRectangle(sf::RectangleShape& shape,
+                               sf::Color fill,
+                               sf::Color outline,
+                               float outlineThickness);
+
+    /// @brief Creates styled text at a position.
+    static sf::Text makeText(const sf::Font& font,
+                             const std::string& value,
+                             unsigned int size,
+                             sf::Vector2f position,
+                             sf::Color color);
+
+    /// @brief Creates styled text with its origin centered.
+    static sf::Text makeCenteredText(const sf::Font& font,
+                                     const std::string& value,
+                                     unsigned int size,
+                                     sf::Vector2f position,
+                                     sf::Color color);
 
 protected:
     /// @brief Handles one event after overlay routing.
