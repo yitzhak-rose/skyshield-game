@@ -43,7 +43,7 @@ public:
     void stopPreview();
 
     /// @brief Lowers the background music volume (used while paused or in menus).
-    void duckBackgroundVolume();
+    void reduceBackgroundVolume();
 
     /// @brief Restores the background music volume to normal.
     void restoreBackgroundVolume();

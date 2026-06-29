@@ -159,7 +159,7 @@ void SoundManager::stopPreview() {
     m_resumeBackgroundAfterPreview = false;
 }
 
-void SoundManager::duckBackgroundVolume() {
+void SoundManager::reduceBackgroundVolume() {
     m_manuallyDucked = true;
     m_targetBackgroundVolume = DuckedBackgroundVolume;
 }

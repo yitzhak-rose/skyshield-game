@@ -15,8 +15,8 @@ OverlayView::OverlayView(std::string title,
     : m_title(std::move(title))
     , m_bodyLines(std::move(bodyLines))
     , m_actions(std::move(actions))
-    , m_scrim({ WindowConfig::Width, WindowConfig::Height })
-    , m_panel({ OverlayViewConfig::PanelWidth, OverlayViewConfig::PanelHeight })
+    , m_backgroundDim({ WindowConfig::Width, WindowConfig::Height })
+    , m_dialogPanel({ OverlayViewConfig::PanelWidth, OverlayViewConfig::PanelHeight })
     , m_font(ResourceManager::instance().getFont(Fonts::StencilForce)) {
     validateActions();
     configureLayout();
@@ -31,15 +31,15 @@ void OverlayView::validateActions() const {
 }
 
 void OverlayView::configureLayout() {
-    m_scrim.setFillColor(OverlayViewConfig::ScrimColor);
+    m_backgroundDim.setFillColor(OverlayViewConfig::backgroundDimColor);
 
-    Screen::styleRectangle(m_panel,
+    Screen::styleRectangle(m_dialogPanel,
         OverlayViewConfig::PanelColor,
         OverlayViewConfig::PanelOutlineColor,
         OverlayViewConfig::PanelOutlineThickness);
-    m_panel.setOrigin({ OverlayViewConfig::PanelWidth / 2.f,
+    m_dialogPanel.setOrigin({ OverlayViewConfig::PanelWidth / 2.f,
                         OverlayViewConfig::PanelHeight / 2.f });
-    m_panel.setPosition({ WindowConfig::Width / 2.f, WindowConfig::Height / 2.f });
+    m_dialogPanel.setPosition({ WindowConfig::Width / 2.f, WindowConfig::Height / 2.f });
 
     const float totalButtonWidth =
         static_cast<float>(m_actions.size()) * OverlayViewConfig::ButtonWidth +
@@ -121,8 +121,8 @@ void OverlayView::update(float /*dt*/) {
 
 void OverlayView::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     states.transform *= getTransform();
-    target.draw(m_scrim, states);
-    target.draw(m_panel, states);
+    target.draw(m_backgroundDim, states);
+    target.draw(m_dialogPanel, states);
     drawText(target, states);
     drawButtons(target, states);
 }

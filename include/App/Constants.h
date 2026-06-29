@@ -119,7 +119,7 @@ namespace OverlayViewConfig {
     inline constexpr unsigned int TitleTextSize = 48;
     inline constexpr unsigned int BodyTextSize = 28;
     inline constexpr unsigned int ButtonTextSize = 30;
-    inline const sf::Color ScrimColor(0, 0, 0, 135);
+    inline const sf::Color backgroundDimColor(0, 0, 0, 135);
     inline const sf::Color PanelColor(16, 20, 28, 235);
     inline const sf::Color PanelOutlineColor(244, 232, 178, 210);
     inline const sf::Color TitleColor(244, 232, 178);

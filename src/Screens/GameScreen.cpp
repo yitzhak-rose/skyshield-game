@@ -75,7 +75,7 @@ void GameScreen::showLevelCompletedOverlay() {
 }
 
 void GameScreen::showPauseOverlay() {
-    SoundManager::instance().duckBackgroundVolume();
+    SoundManager::instance().reduceBackgroundVolume();
     showOverlay(std::make_unique<OverlayView>(
         "Paused",
         std::vector<std::string>{ "Game is paused" },

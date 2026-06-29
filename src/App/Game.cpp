@@ -40,6 +40,30 @@ Game::Game()
     showStartScreen();
 }
 
+Game::~Game() {
+    saveUserData();
+}
+
+void Game::run() {
+    m_clock.restart();
+    while (window.isOpen()) {
+        float dt = m_clock.restart().asSeconds();
+        handleEvents();
+        if (!window.isOpen())
+            break;
+
+        handleScreenCommand();
+        if (!window.isOpen())
+            break;
+
+        update(dt);
+        if (!window.isOpen())
+            break;
+
+        render();
+    }
+}
+
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
     const sf::Vector2u textureSize = texture.getSize();
@@ -81,10 +105,6 @@ void Game::showShopScreen() {
         gameData.uncatalogedShopFiles);
 }
 
-Game::~Game() {
-    saveUserData();
-}
-
 void Game::saveUserData() {
     DataManager::instance().setUserData(m_gameState.getUserData());
     DataManager::instance().saveUserData();
@@ -97,26 +117,6 @@ void Game::syncShopSelections() {
         m_gameState.getUserData());
     m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
     initBackground();
-}
-
-void Game::run() {
-    m_clock.restart();
-    while (window.isOpen()) {
-        float dt = m_clock.restart().asSeconds();
-        handleEvents();
-        if (!window.isOpen())
-            break;
-
-        handleScreenCommand();
-        if (!window.isOpen())
-            break;
-
-        update(dt);
-        if (!window.isOpen())
-            break;
-
-        render();
-    }
 }
 
 void Game::handleEvents() {

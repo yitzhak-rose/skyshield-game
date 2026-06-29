@@ -88,8 +88,8 @@ private:
     std::vector<OverlayAction> m_actions;
     std::vector<sf::FloatRect> m_buttonBounds;
 
-    sf::RectangleShape m_scrim;
-    sf::RectangleShape m_panel;
+    sf::RectangleShape m_backgroundDim;
+    sf::RectangleShape m_dialogPanel;
 
     const sf::Font& m_font;
     std::size_t m_selectedAction = 0;

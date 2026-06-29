@@ -103,7 +103,7 @@ void ShopPreview::draw(sf::RenderTarget& target) const {
 
 sf::FloatRect ShopPreview::drawPreviewPanel(sf::RenderTarget& target) const {
     sf::RectangleShape scrim({ WindowConfig::Width, WindowConfig::Height });
-    scrim.setFillColor(OverlayViewConfig::ScrimColor);
+    scrim.setFillColor(OverlayViewConfig::backgroundDimColor);
     target.draw(scrim);
 
     const sf::FloatRect panelBounds(
