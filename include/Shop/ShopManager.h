@@ -6,6 +6,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -15,10 +16,8 @@ public:
     /// @brief Creates shop logic for the current game state and catalog.
     /// @param gameState Mutable player state used for coins, ownership, and selections.
     /// @param catalog Shop assets loaded from game data.
-    /// @param uncatalogedShopFiles Number of media files that are not listed in the catalog.
     ShopManager(GameState& gameState,
-                const std::vector<ShopAsset>& catalog,
-                int uncatalogedShopFiles);
+                const std::vector<ShopAsset>& catalog);
 
     /// @brief Updates which shop tile is currently hovered.
     /// @param position Mouse position in screen coordinates.
@@ -105,6 +104,12 @@ private:
     /// @param position Mouse position in screen coordinates.
     /// @return Matching preview action, or PreviewAction::None.
     PreviewAction previewActionAt(sf::Vector2f position) const;
+
+    /// @brief Counts shop media files present on disk but missing from the catalog.
+    static int countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog);
+
+    /// @brief Identifies generated companion files that should not appear in shop warnings.
+    static bool isHiddenShopCompanionFile(const std::filesystem::path& path);
 
     /// @brief Mutable player state used for coins, ownership, and selected assets.
     GameState& m_gameState;

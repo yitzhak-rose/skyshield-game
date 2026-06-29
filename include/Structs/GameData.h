@@ -9,5 +9,4 @@
 struct GameData {
     std::vector<LevelConfig> stages;
     std::vector<ShopAsset> shopAssets;
-    int uncatalogedShopFiles = 0;
 };

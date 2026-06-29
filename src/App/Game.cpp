@@ -14,9 +14,6 @@
 #include <string>
 #include <vector>
 
-const std::string GameDataPath = "data/gameData.json";
-const std::string UserDataPath = "userData.json";
-
 #pragma region Public
 Game::Game()
     : window(sf::VideoMode(AppUtils::initialWindowSize()), "SkyShield")
@@ -78,12 +75,11 @@ void Game::initBackground() {
 }
 
 void Game::loadSavedData() {
-    DataManager::instance().configure(GameDataPath, UserDataPath);
     DataManager::instance().load();
-    m_gameState.setUserData(DataManager::instance().userData());
+    m_gameState.setUserData(DataManager::instance().getUserData());
     syncShopSelections();
     m_lastSavedUserData = m_gameState.getUserData();
-    DataManager::instance().setUserData(m_lastSavedUserData);
+    DataManager::instance().updateUserData(m_lastSavedUserData);
     DataManager::instance().saveUserData();
 }
 
@@ -97,27 +93,24 @@ void Game::showGameScreen() {
     m_activeScreen = ActiveScreen::Game;
     syncShopSelections();
     SoundManager::instance().startBackground();
-    m_screen = std::make_unique<GameScreen>(m_gameState, DataManager::instance().gameData().stages);
+    m_screen = std::make_unique<GameScreen>(m_gameState, DataManager::instance().getGameData().stages);
 }
 
 void Game::showShopScreen() {
-    const GameData& gameData = DataManager::instance().gameData();
+    const GameData& gameData = DataManager::instance().getGameData();
     m_activeScreen = ActiveScreen::Shop;
-    m_screen = std::make_unique<ShopScreen>(
-        m_gameState,
-        gameData.shopAssets,
-        gameData.uncatalogedShopFiles);
+    m_screen = std::make_unique<ShopScreen>(m_gameState, gameData.shopAssets);
 }
 
 void Game::saveUserData() {
-    DataManager::instance().setUserData(m_gameState.getUserData());
+    DataManager::instance().updateUserData(m_gameState.getUserData());
     DataManager::instance().saveUserData();
     m_lastSavedUserData = m_gameState.getUserData();
 }
 
 void Game::syncShopSelections() {
     ResourceManager::instance().applyShopSelections(
-        DataManager::instance().gameData().shopAssets,
+        DataManager::instance().getGameData().shopAssets,
         m_gameState.getUserData());
     m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
     initBackground();
@@ -243,7 +236,6 @@ void Game::handleFatalEvents() {
 
 #pragma region Updating
 void Game::update(float dt) {
-    refreshDataIfChanged();
     m_screen->update(dt);
     saveUserDataIfChanged();
     SoundManager::instance().update(dt);
@@ -255,18 +247,6 @@ void Game::saveUserDataIfChanged() {
         return;
 
     saveUserData();
-}
-
-void Game::refreshDataIfChanged() {
-    if (!DataManager::instance().refreshIfChanged())
-        return;
-
-    m_gameState.setUserData(DataManager::instance().userData());
-    m_lastSavedUserData = m_gameState.getUserData();
-    syncShopSelections();
-
-    if (m_activeScreen == ActiveScreen::Shop)
-        showShopScreen();
 }
 #pragma endregion
 

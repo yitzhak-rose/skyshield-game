@@ -7,12 +7,10 @@
 #include <sstream>
 #include <string>
 
-ShopScreen::ShopScreen(GameState& gameState,
-                       const std::vector<ShopAsset>& catalog,
-                       int uncatalogedShopFiles)
+ShopScreen::ShopScreen(GameState& gameState, const std::vector<ShopAsset>& catalog)
     : m_gameState(gameState)
     , m_catalog(catalog)
-    , m_shopManager(gameState, catalog, uncatalogedShopFiles)
+    , m_shopManager(gameState, catalog)
     , m_background({ WindowConfig::Width, WindowConfig::Height })
     , m_font(ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_preview(gameState, m_shopManager, m_textures, m_fonts, m_font) {

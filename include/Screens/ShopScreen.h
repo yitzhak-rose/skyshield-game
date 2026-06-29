@@ -14,9 +14,7 @@ class ShopScreen : public Screen {
 public:
 #pragma region Public
     /// @brief Creates the visual shop screen around a ShopManager.
-    ShopScreen(GameState& gameState,
-               const std::vector<ShopAsset>& catalog,
-               int uncatalogedShopFiles);
+    ShopScreen(GameState& gameState, const std::vector<ShopAsset>& catalog);
 
     /// @brief Handles shop input and delegates shop actions to ShopManager.
     void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;

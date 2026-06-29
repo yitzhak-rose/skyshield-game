@@ -8,13 +8,21 @@
 #include "Utilities/Utils.h"
 
 #include <array>
+#include <filesystem>
+#include <set>
+
+namespace {
+const std::array<std::filesystem::path, 2> ShopAssetFolders = {
+    "images/shop",
+    "sounds/shop"
+};
+}
 
 ShopManager::ShopManager(GameState& gameState,
-                         const std::vector<ShopAsset>& catalog,
-                         int uncatalogedShopFiles)
+                         const std::vector<ShopAsset>& catalog)
     : m_gameState(gameState)
     , m_catalog(catalog)
-    , m_uncatalogedShopFiles(uncatalogedShopFiles) {
+    , m_uncatalogedShopFiles(countUncatalogedShopFiles(catalog)) {
 }
 
 void ShopManager::updateHover(sf::Vector2f position) {
@@ -81,7 +89,7 @@ void ShopManager::activatePreviewAction(PreviewAction action) {
 }
 
 void ShopManager::saveUserData() const {
-    DataManager::instance().setUserData(m_gameState.getUserData());
+    DataManager::instance().updateUserData(m_gameState.getUserData());
     DataManager::instance().saveUserData();
 }
 
@@ -95,6 +103,40 @@ bool ShopManager::isFontAsset(const ShopAsset& asset) {
 
 bool ShopManager::isImageAsset(const ShopAsset& asset) {
     return !isMusicAsset(asset) && !isFontAsset(asset);
+}
+
+int ShopManager::countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
+    std::set<std::string> catalogFiles;
+    for (const ShopAsset& asset : catalog) {
+        catalogFiles.insert(asset.file);
+    }
+
+    int count = 0;
+    for (const std::filesystem::path& folder : ShopAssetFolders) {
+        if (!std::filesystem::exists(folder)) {
+            continue;
+        }
+
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(folder)) {
+            if (!entry.is_regular_file()) {
+                continue;
+            }
+            if (isHiddenShopCompanionFile(entry.path())) {
+                continue;
+            }
+
+            const std::string path = entry.path().generic_string();
+            if (!catalogFiles.contains(path)) {
+                ++count;
+            }
+        }
+    }
+
+    return count;
+}
+
+bool ShopManager::isHiddenShopCompanionFile(const std::filesystem::path& path) {
+    return path.filename().generic_string().starts_with("start-background");
 }
 
 std::vector<const ShopAsset*> ShopManager::visibleAssets() const {

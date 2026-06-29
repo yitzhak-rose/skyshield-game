@@ -1,275 +1,155 @@
 #include "Resources/DataManager.h"
-#include "Utilities/JsonUtils.h"
+
+#include "Shop/ShopData.h"
+#include "external/json.hpp"
 
 #include <algorithm>
-#include <array>
 #include <filesystem>
 #include <fstream>
-#include <limits>
-#include <map>
 #include <set>
 #include <stdexcept>
 #include <string>
-#include <utility>
 
-namespace DataManagerParsing {
+using Json = nlohmann::json;
 
-#pragma region Parsing
-std::string requireTitle(const JsonUtils::Json& object, const std::string& context) {
-    const std::string title = JsonUtils::optionalString(object, "title");
-    if (!title.empty())
-        return title;
+void from_json(const Json& json, LevelConfig& level);
+void from_json(const Json& json, ShopAsset& asset);
+void from_json(const Json& json, UserData& userData);
+void to_json(Json& json, const UserData& userData);
 
-    return JsonUtils::requireString(object, "name", context);
-}
+namespace {
+const std::filesystem::path GameDataPath = "data/gameData.json";
+const std::filesystem::path UserDataPath = "userData.json";
 
-LevelConfig parseLevel(const JsonUtils::Json& value, std::size_t stageIndex) {
-    if (!value.is_object()) {
-        throw std::runtime_error("DataManager: stage "
-            + std::to_string(stageIndex + 1) + " must be an object");
+Json fetchJson(const std::filesystem::path& path) {
+    std::ifstream file(path);
+    if (!file) {
+        throw std::runtime_error("DataManager: cannot open JSON file: " + path.generic_string());
     }
 
-    const std::string context = "stage " + std::to_string(stageIndex + 1);
-    return {
-        JsonUtils::requireInt(value, "enemyCount", context),
-        JsonUtils::requireFloat(value, "tankChance", context),
-        JsonUtils::requireFloat(value, "spawnInterval", context),
-        JsonUtils::requireFloat(value, "batteryDrain", context),
-        JsonUtils::requireInt(value, "startAmmo", context)
-    };
-}
-
-ShopAsset parseShopAsset(const JsonUtils::Json& value, ShopAssetType type) {
-    if (!value.is_object())
-        throw std::runtime_error("DataManager: shop asset must be an object");
-
-    const int id = JsonUtils::requireInt(value, "id", "shop asset");
-    if (id <= 0)
-        throw std::runtime_error("DataManager: shop asset id must be positive");
-
-    ShopAsset asset;
-    asset.id = id;
-    asset.type = type;
-    asset.title = requireTitle(value, "shop asset " + std::to_string(id));
-    asset.price = JsonUtils::requireInt(value, "price", "shop asset " + std::to_string(id));
-    asset.file = JsonUtils::requireString(value, "file", "shop asset " + std::to_string(id));
-    asset.extra = JsonUtils::requireInt(value, "extra", "shop asset " + std::to_string(id));
-    asset.isDefault = JsonUtils::optionalBool(value, "default", false);
-    asset.description = JsonUtils::optionalString(value, "description");
-
-    if (asset.price < 0)
-        throw std::runtime_error("DataManager: shop asset price cannot be negative");
-    if (asset.extra < 0)
-        throw std::runtime_error("DataManager: shop asset extra cannot be negative");
-    if (!std::filesystem::exists(asset.file))
-        throw std::runtime_error("DataManager: missing shop asset file: " + asset.file);
-
-    return asset;
-}
-
-std::vector<LevelConfig> parseLevels(const JsonUtils::Json& root, const std::string& context) {
-    const JsonUtils::Json& stagesValue = JsonUtils::requireField(root, "stages", context);
-    if (!stagesValue.is_array())
-        throw std::runtime_error("DataManager: \"stages\" must be an array");
-
-    std::vector<LevelConfig> stages;
-    stages.reserve(stagesValue.size());
-    for (std::size_t index = 0; index < stagesValue.size(); ++index) {
-        stages.push_back(parseLevel(stagesValue[index], index));
+    try {
+        return Json::parse(file);
+    } catch (const Json::parse_error& error) {
+        throw std::runtime_error("DataManager: JSON parse error in "
+            + path.generic_string() + ": " + error.what());
     }
-
-    return stages;
 }
 
-std::vector<ShopAsset> parseShopAssets(const JsonUtils::Json& root) {
-    const JsonUtils::Json& assetsValue = JsonUtils::requireField(root, "shopAssets", "game data root");
-    if (!assetsValue.is_object())
-        throw std::runtime_error("DataManager: \"shopAssets\" must be an object");
+std::vector<LevelConfig> parseLevels(const Json& root) {
+    return root.at("stages").get<std::vector<LevelConfig>>();
+}
 
+std::vector<ShopAsset> parseShopAssets(const Json& root) {
     std::vector<ShopAsset> assets;
-    std::set<int> ids;
-    std::map<ShopAssetType, int> defaults;
+    const Json&            assetsValue = root.at("shopAssets");
 
     for (ShopAssetType type : allShopAssetTypes()) {
-        const std::string key = shopAssetTypeToKey(type);
-        const JsonUtils::Json& group = JsonUtils::requireField(assetsValue, key, "shopAssets");
-        if (!group.is_array())
-            throw std::runtime_error("DataManager: shopAssets." + key + " must be an array");
-
-        for (const JsonUtils::Json& value : group) {
-            ShopAsset asset = parseShopAsset(value, type);
-            if (!ids.insert(asset.id).second)
-                throw std::runtime_error("DataManager: duplicate shop asset id: " + std::to_string(asset.id));
-
-            if (asset.isDefault) {
-                if (asset.price != 0)
-                    throw std::runtime_error("DataManager: default shop assets must be free");
-                ++defaults[type];
-            }
-
-            assets.push_back(std::move(asset));
-        }
-    }
-
-    for (ShopAssetType type : allShopAssetTypes()) {
-        if (defaults[type] != 1) {
-            throw std::runtime_error("DataManager: expected one default shop asset for "
-                + shopAssetTypeToKey(type));
+        const Json& group = assetsValue.at(shopAssetTypeToKey(type));
+        for (const Json& value : group) {
+            ShopAsset asset = value.get<ShopAsset>();
+            asset.type      = type;
+            assets.push_back(asset);
         }
     }
 
     return assets;
 }
 
-std::set<int> parseIdArray(const JsonUtils::Json& object, const std::string& key) {
+std::set<int> parseIdArray(const Json& object, const std::string& key) {
     std::set<int> ids;
-    const auto found = object.find(key);
-    if (found == object.end() || !found->is_array())
+    const auto    found = object.find(key);
+    if (found == object.end() || !found->is_array()) {
         return ids;
+    }
 
-    for (const JsonUtils::Json& value : *found) {
-        if (!value.is_number_integer())
+    for (const Json& value : *found) {
+        if (!value.is_number_integer()) {
             continue;
+        }
 
-        const long long id = value.get<long long>();
-        if (id > 0 && id <= static_cast<long long>(std::numeric_limits<int>::max()))
-            ids.insert(static_cast<int>(id));
+        ids.insert(value.get<int>());
     }
 
     return ids;
 }
 
-JsonUtils::Json userDataToJson(const UserData& userData) {
-    JsonUtils::Json ownedAssets = JsonUtils::Json::object();
-    JsonUtils::Json selectedAssets = JsonUtils::Json::object();
+const ShopAsset* findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type) {
+    for (const ShopAsset& asset : catalog) {
+        if (asset.type == type && asset.isDefault) {
+            return &asset;
+        }
+    }
+
+    return nullptr;
+}
+}
+
+void from_json(const Json& json, LevelConfig& level) {
+    level.enemyCount    = json.value("enemyCount", 0);
+    level.tankChance    = json.value("tankChance", 0.f);
+    level.spawnInterval = json.value("spawnInterval", 0.f);
+    level.batteryDrain  = json.value("batteryDrain", 0.f);
+    level.startAmmo     = json.value("startAmmo", 0);
+}
+
+void from_json(const Json& json, ShopAsset& asset) {
+    const std::string name = json.value("name", "");
+    asset.id              = json.value("id", 0);
+    asset.title           = json.value("title", name);
+    asset.price           = json.value("price", 0);
+    asset.file            = json.value("file", "");
+    asset.extra           = json.value("extra", 0);
+    asset.isDefault       = json.value("default", false);
+    asset.description     = json.value("description", "");
+}
+
+void from_json(const Json& json, UserData& userData) {
+    if (!json.is_object()) {
+        return;
+    }
+
+    userData.coins = json.value("coins", 0);
+
+    const auto owned = json.find("ownedAssets");
+    if (owned != json.end() && owned->is_object()) {
+        for (ShopAssetType type : allShopAssetTypes()) {
+            userData.ownedAssets[type] = parseIdArray(*owned, shopAssetTypeToKey(type));
+        }
+    }
+
+    const auto selected = json.find("selectedAssets");
+    if (selected != json.end() && selected->is_object()) {
+        for (ShopAssetType type : allShopAssetTypes()) {
+            const auto found = selected->find(shopAssetTypeToKey(type));
+            if (found != selected->end() && found->is_number_integer()) {
+                userData.selectedAssets[type] = found->get<int>();
+            }
+        }
+    }
+}
+
+void to_json(Json& json, const UserData& userData) {
+    Json ownedAssets    = Json::object();
+    Json selectedAssets = Json::object();
 
     for (ShopAssetType type : allShopAssetTypes()) {
         const std::string key = shopAssetTypeToKey(type);
 
         const auto owned = userData.ownedAssets.find(type);
         ownedAssets[key] = owned == userData.ownedAssets.end()
-            ? JsonUtils::Json::array()
-            : JsonUtils::Json(owned->second);
+            ? Json::array()
+            : Json(owned->second);
 
         const auto selected = userData.selectedAssets.find(type);
         selectedAssets[key] = selected == userData.selectedAssets.end() ? 0 : selected->second;
     }
 
-    return {
+    json = {
         { "coins", std::max(0, userData.coins) },
         { "ownedAssets", ownedAssets },
         { "selectedAssets", selectedAssets }
     };
 }
-
-UserData parseUserData(const JsonUtils::Json& root) {
-    UserData userData;
-    if (!root.is_object())
-        return userData;
-
-    const auto coins = root.find("coins");
-    if (coins != root.end() && coins->is_number_integer()) {
-        const long long value = coins->get<long long>();
-        if (value >= 0 && value <= static_cast<long long>(std::numeric_limits<int>::max()))
-            userData.coins = static_cast<int>(value);
-    }
-
-    const auto owned = root.find("ownedAssets");
-    if (owned != root.end() && owned->is_object()) {
-        for (ShopAssetType type : allShopAssetTypes())
-            userData.ownedAssets[type] = parseIdArray(*owned, shopAssetTypeToKey(type));
-    }
-
-    const auto selected = root.find("selectedAssets");
-    if (selected != root.end() && selected->is_object()) {
-        for (ShopAssetType type : allShopAssetTypes()) {
-            const auto found = selected->find(shopAssetTypeToKey(type));
-            if (found == selected->end() || !found->is_number_integer())
-                continue;
-
-            const long long id = found->get<long long>();
-            if (id > 0 && id <= static_cast<long long>(std::numeric_limits<int>::max()))
-                userData.selectedAssets[type] = static_cast<int>(id);
-        }
-    }
-
-    return userData;
-}
-#pragma endregion
-
-}
-
-#pragma region Validation
-bool DataManager::isHiddenShopCompanionFile(const std::filesystem::path& path) {
-    return path.filename().generic_string().starts_with("start-background");
-}
-
-int DataManager::countUncatalogedShopFiles(const std::vector<ShopAsset>& catalog) {
-    std::set<std::string> catalogFiles;
-    for (const ShopAsset& asset : catalog)
-        catalogFiles.insert(asset.file);
-
-    int count = 0;
-    const std::array<std::string, 2> folders = { "images/shop", "sounds/shop" };
-    for (const std::string& folder : folders) {
-        if (!std::filesystem::exists(folder))
-            continue;
-
-        for (const auto& entry : std::filesystem::recursive_directory_iterator(folder)) {
-            if (!entry.is_regular_file())
-                continue;
-            if (isHiddenShopCompanionFile(entry.path()))
-                continue;
-
-            const std::string path = entry.path().generic_string();
-            if (!catalogFiles.contains(path))
-                ++count;
-        }
-    }
-
-    return count;
-}
-
-const ShopAsset* DataManager::findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type) {
-    for (const ShopAsset& asset : catalog) {
-        if (asset.type == type && asset.isDefault)
-            return &asset;
-    }
-
-    return nullptr;
-}
-
-void DataManager::normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog) {
-    userData.coins = std::max(0, userData.coins);
-
-    for (ShopAssetType type : allShopAssetTypes()) {
-        const ShopAsset* defaultAsset = findDefaultAsset(catalog, type);
-        if (!defaultAsset)
-            continue;
-
-        std::set<int> validIds;
-        for (const ShopAsset& asset : catalog) {
-            if (asset.type == type)
-                validIds.insert(asset.id);
-        }
-
-        std::erase_if(userData.ownedAssets[type], [&validIds](int id) {
-            return !validIds.contains(id);
-        });
-
-        userData.ownedAssets[type].insert(defaultAsset->id);
-
-        const int selectedId = userData.selectedAssets.contains(type)
-            ? userData.selectedAssets[type]
-            : defaultAsset->id;
-
-        if (validIds.contains(selectedId) && userData.ownedAssets[type].contains(selectedId))
-            userData.selectedAssets[type] = selectedId;
-        else
-            userData.selectedAssets[type] = defaultAsset->id;
-    }
-}
-#pragma endregion
 
 #pragma region Public
 DataManager& DataManager::instance() {
@@ -277,172 +157,89 @@ DataManager& DataManager::instance() {
     return manager;
 }
 
-void DataManager::configure(std::string gameDataPath, std::string userDataPath) {
-    m_gameDataPath = std::move(gameDataPath);
-    m_userDataPath = std::move(userDataPath);
-    m_hasGameDataWriteTime = false;
-    m_hasUserDataWriteTime = false;
-}
-
 void DataManager::load() {
-    m_gameData = loadGameData(m_gameDataPath);
-    m_userData = loadUserData(m_userDataPath, m_gameData.shopAssets);
-    rememberFileTime(m_gameDataPath, m_gameDataWriteTime, m_hasGameDataWriteTime);
-    rememberFileTime(m_userDataPath, m_userDataWriteTime, m_hasUserDataWriteTime);
+    m_gameData = fetchGameData();
+    m_userData = fetchUserData();
 }
 
-bool DataManager::refreshIfChanged() {
-    bool changed = false;
-
-    if (hasFileChanged(m_gameDataPath, m_gameDataWriteTime, m_hasGameDataWriteTime)) {
-        m_gameData = loadGameData(m_gameDataPath);
-        m_userData = loadUserData(m_userDataPath, m_gameData.shopAssets);
-        rememberFileTime(m_gameDataPath, m_gameDataWriteTime, m_hasGameDataWriteTime);
-        rememberFileTime(m_userDataPath, m_userDataWriteTime, m_hasUserDataWriteTime);
-        changed = true;
-    } else if (hasFileChanged(m_userDataPath, m_userDataWriteTime, m_hasUserDataWriteTime)) {
-        m_userData = loadUserData(m_userDataPath, m_gameData.shopAssets);
-        rememberFileTime(m_userDataPath, m_userDataWriteTime, m_hasUserDataWriteTime);
-        changed = true;
-    }
-
-    return changed;
-}
-
-void DataManager::setUserData(const UserData& userData) {
-    m_userData = userData;
-    normalizeUserData(m_userData, m_gameData.shopAssets);
+void DataManager::updateUserData(const UserData& userData) {
+    m_userData = normalizeUserData(userData);
 }
 
 void DataManager::saveUserData() {
-    saveUserData(m_userDataPath, m_userData);
-    rememberFileTime(m_userDataPath, m_userDataWriteTime, m_hasUserDataWriteTime);
+    writeUserData(m_userData);
 }
+#pragma endregion
 
-std::vector<LevelConfig> DataManager::loadLevels(const std::string& path) const {
-    const JsonUtils::Json root = JsonUtils::readJsonFile(path);
-    std::vector<LevelConfig> stages = DataManagerParsing::parseLevels(root, "level JSON root");
-    for (std::size_t index = 0; index < stages.size(); ++index)
-        validateLevel(stages[index], index);
-
-    if (stages.empty())
-        throw std::runtime_error("DataManager: no valid stages found in: " + path);
-
-    return stages;
-}
-
-GameData DataManager::loadGameData(const std::string& path) const {
-    const JsonUtils::Json root = JsonUtils::readJsonFile(path);
-    if (!root.is_object())
-        throw std::runtime_error("DataManager: game data JSON root must be an object");
+#pragma region Fetching
+GameData DataManager::fetchGameData() const {
+    const Json root = fetchJson(GameDataPath);
+    if (!root.is_object()) {
+        throw std::runtime_error("DataManager: game data root must be an object");
+    }
 
     GameData gameData;
-    gameData.stages = DataManagerParsing::parseLevels(root, "game data root");
-    for (std::size_t index = 0; index < gameData.stages.size(); ++index)
-        validateLevel(gameData.stages[index], index);
-
-    if (gameData.stages.empty())
-        throw std::runtime_error("DataManager: no valid stages found in: " + path);
-
-    gameData.shopAssets = DataManagerParsing::parseShopAssets(root);
-    gameData.uncatalogedShopFiles = countUncatalogedShopFiles(gameData.shopAssets);
+    gameData.stages     = parseLevels(root);
+    gameData.shopAssets = parseShopAssets(root);
 
     return gameData;
 }
 
-UserData DataManager::loadUserData(const std::string& path, const std::vector<ShopAsset>& catalog) const {
+UserData DataManager::fetchUserData() const {
     UserData userData;
 
     try {
-        userData = DataManagerParsing::parseUserData(JsonUtils::readJsonFile(path));
+        userData = fetchJson(UserDataPath).get<UserData>();
     } catch (const std::exception&) {
         userData = UserData{};
     }
 
-    normalizeUserData(userData, catalog);
-    return userData;
+    return normalizeUserData(userData);
 }
 
-void DataManager::saveUserData(const std::string& path, const UserData& userData) {
-    std::ofstream file(path);
-    if (!file)
-        return;
+UserData DataManager::normalizeUserData(const UserData& userData) const {
+    UserData normalized = userData;
+    normalized.coins    = std::max(0, normalized.coins);
 
-    file << DataManagerParsing::userDataToJson(userData).dump(2) << '\n';
-}
+    for (ShopAssetType type : allShopAssetTypes()) {
+        const ShopAsset* defaultAsset = findDefaultAsset(m_gameData.shopAssets, type);
+        if (!defaultAsset) {
+            continue;
+        }
 
-int DataManager::loadCoins(const std::string& path) const {
-    try {
-        const JsonUtils::Json root = JsonUtils::readJsonFile(path);
-        const auto coins = root.find("coins");
-        if (coins == root.end() || !coins->is_number_integer())
-            return 0;
+        std::set<int> validIds;
+        for (const ShopAsset& asset : m_gameData.shopAssets) {
+            if (asset.type == type) {
+                validIds.insert(asset.id);
+            }
+        }
 
-        const long long value = coins->get<long long>();
-        if (value < 0)
-            return 0;
-        if (value > static_cast<long long>(std::numeric_limits<int>::max()))
-            return std::numeric_limits<int>::max();
+        std::erase_if(normalized.ownedAssets[type], [&validIds](int id) {
+            return !validIds.contains(id);
+        });
 
-        return static_cast<int>(value);
-    } catch (const std::exception&) {
-        return 0;
-    }
-}
+        normalized.ownedAssets[type].insert(defaultAsset->id);
 
-void DataManager::saveCoins(const std::string& path, int coins) {
-    std::ofstream file(path);
-    if (!file)
-        return;
+        const int selectedId = normalized.selectedAssets.contains(type)
+            ? normalized.selectedAssets[type]
+            : defaultAsset->id;
 
-    file << JsonUtils::Json{ { "coins", std::max(0, coins) } }.dump(2) << '\n';
-}
-#pragma endregion
-
-#pragma region Validation
-void DataManager::validateLevel(const LevelConfig& config, std::size_t stageIndex) {
-    const auto fail = [stageIndex](const std::string& why) {
-        throw std::runtime_error("DataManager: stage "
-            + std::to_string(stageIndex + 1) + " - " + why);
-    };
-
-    if (config.enemyCount < 1)
-        fail("enemyCount must be >= 1");
-    if (config.tankChance < 0.f || config.tankChance > 1.f)
-        fail("tankChance must be in [0, 1]");
-    if (config.spawnInterval <= 0.f)
-        fail("spawnInterval must be > 0");
-    if (config.batteryDrain < 0.f)
-        fail("batteryDrain must be >= 0");
-    if (config.startAmmo < 1)
-        fail("startAmmo must be >= 1");
-}
-#pragma endregion
-
-#pragma region Utilities
-std::filesystem::file_time_type DataManager::fileTime(const std::string& path) const {
-    std::error_code error;
-    const auto time = std::filesystem::last_write_time(path, error);
-    return error ? std::filesystem::file_time_type{} : time;
-}
-
-bool DataManager::hasFileChanged(const std::string& path,
-                                 std::filesystem::file_time_type& knownTime,
-                                 bool& hasKnownTime) const {
-    const std::filesystem::file_time_type currentTime = fileTime(path);
-    if (!hasKnownTime) {
-        knownTime = currentTime;
-        hasKnownTime = true;
-        return false;
+        if (validIds.contains(selectedId) && normalized.ownedAssets[type].contains(selectedId)) {
+            normalized.selectedAssets[type] = selectedId;
+        } else {
+            normalized.selectedAssets[type] = defaultAsset->id;
+        }
     }
 
-    return currentTime != knownTime;
+    return normalized;
 }
 
-void DataManager::rememberFileTime(const std::string& path,
-                                   std::filesystem::file_time_type& knownTime,
-                                   bool& hasKnownTime) const {
-    knownTime = fileTime(path);
-    hasKnownTime = true;
+void DataManager::writeUserData(const UserData& userData) const {
+    std::ofstream file(UserDataPath);
+    if (!file) {
+        return;
+    }
+
+    file << Json(userData).dump(2) << '\n';
 }
 #pragma endregion

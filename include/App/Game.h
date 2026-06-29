@@ -64,9 +64,6 @@ private:
     /// @brief Saves user data when coins or shop selections have changed since the last write.
     void saveUserDataIfChanged();
 
-    /// @brief Reloads JSON-backed data if its files changed on disk.
-    void refreshDataIfChanged();
-
     void render();
 
     /// @brief Draws the last known screen state and fatal overlay.
