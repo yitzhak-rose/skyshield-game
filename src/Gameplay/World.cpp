@@ -1,8 +1,7 @@
 #include "Gameplay/World.h"
-//#include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/CollisionHandling.h"
 #include "Resources/ResourceManager.h"
-#include "Gameplay/Factory.h" 
+#include "Gameplay/Factory.h"
 #include "Gameplay/Constants.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
@@ -13,8 +12,7 @@ World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     : m_config(config)
     , m_gameState(gameState)
     , m_objects()
-    , m_enemiesToSpawn(config.enemyCount)
-{
+    , m_enemiesToSpawn(config.enemyCount) {
     m_objects.push_back(Factory::create(GameObjects::CommandCar,
         sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState));
     m_objects.push_back(Factory::create(GameObjects::Drone,
@@ -51,10 +49,13 @@ void World::spawnEnemy() {
     const GameObject* player = nullptr;
     const GameObject* target = nullptr;
     for (const auto& obj : m_objects) {
-        if (!player && obj->isPlayer()) player = obj.get();
-        if (!target && obj->isTarget()) target = obj.get();
+        if (!player && obj->isPlayer())
+            player = obj.get();
+        if (!target && obj->isTarget())
+            target = obj.get();
     }
-    if (!player || !target)  return;
+    if (!player || !target)
+        return;
 
     bool fromLeft = (Utils::randomFloat(0.f, 1.f) < 0.5f);
     float x = fromLeft ? 0.f : WindowConfig::Width;
@@ -99,21 +100,29 @@ void World::processDead() {
 }
 
 void World::checkResult() {
-    if (m_gameState.getVehicleArmorPercent() <= 0.f ||
-        m_gameState.getBatteryPercent() <= 0.f ||
-        (m_gameState.getBombsAvailable() == 0 &&
-            m_gameState.getActiveBombs() == 0 &&
-            m_gameState.getEnemiesRemaining() > 0)) {
+    if (isLossConditionMet()) {
         m_gameState.setLevelResult(LevelResult::Lost);
         return;
     }
 
-    if (m_gameState.getEnemiesRemaining() == 0)
+    if (isWinConditionMet())
         m_gameState.setLevelResult(LevelResult::Won);
+}
+
+bool World::isLossConditionMet() const {
+    const bool noBombsLeft = m_gameState.getBombsAvailable() == 0 &&
+        m_gameState.getActiveBombs() == 0 &&
+        m_gameState.getEnemiesRemaining() > 0;
+    return m_gameState.getVehicleArmorPercent() <= 0.f ||
+        m_gameState.getBatteryPercent() <= 0.f ||
+        noBombsLeft;
+}
+
+bool World::isWinConditionMet() const {
+    return m_gameState.getEnemiesRemaining() == 0;
 }
 
 void World::draw(sf::RenderWindow& target) const {
     for (const auto& object : m_objects)
         object->draw(target);
 }
-

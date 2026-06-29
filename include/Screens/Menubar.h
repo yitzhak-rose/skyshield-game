@@ -15,6 +15,9 @@ public:
     /// @brief Advances time-based content (the coin's spin and count pop).
     void update(float dt);
 
+    /// @brief Returns the clickable pause button bounds in screen coordinates.
+    sf::FloatRect pauseButtonBounds() const;
+
 protected:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
@@ -52,4 +55,7 @@ private:
     sf::IntRect batteryFrameRect() const;
     void drawLevelIndicator(sf::RenderTarget& target, sf::RenderStates states) const;
     sf::Text makeLevelText() const;
+    void drawPauseButton(sf::RenderTarget& target, sf::RenderStates states) const;
+    sf::RectangleShape makePauseButtonShape() const;
+    void drawPauseIcon(sf::RenderTarget& target, sf::RenderStates states) const;
 };

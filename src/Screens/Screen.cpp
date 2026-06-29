@@ -72,13 +72,6 @@ void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
     m_overlay = std::move(overlay);
 }
 
-bool Screen::contains(sf::FloatRect bounds, sf::Vector2f position) {
-    return position.x >= bounds.position.x &&
-        position.x <= bounds.position.x + bounds.size.x &&
-        position.y >= bounds.position.y &&
-        position.y <= bounds.position.y + bounds.size.y;
-}
-
 sf::Vector2f Screen::centerOf(sf::FloatRect bounds) {
     return {
         bounds.position.x + bounds.size.x / 2.f,

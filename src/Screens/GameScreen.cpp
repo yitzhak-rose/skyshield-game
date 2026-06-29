@@ -1,6 +1,7 @@
 #include "Screens/GameScreen.h"
 #include "Resources/SoundManager.h"
 #include "Gameplay/Constants.h"
+#include "Utilities/Utils.h"
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,9 +17,16 @@ void GameScreen::update(float deltaTime) {
     if (updateOverlay(deltaTime))
         return;
 
+    updateRunningLevel(deltaTime);
+    handleLevelResult();
+}
+
+void GameScreen::updateRunningLevel(float deltaTime) {
     m_world->update(deltaTime);
     m_menuBar->update(deltaTime);
+}
 
+void GameScreen::handleLevelResult() {
     if (m_world->getResult() == LevelResult::Lost)
         showGameOverOverlay();
 
@@ -82,6 +90,21 @@ void GameScreen::showPauseOverlay() {
     }));
 }
 
+bool GameScreen::handlePauseInput(const sf::Event& event, const ScreenEventContext& context) {
+    if (isKeyPressed(event, sf::Keyboard::Key::Escape) || isPauseClick(event, context)) {
+        showPauseOverlay();
+        return true;
+    }
+
+    return false;
+}
+
+bool GameScreen::isPauseClick(const sf::Event& event, const ScreenEventContext& context) const {
+    return isLeftMousePressed(event) &&
+        m_menuBar &&
+        GeometryUtils::contains(m_menuBar->pauseButtonBounds(), context.mousePosition);
+}
+
 std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
     return {
         "Enemies defeated: " + std::to_string(m_gameState.getEnemiesDefeated()),
@@ -102,13 +125,9 @@ void GameScreen::startCurrentStage() {
     m_completionOverlayShown = false;
 }
 
-void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& /*context*/) {
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Escape) {
-            showPauseOverlay();
-            return;
-        }
-    }
+void GameScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (handlePauseInput(event, context))
+        return;
 }
 
 void GameScreen::draw(sf::RenderWindow& target) {
@@ -120,4 +139,3 @@ void GameScreen::draw(sf::RenderWindow& target) {
 void GameScreen::restartLevel() {
     startCurrentStage();
 }
-

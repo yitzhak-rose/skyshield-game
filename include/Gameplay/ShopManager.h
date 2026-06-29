@@ -91,12 +91,6 @@ public:
     /// @return Button bounds, or an empty rectangle when the action is unavailable.
     sf::FloatRect previewButtonBounds(PreviewAction action) const;
 
-    /// @brief Checks whether a point lies inside a rectangle.
-    /// @param bounds Rectangle to test.
-    /// @param position Point to test.
-    /// @return True when the point is inside the rectangle.
-    static bool contains(sf::FloatRect bounds, sf::Vector2f position);
-
 private:
     /// @brief Opens the preview overlay for an asset.
     /// @param asset Asset to preview.

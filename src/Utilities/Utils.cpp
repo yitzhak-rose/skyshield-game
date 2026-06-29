@@ -13,6 +13,13 @@ float Utils::randomFloat(float min, float max) {
     return dist(generator);
 }
 
+bool GeometryUtils::contains(sf::FloatRect bounds, sf::Vector2f position) {
+    return position.x >= bounds.position.x &&
+        position.x <= bounds.position.x + bounds.size.x &&
+        position.y >= bounds.position.y &&
+        position.y <= bounds.position.y + bounds.size.y;
+}
+
 void GraphicsUtils::centerOrigin(sf::Sprite& sprite) {
     const sf::FloatRect bounds = sprite.getLocalBounds();
     sprite.setOrigin({ bounds.position.x + bounds.size.x / 2.f,

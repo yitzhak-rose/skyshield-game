@@ -4,6 +4,7 @@
 #include "Gameplay/DataManager.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
+#include "Utilities/Utils.h"
 
 #include <array>
 
@@ -25,7 +26,7 @@ ShopManager::ClickResult ShopManager::handleClick(sf::Vector2f position) {
         return ClickResult::None;
     }
 
-    if (contains(backButtonBounds(), position))
+    if (GeometryUtils::contains(backButtonBounds(), position))
         return ClickResult::ReturnToStart;
 
     const int categoryIndex = categoryIndexAt(position);
@@ -108,7 +109,7 @@ std::vector<const ShopAsset*> ShopManager::visibleAssets() const {
 const ShopAsset* ShopManager::tileAt(sf::Vector2f position) const {
     const std::vector<const ShopAsset*> assets = visibleAssets();
     for (std::size_t index = 0; index < assets.size(); ++index) {
-        if (contains(tileBounds(index), position))
+        if (GeometryUtils::contains(tileBounds(index), position))
             return assets[index];
     }
 
@@ -123,7 +124,7 @@ int ShopManager::categoryIndexAt(sf::Vector2f position) {
         const sf::FloatRect bounds(
             { x, ShopScreenConfig::CategoryTop },
             { ShopScreenConfig::CategoryWidth, ShopScreenConfig::CategoryHeight });
-        if (contains(bounds, position))
+        if (GeometryUtils::contains(bounds, position))
             return static_cast<int>(index);
     }
 
@@ -138,7 +139,7 @@ ShopManager::PreviewAction ShopManager::previewActionAt(sf::Vector2f position) c
     };
 
     for (PreviewAction action : actions) {
-        if (contains(previewButtonBounds(action), position))
+        if (GeometryUtils::contains(previewButtonBounds(action), position))
             return action;
     }
 
@@ -211,11 +212,4 @@ sf::FloatRect ShopManager::previewButtonBounds(PreviewAction action) const {
         { startX + static_cast<float>(index) * (width + gap), y },
         { width, height }
     };
-}
-
-bool ShopManager::contains(sf::FloatRect bounds, sf::Vector2f position) {
-    return position.x >= bounds.position.x &&
-        position.x <= bounds.position.x + bounds.size.x &&
-        position.y >= bounds.position.y &&
-        position.y <= bounds.position.y + bounds.size.y;
 }

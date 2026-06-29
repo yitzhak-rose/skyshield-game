@@ -81,9 +81,6 @@ public:
     /// @brief Clears the pending command after Game handles it.
     void clearCommand() { m_command = ScreenCommand::None; }
 
-    /// @brief Checks whether a point lies inside a rectangle.
-    static bool contains(sf::FloatRect bounds, sf::Vector2f position);
-
     /// @brief Returns the center point of a rectangle.
     static sf::Vector2f centerOf(sf::FloatRect bounds);
 

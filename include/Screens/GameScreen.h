@@ -41,6 +41,18 @@ private:
     /// @brief Shows the pause overlay with resume and quit-to-start actions.
     void showPauseOverlay();
 
+    /// @brief Updates gameplay while no overlay is active.
+    void updateRunningLevel(float deltaTime);
+
+    /// @brief Shows the appropriate completion overlay when the world finishes.
+    void handleLevelResult();
+
+    /// @brief Handles keyboard and mouse pause requests.
+    bool handlePauseInput(const sf::Event& event, const ScreenEventContext& context);
+
+    /// @brief Returns true when a click lands on the HUD pause button.
+    bool isPauseClick(const sf::Event& event, const ScreenEventContext& context) const;
+
     /// @brief Returns summary lines reused by completion overlays.
     std::vector<std::string> makeLevelSummaryLines() const;
 

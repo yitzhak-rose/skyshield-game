@@ -54,7 +54,8 @@ void MenuBar::configureBatterySprite() {
     const float batteryScale = MenuBarConfig::BatteryHeight / batteryBounds.size.y;
     m_batterySprite.setScale({ batteryScale, batteryScale });
     m_batterySprite.setPosition({
-        m_width - MenuBarConfig::SidePadding - batteryBounds.size.x * batteryScale / 2.f,
+        pauseButtonBounds().position.x -
+            MenuBarConfig::PauseBatteryGap - batteryBounds.size.x * batteryScale / 2.f,
         m_height / 2.f
         });
 }
@@ -75,6 +76,7 @@ void MenuBar::drawContent(sf::RenderTarget& target, sf::RenderStates states) con
     drawTitle(target, states);
     drawBattery(target, states);
     drawLevelIndicator(target, states);
+    drawPauseButton(target, states);
     m_coin.draw(target, states);
 }
 
@@ -190,8 +192,9 @@ void MenuBar::updateBatterySpriteForView(const sf::View& view) const {
 
     const float batteryHalfWidth = m_batterySprite.getGlobalBounds().size.x / 2.f;
     const float rightEdge = view.getCenter().x + view.getSize().x / 2.f;
+    const float pauseLeft = rightEdge - MenuBarConfig::SidePadding - MenuBarConfig::PauseButtonSize;
     m_batterySprite.setPosition({
-        rightEdge - MenuBarConfig::SidePadding - batteryHalfWidth,
+        pauseLeft - MenuBarConfig::PauseBatteryGap - batteryHalfWidth,
         m_height / 2.f
         });
 }
@@ -227,6 +230,45 @@ sf::Text MenuBar::makeLevelText() const {
     text.setPosition({
         batteryBounds.position.x - MenuBarConfig::LevelBatteryGap,
         m_height / 2.f
-        });
+    });
     return text;
+}
+
+sf::FloatRect MenuBar::pauseButtonBounds() const {
+    return {
+        { m_width - MenuBarConfig::SidePadding - MenuBarConfig::PauseButtonSize,
+          (m_height - MenuBarConfig::PauseButtonSize) / 2.f },
+        { MenuBarConfig::PauseButtonSize, MenuBarConfig::PauseButtonSize }
+    };
+}
+
+void MenuBar::drawPauseButton(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(makePauseButtonShape(), states);
+    drawPauseIcon(target, states);
+}
+
+sf::RectangleShape MenuBar::makePauseButtonShape() const {
+    const sf::FloatRect bounds = pauseButtonBounds();
+    sf::RectangleShape button(bounds.size);
+    button.setPosition(bounds.position);
+    button.setFillColor(MenuBarConfig::PauseButtonColor);
+    button.setOutlineColor(MenuBarConfig::PauseButtonOutlineColor);
+    button.setOutlineThickness(MenuBarConfig::VehicleArmorBarOutlineThickness);
+    return button;
+}
+
+void MenuBar::drawPauseIcon(sf::RenderTarget& target, sf::RenderStates states) const {
+    const sf::FloatRect bounds = pauseButtonBounds();
+    const sf::Vector2f center = {
+        bounds.position.x + bounds.size.x / 2.f,
+        bounds.position.y + bounds.size.y / 2.f
+    };
+    const float step = MenuBarConfig::PauseIconWidth + MenuBarConfig::PauseIconGap;
+    for (float offset : { -step / 2.f, step / 2.f }) {
+        sf::RectangleShape bar({ MenuBarConfig::PauseIconWidth, MenuBarConfig::PauseIconHeight });
+        bar.setOrigin({ MenuBarConfig::PauseIconWidth / 2.f, MenuBarConfig::PauseIconHeight / 2.f });
+        bar.setPosition({ center.x + offset, center.y });
+        bar.setFillColor(MenuBarConfig::PauseIconColor);
+        target.draw(bar, states);
+    }
 }

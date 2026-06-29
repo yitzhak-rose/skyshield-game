@@ -2,6 +2,7 @@
 #include "Gameplay/Constants.h"
 #include "Resources/ResourceManager.h"
 #include "Screens/Screen.h"
+#include "Utilities/Utils.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -85,7 +86,7 @@ void OverlayView::updateSelectionFromMouse(sf::Vector2f mousePosition) {
 int OverlayView::buttonIndexAt(sf::Vector2f position) const {
     for (std::size_t i = 0; i < m_buttonBounds.size(); ++i) {
         const sf::FloatRect& bounds = m_buttonBounds[i];
-        if (Screen::contains(bounds, position))
+        if (GeometryUtils::contains(bounds, position))
             return static_cast<int>(i);
     }
 

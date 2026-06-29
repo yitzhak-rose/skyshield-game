@@ -4,8 +4,7 @@
 #include "Gameplay/Constants.h"
 
 /// @brief The player-controlled drone. Moves horizontally, drops bombs, manages resources.
-class Drone : public MovingObject
-{
+class Drone : public MovingObject {
 public:
     /// @brief Constructs the drone with a texture and a starting position.
     Drone(const sf::Texture& texture, sf::Vector2f position, GameState& gameState);

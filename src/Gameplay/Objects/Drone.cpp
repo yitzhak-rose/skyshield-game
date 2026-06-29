@@ -2,6 +2,7 @@
 #include "Gameplay/Constants.h"
 #include "Gameplay/GameState.h"
 #include "Gameplay/Factory.h"
+#include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 
 // Builds the drone, then crops the sprite to one frame and centers its origin.
@@ -18,10 +19,9 @@ Drone::Drone(const sf::Texture& texture, sf::Vector2f position, GameState& gameS
 }
 
 // Moves, advances the rotor animation, then drains the battery.
-void Drone::update(float dt)
-{
-    handleInput();         
-    handleBombDrop();      
+void Drone::update(float dt) {
+    handleInput();
+    handleBombDrop();
     move(dt);
     // Keep the whole drone on screen; it only ever moves horizontally.
     float halfWidth = getBounds().size.x * 0.5f;
@@ -61,19 +61,16 @@ bool Drone::consumeAmmo() {
     return gameState().consumeBomb();
 }
 
-void Drone::moveLeft()
-{
+void Drone::moveLeft() {
     m_velocity.x = -DroneConfig::Speed;
     m_sprite.setScale({ -m_displayScale, m_displayScale }); // mirror to face left
 }
 
-void Drone::moveRight()
-{
+void Drone::moveRight() {
     m_velocity.x = DroneConfig::Speed;
     m_sprite.setScale({ m_displayScale, m_displayScale }); // normal, facing right
 }
 
-void Drone::stop()
-{
+void Drone::stop() {
     m_velocity.x = 0.f;
 }

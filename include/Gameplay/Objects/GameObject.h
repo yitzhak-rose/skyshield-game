@@ -6,8 +6,8 @@
 
 class GameState;
 
-/// @brief «abstract» base of every game object. It is the single polymorphic
-///        type the World stores, updates, draws, and collides — so it carries
+/// @brief Abstract base of every game object. It is the single polymorphic
+///        type the World stores, updates, draws, and collides, so it carries
 ///        the full contract: drawable (IDrawable) and updatable (IUpdatable).
 class GameObject : public IDrawable, public IUpdatable {
 public:

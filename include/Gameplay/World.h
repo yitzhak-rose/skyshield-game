@@ -44,6 +44,12 @@ private:
     /// @brief Updates the level result based on vehicle health, battery, and enemies remaining.
     void checkResult();
 
+    /// @brief Returns true when the level can no longer be completed.
+    bool isLossConditionMet() const;
+
+    /// @brief Returns true when all enemies have been defeated.
+    bool isWinConditionMet() const;
+
     LevelConfig m_config;
     GameState& m_gameState;
 

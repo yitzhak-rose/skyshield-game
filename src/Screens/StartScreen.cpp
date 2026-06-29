@@ -154,16 +154,16 @@ void StartScreen::handleClick(sf::Vector2f position) {
 }
 
 StartScreen::Button StartScreen::buttonAt(sf::Vector2f position) const {
-    if (contains(m_settingsButton.getGlobalBounds(), position))
+    if (GeometryUtils::contains(m_settingsButton.getGlobalBounds(), position))
         return Button::Settings;
 
-    if (contains(m_quitButton.getGlobalBounds(), position))
+    if (GeometryUtils::contains(m_quitButton.getGlobalBounds(), position))
         return Button::Quit;
 
-    if (contains(m_startButton.getGlobalBounds(), position))
+    if (GeometryUtils::contains(m_startButton.getGlobalBounds(), position))
         return Button::Start;
 
-    if (contains(m_shopButton.getGlobalBounds(), position))
+    if (GeometryUtils::contains(m_shopButton.getGlobalBounds(), position))
         return Button::Shop;
 
     return Button::None;
