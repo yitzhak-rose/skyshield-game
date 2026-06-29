@@ -29,114 +29,172 @@
       "startAmmo": 28
     }
   ],
-  "shopAssets": [
-    {
-      "id": 1,
-      "type": "command_vehicle",
-      "title": "Default Command Vehicle",
-      "price": 0,
-      "file": "images/default/commandCar.png",
-      "extra": 0,
-      "default": true
-    },
-    {
-      "id": 2,
-      "type": "drone",
-      "title": "Default Drone",
-      "price": 0,
-      "file": "images/default/drone.png",
-      "extra": 0,
-      "default": true
-    },
-    {
-      "id": 3,
-      "type": "background",
-      "title": "Default Background",
-      "price": 0,
-      "file": "images/default/background.png",
-      "extra": 0,
-      "default": true
-    },
-    {
-      "id": 4,
-      "type": "background_music",
-      "title": "Default Music",
-      "price": 0,
-      "file": "sounds/default/background-sound.mp3",
-      "extra": 0,
-      "default": true
-    },
-    {
-      "id": 5,
-      "type": "command_vehicle",
-      "title": "Upgraded Command Vehicle",
-      "price": 60,
-      "file": "images/shop/UpgradedCommandCar.png",
-      "extra": 25,
-      "default": false
-    },
-    {
-      "id": 6,
-      "type": "drone",
-      "title": "Drone Helicopter",
-      "price": 70,
-      "file": "images/shop/DroneHelicopter.png",
-      "extra": 50,
-      "default": false
-    },
-    {
-      "id": 7,
-      "type": "font",
-      "title": "Stencil Force",
-      "price": 0,
-      "file": "fonts/StencilForce.otf",
-      "extra": 0,
-      "default": true
-    },
-    {
-      "id": 8,
-      "type": "font",
-      "title": "Battle Grid",
-      "price": 30,
-      "file": "fonts/BattleGridFree.ttf",
-      "extra": 0,
-      "default": false
-    },
-    {
-      "id": 9,
-      "type": "drone",
-      "title": "Drone Scorpion",
-      "price": 90,
-      "file": "images/shop/DroneScorpion.png",
-      "extra": 75,
-      "default": false
-    },
-    {
-      "id": 10,
-      "type": "background",
-      "title": "Canyon Outpost",
-      "price": 35,
-      "file": "images/shop/background2.png",
-      "extra": 0,
-      "default": false
-    },
-    {
-      "id": 11,
-      "type": "background",
-      "title": "Frozen Ruins",
-      "price": 35,
-      "file": "images/shop/background3.png",
-      "extra": 0,
-      "default": false
-    },
-    {
-      "id": 12,
-      "type": "background",
-      "title": "Dustfall City",
-      "price": 35,
-      "file": "images/shop/background5.png",
-      "extra": 0,
-      "default": false
-    }
-  ]
+  "shopAssets": {
+    "command_vehicle": [
+      {
+        "id": 1,
+        "title": "Default Command Vehicle",
+        "price": 0,
+        "file": "images/default/commandCar.png",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 5,
+        "title": "Upgraded Command Vehicle",
+        "price": 60,
+        "file": "images/shop/UpgradedCommandCar.png",
+        "extra": 25,
+        "default": false
+      },
+      {
+        "id": 13,
+        "title": "Command Runner",
+        "price": 75,
+        "file": "images/shop/NewCommandCar.png",
+        "extra": 30,
+        "default": false
+      },
+      {
+        "id": 14,
+        "title": "Command Interceptor",
+        "price": 95,
+        "file": "images/shop/NewCommandCar2.png",
+        "extra": 40,
+        "default": false
+      }
+    ],
+    "drone": [
+      {
+        "id": 2,
+        "title": "Default Drone",
+        "price": 0,
+        "file": "images/default/drone.png",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 6,
+        "title": "Drone Helicopter",
+        "price": 70,
+        "file": "images/shop/DroneHelicopter.png",
+        "extra": 50,
+        "default": false
+      },
+      {
+        "id": 9,
+        "title": "Drone Scorpion",
+        "price": 90,
+        "file": "images/shop/DroneScorpion.png",
+        "extra": 75,
+        "default": false
+      },
+      {
+        "id": 15,
+        "title": "Recon Drone",
+        "price": 85,
+        "file": "images/shop/NewDrone.png",
+        "extra": 65,
+        "default": false
+      }
+    ],
+    "fast_enemy": [
+      {
+        "id": 16,
+        "title": "Default Fast Enemy",
+        "price": 0,
+        "file": "images/game/smallEnemy.png",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 17,
+        "title": "Raider Fast Enemy",
+        "price": 55,
+        "file": "images/shop/NewSmallEnemy.png",
+        "extra": 0,
+        "default": false
+      }
+    ],
+    "tank_enemy": [
+      {
+        "id": 18,
+        "title": "Default Tank Enemy",
+        "price": 0,
+        "file": "images/game/enemy.png",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 19,
+        "title": "Heavy Tank Enemy",
+        "price": 65,
+        "file": "images/shop/NewTankEnemy.png",
+        "extra": 0,
+        "default": false
+      }
+    ],
+    "background": [
+      {
+        "id": 3,
+        "title": "Default Background",
+        "price": 0,
+        "file": "images/default/background.png",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 10,
+        "title": "Canyon Outpost",
+        "price": 35,
+        "file": "images/shop/background2.png",
+        "extra": 0,
+        "default": false
+      },
+      {
+        "id": 11,
+        "title": "Frozen Ruins",
+        "price": 35,
+        "file": "images/shop/background3.png",
+        "extra": 0,
+        "default": false
+      },
+      {
+        "id": 12,
+        "title": "Dustfall City",
+        "price": 35,
+        "file": "images/shop/background5.png",
+        "extra": 0,
+        "default": false
+      }
+    ],
+    "background_music": [
+      {
+        "id": 4,
+        "title": "Default Music",
+        "price": 0,
+        "file": "sounds/default/background-sound.mp3",
+        "extra": 0,
+        "default": true
+      }
+    ],
+    "font": [
+      {
+        "id": 7,
+        "title": "Stencil Force",
+        "price": 0,
+        "file": "fonts/StencilForce.otf",
+        "extra": 0,
+        "default": true
+      },
+      {
+        "id": 8,
+        "title": "Battle Grid",
+        "price": 30,
+        "file": "fonts/BattleGridFree.ttf",
+        "extra": 0,
+        "default": false
+      }
+    ]
+  }
 }

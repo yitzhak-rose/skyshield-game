@@ -1,6 +1,7 @@
 #include "Screens/StartScreen.h"
 
 #include "App/Constants.h"
+#include "App/ScreenConstants.h"
 #include "App/State/GameState.h"
 #include "Resources/ResourceManager.h"
 #include "Utilities/Utils.h"
@@ -136,37 +137,37 @@ void StartScreen::updateHover(sf::Vector2f position) {
 
 void StartScreen::handleClick(sf::Vector2f position) {
     switch (buttonAt(position)) {
-        case Button::Start:
+        case StartScreenButton::Start:
             requestCommand(ScreenCommand::StartGame);
             break;
-        case Button::Shop:
+        case StartScreenButton::Shop:
             requestCommand(ScreenCommand::OpenShop);
             break;
-        case Button::Settings:
+        case StartScreenButton::Settings:
             showFeatureUnavailableOverlay();
             break;
-        case Button::Quit:
+        case StartScreenButton::Quit:
             requestCommand(ScreenCommand::Quit);
             break;
-        case Button::None:
+        case StartScreenButton::None:
             break;
     }
 }
 
-StartScreen::Button StartScreen::buttonAt(sf::Vector2f position) const {
+StartScreenButton StartScreen::buttonAt(sf::Vector2f position) const {
     if (GeometryUtils::contains(m_settingsButton.getGlobalBounds(), position))
-        return Button::Settings;
+        return StartScreenButton::Settings;
 
     if (GeometryUtils::contains(m_quitButton.getGlobalBounds(), position))
-        return Button::Quit;
+        return StartScreenButton::Quit;
 
     if (GeometryUtils::contains(m_startButton.getGlobalBounds(), position))
-        return Button::Start;
+        return StartScreenButton::Start;
 
     if (GeometryUtils::contains(m_shopButton.getGlobalBounds(), position))
-        return Button::Shop;
+        return StartScreenButton::Shop;
 
-    return Button::None;
+    return StartScreenButton::None;
 }
 
 void StartScreen::showFeatureUnavailableOverlay() {
@@ -186,8 +187,8 @@ void StartScreen::update(float deltaTime) {
 
 void StartScreen::draw(sf::RenderWindow& target) {
     target.draw(m_backgroundSprite);
-    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, Button::Start);
-    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, Button::Shop);
+    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, StartScreenButton::Start);
+    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, StartScreenButton::Shop);
     drawSettingsButton(target);
     drawCoinCounter(target);
     drawQuitButton(target);
@@ -198,7 +199,7 @@ void StartScreen::drawTextButton(sf::RenderWindow& target,
                                  sf::RenderStates states,
                                  const sf::RectangleShape& button,
                                  const sf::Text& text,
-                                 Button buttonType) const {
+                                 StartScreenButton buttonType) const {
     sf::RectangleShape buttonShape = button;
     if (m_hoveredButton == buttonType)
         buttonShape.setFillColor(StartScreenConfig::ButtonHoverColor);
@@ -209,7 +210,7 @@ void StartScreen::drawTextButton(sf::RenderWindow& target,
 
 void StartScreen::drawSettingsButton(sf::RenderWindow& target) const {
     sf::RectangleShape settingsButton = m_settingsButton;
-    if (m_hoveredButton == Button::Settings)
+    if (m_hoveredButton == StartScreenButton::Settings)
         settingsButton.setFillColor(StartScreenConfig::SettingsButtonHoverColor);
 
     target.draw(settingsButton);
@@ -230,7 +231,7 @@ void StartScreen::drawQuitButton(sf::RenderWindow& target) const {
     updateQuitButtonForTarget(target);
 
     sf::RectangleShape quitButton = m_quitButton;
-    if (m_hoveredButton == Button::Quit)
+    if (m_hoveredButton == StartScreenButton::Quit)
         quitButton.setFillColor(StartScreenConfig::QuitButtonHoverColor);
 
     target.draw(quitButton);

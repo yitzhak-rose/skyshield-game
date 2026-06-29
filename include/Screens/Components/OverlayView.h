@@ -1,29 +1,11 @@
 #pragma once
 
+#include "Structs/OverlayAction.h"
+#include "Structs/ScreenEventContext.h"
+
 #include <SFML/Graphics.hpp>
-#include <functional>
 #include <string>
 #include <vector>
-
-struct ScreenEventContext;
-
-/// @brief Visual style for an overlay action button.
-enum class OverlayActionType {
-    Default,
-    Primary,
-    Danger
-};
-
-/// @brief A labeled overlay button with optional styling and behavior.
-struct OverlayAction {
-    std::string label;
-
-    OverlayActionType type = OverlayActionType::Default;
-
-    std::function<void()> action;
-
-    bool enabled = true;
-};
 
 /// @brief Reusable modal-style overlay with text and action buttons.
 class OverlayView : public sf::Drawable, public sf::Transformable {

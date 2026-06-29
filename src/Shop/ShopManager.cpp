@@ -1,6 +1,7 @@
 #include "Shop/ShopManager.h"
 
 #include "App/Constants.h"
+#include "App/ScreenConstants.h"
 #include "Resources/DataManager.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
@@ -20,26 +21,26 @@ void ShopManager::updateHover(sf::Vector2f position) {
     m_hoveredAsset = m_previewAsset ? nullptr : tileAt(position);
 }
 
-ShopManager::ClickResult ShopManager::handleClick(sf::Vector2f position) {
+ShopClickResult ShopManager::handleClick(sf::Vector2f position) {
     if (m_previewAsset) {
         activatePreviewAction(previewActionAt(position));
-        return ClickResult::None;
+        return ShopClickResult::None;
     }
 
     if (GeometryUtils::contains(backButtonBounds(), position))
-        return ClickResult::ReturnToStart;
+        return ShopClickResult::ReturnToStart;
 
     const int categoryIndex = categoryIndexAt(position);
     if (categoryIndex >= 0) {
         m_activeType = allShopAssetTypes()[static_cast<std::size_t>(categoryIndex)];
         m_hoveredAsset = nullptr;
-        return ClickResult::None;
+        return ShopClickResult::None;
     }
 
     if (const ShopAsset* asset = tileAt(position))
         openPreview(*asset);
 
-    return ClickResult::None;
+    return ShopClickResult::None;
 }
 
 void ShopManager::openPreview(const ShopAsset& asset) {
@@ -131,7 +132,7 @@ int ShopManager::categoryIndexAt(sf::Vector2f position) {
     return -1;
 }
 
-ShopManager::PreviewAction ShopManager::previewActionAt(sf::Vector2f position) const {
+PreviewAction ShopManager::previewActionAt(sf::Vector2f position) const {
     const std::array<PreviewAction, 3> actions = {
         PreviewAction::Primary,
         PreviewAction::Try,

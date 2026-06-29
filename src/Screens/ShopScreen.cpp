@@ -1,6 +1,7 @@
 #include "Screens/ShopScreen.h"
 
 #include "App/Constants.h"
+#include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
 
 #include <sstream>
@@ -19,6 +20,7 @@ ShopScreen::ShopScreen(GameState& gameState,
     configureLayout();
 }
 
+#pragma region Resource Loading
 void ShopScreen::loadTextures() {
     for (const ShopAsset& asset : m_catalog) {
         if (ShopManager::isImageAsset(asset))
@@ -31,13 +33,15 @@ void ShopScreen::loadTextures() {
 void ShopScreen::configureLayout() {
     m_background.setFillColor(ShopScreenConfig::BackgroundColor);
 }
+#pragma endregion
 
+#pragma region Event Handling
 void ShopScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
     if (isMouseMoved(event))
         m_shopManager.updateHover(context.mousePosition);
 
     if (isLeftMousePressed(event)) {
-        if (m_shopManager.handleClick(context.mousePosition) == ShopManager::ClickResult::ReturnToStart)
+        if (m_shopManager.handleClick(context.mousePosition) == ShopClickResult::ReturnToStart)
             requestCommand(ScreenCommand::ReturnToStart);
     }
 
@@ -51,7 +55,9 @@ void ShopScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
 
 void ShopScreen::update(float /*deltaTime*/) {
 }
+#pragma endregion
 
+#pragma region Drawing
 void ShopScreen::draw(sf::RenderWindow& target) {
     target.draw(m_background);
     drawHeader(target);
@@ -228,7 +234,9 @@ void ShopScreen::drawFittedText(sf::RenderTarget& target,
         text.setCharacterSize(text.getCharacterSize() - 1u);
     target.draw(text);
 }
+#pragma endregion
 
+#pragma region Utilities
 std::vector<std::string> ShopScreen::wrapTextLines(const std::string& text,
                                                    unsigned int size,
                                                    float maxWidth,
@@ -284,3 +292,4 @@ void ShopScreen::trimLastLine(std::vector<std::string>& lines, unsigned int size
         lastLine.setString(lines.back());
     }
 }
+#pragma endregion

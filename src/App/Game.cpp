@@ -1,38 +1,25 @@
 #include "App/Game.h"
+#include "App/Constants.h"
+#include "Enums/LevelResult.h"
+#include "Resources/DataManager.h"
+#include "Resources/ResourceManager.h"
+#include "Resources/SoundManager.h"
 #include "Screens/GameScreen.h"
 #include "Screens/ShopScreen.h"
 #include "Screens/StartScreen.h"
-#include "Resources/ResourceManager.h"
-#include "Resources/SoundManager.h"
-#include "App/Constants.h"
-#include "Resources/DataManager.h"
-#include "Enums/LevelResult.h"
+#include "Utilities/AppUtils.h"
 
-#include <algorithm>
+#include <exception>
 #include <optional>
 #include <string>
+#include <vector>
 
-namespace {
 const std::string GameDataPath = "data/gameData.json";
 const std::string UserDataPath = "userData.json";
 
-bool sameUserData(const UserData& lhs, const UserData& rhs) {
-    return lhs.coins == rhs.coins &&
-        lhs.ownedAssets == rhs.ownedAssets &&
-        lhs.selectedAssets == rhs.selectedAssets;
-}
-
-sf::Vector2u initialWindowSize() {
-    const sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-    return {
-        std::min(static_cast<unsigned int>(WindowConfig::Width), desktopMode.size.x),
-        std::min(static_cast<unsigned int>(WindowConfig::Height), desktopMode.size.y)
-    };
-}
-}
-
+#pragma region Public
 Game::Game()
-    : window(sf::VideoMode(initialWindowSize()), "SkyShield")
+    : window(sf::VideoMode(AppUtils::initialWindowSize()), "SkyShield")
     , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
     window.setFramerateLimit(60);
     initBackground();
@@ -41,29 +28,46 @@ Game::Game()
 }
 
 Game::~Game() {
-    saveUserData();
+    if (!m_fatalMode)
+        saveUserData();
 }
 
 void Game::run() {
     m_clock.restart();
     while (window.isOpen()) {
-        float dt = m_clock.restart().asSeconds();
-        handleEvents();
-        if (!window.isOpen())
-            break;
+        try {
+            const float dt = m_clock.restart().asSeconds();
 
-        handleScreenCommand();
-        if (!window.isOpen())
-            break;
+            if (m_fatalMode) {
+                handleFatalEvents();
+                if (window.isOpen())
+                    renderFatalOverlay();
+                continue;
+            }
 
-        update(dt);
-        if (!window.isOpen())
-            break;
+            handleEvents();
+            if (!window.isOpen())
+                break;
 
-        render();
+            handleScreenCommand();
+            if (!window.isOpen())
+                break;
+
+            update(dt);
+            if (!window.isOpen())
+                break;
+
+            render();
+        } catch (const std::exception& error) {
+            enterFatalMode(error.what());
+            if (window.isOpen())
+                renderFatalOverlay();
+        }
     }
 }
+#pragma endregion
 
+#pragma region Resource Loading
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
     const sf::Vector2u textureSize = texture.getSize();
@@ -118,7 +122,9 @@ void Game::syncShopSelections() {
     m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
     initBackground();
 }
+#pragma endregion
 
+#pragma region Event Handling
 void Game::handleEvents() {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
         if (event->is<sf::Event::Closed>()) {
@@ -201,6 +207,41 @@ void Game::applyScreenCommand(ScreenCommand command) {
     }
 }
 
+void Game::enterFatalMode(const std::string& message) {
+    if (m_fatalMode)
+        return;
+
+    m_fatalMode = true;
+    SoundManager::instance().stopPreview();
+    m_fatalOverlay = std::make_unique<OverlayView>(
+        "Fatal Error",
+        std::vector<std::string>{ message },
+        std::vector<OverlayAction>{
+            { "Quit", OverlayActionType::Danger, [this]() { window.close(); } }
+        });
+}
+
+void Game::handleFatalEvents() {
+    while (const std::optional<sf::Event> event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            window.close();
+            break;
+        }
+
+        if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+            const sf::FloatRect visibleArea(
+                { 0.f, 0.f },
+                { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
+            window.setView(sf::View(visibleArea));
+        }
+
+        if (m_fatalOverlay)
+            m_fatalOverlay->handleEvent(*event, makeEventContext(*event));
+    }
+}
+#pragma endregion
+
+#pragma region Updating
 void Game::update(float dt) {
     refreshDataIfChanged();
     m_screen->update(dt);
@@ -210,7 +251,7 @@ void Game::update(float dt) {
 }
 
 void Game::saveUserDataIfChanged() {
-    if (sameUserData(m_lastSavedUserData, m_gameState.getUserData()))
+    if (AppUtils::sameUserData(m_lastSavedUserData, m_gameState.getUserData()))
         return;
 
     saveUserData();
@@ -227,10 +268,25 @@ void Game::refreshDataIfChanged() {
     if (m_activeScreen == ActiveScreen::Shop)
         showShopScreen();
 }
+#pragma endregion
 
+#pragma region Drawing
 void Game::render() {
     window.clear(sf::Color::Black);
     window.draw(m_backgroundSprite);
     m_screen->draw(window);
     window.display();
 }
+
+void Game::renderFatalOverlay() {
+    window.clear(sf::Color::Black);
+    window.draw(m_backgroundSprite);
+
+    if (m_screen)
+        m_screen->draw(window);
+    if (m_fatalOverlay)
+        window.draw(*m_fatalOverlay);
+
+    window.display();
+}
+#pragma endregion

@@ -1,79 +1,14 @@
 #include "Resources/ResourceManager.h"
-#include <filesystem>
+#include "Utilities/AppUtils.h"
+
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 #include <type_traits>
 
-namespace {
-std::string matchingStartBackgroundPath(const std::string& backgroundPath) {
-    const std::filesystem::path path(backgroundPath);
-    const std::filesystem::path startFilename = "start-" + path.filename().string();
-    return (path.parent_path() / startFilename).generic_string();
-}
-}
-
+#pragma region Public
 ResourceManager& ResourceManager::instance() {
     static ResourceManager _instance;
     return _instance;
-}
-
-ResourceManager::ResourceManager() {
-    loadData();
-}
-
-void ResourceManager::loadData() {
-    loadResources(Resources::imageResources, m_imageTextures);
-    loadResources(Resources::fontResources, m_fonts);
-    loadSoundPaths();
-}
-
-template<typename Key, typename Value, std::size_t N>
-void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& resources, 
-                                    std::map<Key, Value>& dataMap,
-                                    std::function<std::string(Key)> pathResolver) {
-    const std::size_t count = resources.size();
-    for (std::size_t i = 0; i < count; i++) {
-        Value val;
-        auto resource = resources[i];
-        Key type = resource.type;
-        
-        std::string path;
-        if (pathResolver) {
-            path = pathResolver(type);
-            // Fallback to resource.path if resolver returns empty
-            if (path.empty()) path = resource.path;
-        } else {
-            path = resource.path;
-        }
-
-        bool loaded = false;
-        if constexpr (std::is_same_v<Value, sf::Font>) {
-            loaded = val.openFromFile(path);
-        }
-        else {
-            loaded = val.loadFromFile(path);
-        }
-
-        if (!loaded) {
-            throw std::runtime_error("Failed to load resource from path: " + path);
-        }
-
-        if (type != Key::Max) {
-            dataMap[type] = val;
-        }
-    }
-}
-
-void ResourceManager::loadSoundPaths() {
-    for (const auto& resource : Resources::soundResources) {
-        std::ifstream file(resource.path);
-        if (!file)
-            throw std::runtime_error("Failed to find sound resource from path: " + resource.path);
-
-        if (resource.type != Sounds::Max)
-            m_soundPaths[resource.type] = resource.path;
-    }
 }
 
 sf::Texture& ResourceManager::getImage(GameObjects image) {
@@ -113,9 +48,15 @@ void ResourceManager::applyShopSelections(const std::vector<ShopAsset>& catalog,
             case ShopAssetType::Drone:
                 setImage(GameObjects::Drone, asset.file);
                 break;
+            case ShopAssetType::FastEnemy:
+                setImage(GameObjects::SmallEnemy, asset.file);
+                break;
+            case ShopAssetType::TankEnemy:
+                setImage(GameObjects::Enemy, asset.file);
+                break;
             case ShopAssetType::Background:
                 setImage(GameObjects::Background, asset.file);
-                setImage(GameObjects::StartBackground, matchingStartBackgroundPath(asset.file));
+                setImage(GameObjects::StartBackground, AppUtils::matchingStartBackgroundPath(asset.file));
                 break;
             case ShopAssetType::BackgroundMusic:
                 setSoundPath(Sounds::Background, asset.file);
@@ -142,19 +83,86 @@ sf::Font ResourceManager::loadFontFromFile(const std::string& path) const {
 
     return font;
 }
+#pragma endregion
 
+#pragma region Resource Loading
+ResourceManager::ResourceManager() {
+    loadData();
+}
+
+void ResourceManager::loadData() {
+    loadResources(Resources::imageResources, m_imageTextures);
+    loadResources(Resources::fontResources, m_fonts);
+    loadSoundPaths();
+}
+
+template<typename Key, typename Value, std::size_t N>
+void ResourceManager::loadResources(const std::array<ResourceInfo<Key>, N>& resources, 
+                                    std::map<Key, Value>& dataMap,
+                                    std::function<std::string(Key)> pathResolver) {
+    for (const auto& resource : resources) {
+        Value value;
+        const std::string path = resolveResourcePath(resource, pathResolver);
+        loadResourceValue(value, path);
+        storeResource(resource.type, value, dataMap);
+    }
+}
+
+template<typename Key>
+std::string ResourceManager::resolveResourcePath(const ResourceInfo<Key>& resource,
+                                                 const std::function<std::string(Key)>& pathResolver) {
+    if (!pathResolver)
+        return resource.path;
+
+    const std::string resolvedPath = pathResolver(resource.type);
+    return resolvedPath.empty() ? resource.path : resolvedPath;
+}
+
+template<typename Value>
+void ResourceManager::loadResourceValue(Value& value, const std::string& path) {
+    bool loaded = false;
+    if constexpr (std::is_same_v<Value, sf::Font>)
+        loaded = value.openFromFile(path);
+    else
+        loaded = value.loadFromFile(path);
+
+    if (!loaded)
+        throw std::runtime_error("Failed to load resource from path: " + path);
+}
+
+template<typename Key, typename Value>
+void ResourceManager::storeResource(Key type, Value& value, std::map<Key, Value>& dataMap) {
+    if (type != Key::Max)
+        dataMap[type] = value;
+}
+
+void ResourceManager::loadSoundPaths() {
+    for (const auto& resource : Resources::soundResources) {
+        validateSoundPath(resource.path);
+
+        if (resource.type != Sounds::Max)
+            m_soundPaths[resource.type] = resource.path;
+    }
+}
+
+void ResourceManager::validateSoundPath(const std::string& path) {
+    std::ifstream file(path);
+    if (!file)
+        throw std::runtime_error("Failed to find sound resource from path: " + path);
+}
+#pragma endregion
+
+#pragma region Utilities
 void ResourceManager::setImage(GameObjects image, const std::string& path) {
     m_imageTextures[image] = loadTextureFromFile(path);
 }
 
 void ResourceManager::setSoundPath(Sounds sound, const std::string& path) {
-    std::ifstream file(path);
-    if (!file)
-        throw std::runtime_error("Failed to find sound resource from path: " + path);
-
+    validateSoundPath(path);
     m_soundPaths[sound] = path;
 }
 
 void ResourceManager::setFont(Fonts font, const std::string& path) {
     m_fonts[font] = loadFontFromFile(path);
 }
+#pragma endregion

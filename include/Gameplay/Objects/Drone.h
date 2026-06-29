@@ -1,7 +1,7 @@
 #pragma once
 #include "Gameplay/Objects/MovingObject.h"
 #include "Graphics/Animation.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 
 /// @brief The player-controlled drone. Moves horizontally, drops bombs, manages resources.
 class Drone : public MovingObject {

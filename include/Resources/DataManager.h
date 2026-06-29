@@ -1,17 +1,16 @@
 #pragma once
 
-#include "Gameplay/LevelConfig.h"
 #include "Shop/ShopData.h"
-#include "Utilities/JsonUtils.h"
+#include "Structs/LevelConfig.h"
 
 #include <filesystem>
-#include <set>
 #include <string>
 #include <vector>
 
 /// @brief Owns the game's JSON-backed data and refreshes it when source files change.
 class DataManager {
 public:
+#pragma region Public
     // Public API for loading, reading, refreshing, and saving game data.
 
     /// @brief Gets the shared data manager instance.
@@ -70,52 +69,26 @@ public:
     /// @param path Path to the save file to write.
     /// @param coins Coin total to save; negative values are clamped to 0.
     void saveCoins(const std::string& path, int coins);
+#pragma endregion
 
 private:
-    // Private construction.
-
+#pragma region Private
     /// @brief Private construction keeps DataManager as a single shared instance.
     DataManager() = default;
 
-    // Private validation helpers.
+    /// @brief Private destruction keeps lifetime tied to the Meyers singleton.
+    ~DataManager() = default;
+
+    DataManager(const DataManager&) = delete;
+    DataManager(DataManager&&) = delete;
+    DataManager& operator=(const DataManager&) = delete;
+    DataManager& operator=(DataManager&&) = delete;
 
     /// @brief Validates one parsed level and reports the stage number on failure.
     /// @param config Parsed level data to validate.
     /// @param stageIndex Zero-based stage index, used in error messages.
     /// @throws std::runtime_error if the level contains impossible gameplay values.
     static void validateLevel(const LevelConfig& config, std::size_t stageIndex);
-
-    // Private game-data parsing helpers.
-
-    /// @brief Reads the display title for a shop asset, with legacy "name" fallback.
-    /// @param object JSON object to inspect.
-    /// @param context Human-readable location used in error messages.
-    /// @return Shop asset display title.
-    static std::string requireTitle(const JsonUtils::Json& object, const std::string& context);
-
-    /// @brief Converts one JSON stage object into a LevelConfig.
-    /// @param value JSON object that describes one stage.
-    /// @param stageIndex Zero-based stage index, used in error messages.
-    /// @return Parsed level configuration.
-    static LevelConfig parseLevel(const JsonUtils::Json& value, std::size_t stageIndex);
-
-    /// @brief Converts one JSON shop asset object into a validated ShopAsset.
-    /// @param value JSON object that describes one shop item.
-    /// @return Parsed shop asset.
-    static ShopAsset parseShopAsset(const JsonUtils::Json& value);
-
-    /// @brief Converts the top-level "stages" JSON array into level configs.
-    /// @param root Root JSON object that owns the "stages" array.
-    /// @param context Human-readable location used in error messages.
-    /// @return Parsed level configurations.
-    static std::vector<LevelConfig> parseLevels(const JsonUtils::Json& root, const std::string& context);
-
-    /// @brief Converts the top-level "shopAssets" JSON array into the shop catalog.
-    /// @param root Root JSON object that owns the "shopAssets" array.
-    /// @return Parsed shop catalog.
-    static std::vector<ShopAsset> parseShopAssets(const JsonUtils::Json& root);
-
-    // Private shop catalog helpers.
 
     /// @brief Identifies generated companion files that should not appear in shop warnings.
     /// @param path File path to inspect.
@@ -133,30 +106,10 @@ private:
     /// @return Pointer to the default asset, or nullptr if none exists.
     static const ShopAsset* findDefaultAsset(const std::vector<ShopAsset>& catalog, ShopAssetType type);
 
-    // Private user-data helpers.
-
     /// @brief Clamps and reconciles user-owned data against the current shop catalog.
     /// @param userData User data to normalize in place.
     /// @param catalog Current shop catalog.
     static void normalizeUserData(UserData& userData, const std::vector<ShopAsset>& catalog);
-
-    /// @brief Reads a forgiving array of positive integer asset IDs.
-    /// @param object JSON object to inspect.
-    /// @param key Field name that may contain an array of IDs.
-    /// @return Positive integer IDs found in the array.
-    static std::set<int> parseIdArray(const JsonUtils::Json& object, const std::string& key);
-
-    /// @brief Serializes normalized user data to the on-disk JSON shape.
-    /// @param userData User data to serialize.
-    /// @return JSON object ready to write to disk.
-    static JsonUtils::Json userDataToJson(const UserData& userData);
-
-    /// @brief Parses saved user data while ignoring malformed optional fields.
-    /// @param root Root JSON value from the user data file.
-    /// @return Parsed user data, with invalid optional fields omitted.
-    static UserData parseUserData(const JsonUtils::Json& root);
-
-    // Private file timestamp helpers used by runtime JSON refresh.
 
     /// @brief Reads the last-write time for a file without throwing on filesystem errors.
     /// @param path Path to inspect.
@@ -205,4 +158,5 @@ private:
 
     /// @brief True after m_userDataWriteTime has been initialized.
     bool m_hasUserDataWriteTime = false;
+#pragma endregion
 };

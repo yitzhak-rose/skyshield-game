@@ -1,28 +1,23 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <memory>
 #include "App/State/GameState.h"
+#include "Enums/ActiveScreen.h"
 #include "Shop/ShopData.h"
 #include "Screens/Core/Screen.h"
 
+#include <SFML/Graphics.hpp>
+#include <memory>
+
 class Game {
 public:
+#pragma region Public
     Game();
     ~Game();
     void run();
+#pragma endregion
 
 private:
-    /// @brief Identifies which top-level screen currently owns user interaction.
-    ///
-    /// Game uses this as a command policy boundary. Screens may request commands,
-    /// but Game only executes commands that are valid for the current screen.
-    enum class ActiveScreen {
-        Start,
-        Game,
-        Shop
-    };
-
+#pragma region Private
     void initBackground();
 
     /// @brief Loads saved persistent state before the first screen is shown.
@@ -58,6 +53,12 @@ private:
     /// @brief Applies a command after it passes the active-screen policy check.
     void applyScreenCommand(ScreenCommand command);
 
+    /// @brief Switches the loop into fatal overlay mode after a runtime exception.
+    void enterFatalMode(const std::string& message);
+
+    /// @brief Routes input only to the fatal overlay while fatal mode is active.
+    void handleFatalEvents();
+
     void update(float dt);
 
     /// @brief Saves user data when coins or shop selections have changed since the last write.
@@ -68,6 +69,9 @@ private:
 
     void render();
 
+    /// @brief Draws the last known screen state and fatal overlay.
+    void renderFatalOverlay();
+
     sf::RenderWindow window;
     sf::Clock m_clock;
     sf::Sprite m_backgroundSprite;
@@ -75,6 +79,9 @@ private:
     GameState m_gameState;
     UserData m_lastSavedUserData;
     ActiveScreen m_activeScreen = ActiveScreen::Start;
+    bool m_fatalMode = false;
 
     std::unique_ptr<Screen> m_screen;
+    std::unique_ptr<OverlayView> m_fatalOverlay;
+#pragma endregion
 };

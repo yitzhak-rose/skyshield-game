@@ -1,5 +1,5 @@
 #include "Gameplay/Enemies/FastEnemy.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 
 FastEnemy::FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
     const GameObject& player, const GameObject& target)

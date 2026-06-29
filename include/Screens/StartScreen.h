@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Enums/StartScreenButton.h"
 #include "Gameplay/Coin.h"
 #include "Screens/Core/Screen.h"
 
@@ -24,14 +25,6 @@ public:
     void draw(sf::RenderWindow& target) override;
 
 private:
-    enum class Button {
-        None,
-        Start,
-        Shop,
-        Settings,
-        Quit
-    };
-
     /// @brief Positions all visual elements for the current fixed window size.
     void configureLayout();
 
@@ -63,7 +56,7 @@ private:
     void updateHover(sf::Vector2f position);
 
     /// @brief Returns the button under a point, or None.
-    Button buttonAt(sf::Vector2f position) const;
+    StartScreenButton buttonAt(sf::Vector2f position) const;
 
     /// @brief Shows the shared feature-unavailable dialog.
     void showFeatureUnavailableOverlay();
@@ -85,7 +78,7 @@ private:
                         sf::RenderStates states,
                         const sf::RectangleShape& button,
                         const sf::Text& text,
-                        Button buttonType) const;
+                        StartScreenButton buttonType) const;
 
     sf::Sprite m_backgroundSprite;
     sf::RectangleShape m_settingsButton;
@@ -99,5 +92,5 @@ private:
     sf::Text m_shopText;
 
     const GameState& m_gameState;
-    Button m_hoveredButton = Button::None;
+    StartScreenButton m_hoveredButton = StartScreenButton::None;
 };

@@ -1,17 +1,11 @@
 #pragma once
 
-#include <array>
-#include <string>
 #include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
 #include "Enums/Sounds.h"
+#include "Structs/ResourceInfo.h"
 
-/// @brief Generic metadata struct to associate a resource key (enum) with its default file path.
-template <typename Key>
-struct ResourceInfo {
-    Key type;           ///< The identifier/key for the resource.
-    std::string path;   ///< The file path to load the resource from.
-};
+#include <array>
 
 namespace Resources {
     /// @brief Statically defined configuration of game object textures and their paths.

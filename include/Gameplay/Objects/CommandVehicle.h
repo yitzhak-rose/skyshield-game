@@ -1,7 +1,7 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
 #include "Graphics/Animation.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 
 /// @brief The armored command vehicle the player protects. Stays in place but animates each frame.
 class CommandVehicle : public GameObject

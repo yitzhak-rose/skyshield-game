@@ -1,5 +1,5 @@
 #include "Gameplay/Projectiles/Bomb.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 #include "App/State/GameState.h"
 
 Bomb::Bomb(const sf::Texture& texture, sf::Vector2f position, GameState& gameState)

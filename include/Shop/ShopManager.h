@@ -1,6 +1,8 @@
 #pragma once
 
 #include "App/State/GameState.h"
+#include "Enums/PreviewAction.h"
+#include "Enums/ShopClickResult.h"
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -10,20 +12,6 @@
 /// @brief Owns shop interaction state and purchase/selection behavior.
 class ShopManager {
 public:
-    /// @brief Action buttons available in the shop preview overlay.
-    enum class PreviewAction {
-        None,
-        Primary,
-        Try,
-        Cancel
-    };
-
-    /// @brief Result of a shop click that may affect screen navigation.
-    enum class ClickResult {
-        None,
-        ReturnToStart
-    };
-
     /// @brief Creates shop logic for the current game state and catalog.
     /// @param gameState Mutable player state used for coins, ownership, and selections.
     /// @param catalog Shop assets loaded from game data.
@@ -39,7 +27,7 @@ public:
     /// @brief Handles a left-click in shop coordinates.
     /// @param position Mouse position in screen coordinates.
     /// @return Navigation request produced by the click, if any.
-    ClickResult handleClick(sf::Vector2f position);
+    ShopClickResult handleClick(sf::Vector2f position);
 
     /// @brief Closes the active preview overlay and stops audio preview.
     void closePreview();

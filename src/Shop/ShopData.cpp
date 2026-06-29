@@ -6,6 +6,10 @@ std::string shopAssetTypeToKey(ShopAssetType type) {
             return "command_vehicle";
         case ShopAssetType::Drone:
             return "drone";
+        case ShopAssetType::FastEnemy:
+            return "fast_enemy";
+        case ShopAssetType::TankEnemy:
+            return "tank_enemy";
         case ShopAssetType::Background:
             return "background";
         case ShopAssetType::BackgroundMusic:
@@ -23,6 +27,10 @@ std::string shopAssetTypeToTitle(ShopAssetType type) {
             return "Command Vehicle";
         case ShopAssetType::Drone:
             return "Drone";
+        case ShopAssetType::FastEnemy:
+            return "Fast Enemy";
+        case ShopAssetType::TankEnemy:
+            return "Tank Enemy";
         case ShopAssetType::Background:
             return "Background";
         case ShopAssetType::BackgroundMusic:
@@ -49,6 +57,8 @@ std::vector<ShopAssetType> allShopAssetTypes() {
     return {
         ShopAssetType::CommandVehicle,
         ShopAssetType::Drone,
+        ShopAssetType::FastEnemy,
+        ShopAssetType::TankEnemy,
         ShopAssetType::Background,
         ShopAssetType::BackgroundMusic,
         ShopAssetType::Font

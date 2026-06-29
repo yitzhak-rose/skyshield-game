@@ -1,6 +1,6 @@
 #include "Gameplay/Enemies/Enemy.h"
 #include "Gameplay/Factory.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 #include "App/State/GameState.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
@@ -181,4 +181,3 @@ void Enemy::defeat() {
     m_explosionRequested = true;    
 
 }
-

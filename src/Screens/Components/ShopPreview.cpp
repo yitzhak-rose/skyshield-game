@@ -1,6 +1,7 @@
 #include "Screens/Components/ShopPreview.h"
 
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
+#include "App/ScreenConstants.h"
 #include "Utilities/Utils.h"
 
 ShopPreview::ShopPreview(GameState& gameState,
@@ -167,15 +168,15 @@ void ShopPreview::drawAffordabilityWarning(sf::RenderTarget& target,
 }
 
 void ShopPreview::drawPreviewButtons(sf::RenderTarget& target, const ShopAsset& asset) const {
-    drawPreviewButton(target, m_shopManager.previewButtonBounds(ShopManager::PreviewAction::Primary),
+    drawPreviewButton(target, m_shopManager.previewButtonBounds(PreviewAction::Primary),
         m_shopManager.primaryPreviewLabel(asset), m_shopManager.primaryPreviewEnabled(asset), true);
 
     if (ShopManager::isMusicAsset(asset)) {
-        drawPreviewButton(target, m_shopManager.previewButtonBounds(ShopManager::PreviewAction::Try),
+        drawPreviewButton(target, m_shopManager.previewButtonBounds(PreviewAction::Try),
             "Try", true, false);
     }
 
-    drawPreviewButton(target, m_shopManager.previewButtonBounds(ShopManager::PreviewAction::Cancel),
+    drawPreviewButton(target, m_shopManager.previewButtonBounds(PreviewAction::Cancel),
         "Cancel", true, false);
 }
 
@@ -210,6 +211,10 @@ int ShopPreview::shopPreviewFrameCount(ShopAssetType type) {
             return VehicleConfig::Sprite.frameCount;
         case ShopAssetType::Drone:
             return DroneConfig::Sprite.frameCount;
+        case ShopAssetType::FastEnemy:
+            return FastEnemyConfig::Stats.sprite.frameCount;
+        case ShopAssetType::TankEnemy:
+            return TankEnemyConfig::Stats.sprite.frameCount;
         case ShopAssetType::Background:
         case ShopAssetType::BackgroundMusic:
         case ShopAssetType::Font:

@@ -1,7 +1,7 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
 #include "Graphics/Animation.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
 
 /// @brief A one-shot visual effect: plays the explosion animation once, then dies.
 class Explosion : public GameObject {

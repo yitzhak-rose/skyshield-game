@@ -1,7 +1,7 @@
 #include "App/State/GameState.h"
 
-#include "App/Constants.h"
-#include "Gameplay/LevelConfig.h"
+#include "App/AssetConstants.h"
+#include "Structs/LevelConfig.h"
 
 #include <algorithm>
 

@@ -12,6 +12,7 @@
 
 class ShopScreen : public Screen {
 public:
+#pragma region Public
     /// @brief Creates the visual shop screen around a ShopManager.
     ShopScreen(GameState& gameState,
                const std::vector<ShopAsset>& catalog,
@@ -25,8 +26,10 @@ public:
 
     /// @brief Draws shop chrome, asset tiles, and the preview overlay.
     void draw(sf::RenderWindow& target) override;
+#pragma endregion
 
 private:
+#pragma region Private
     /// @brief Loads textures and fonts needed for shop previews.
     void loadTextures();
 
@@ -133,4 +136,5 @@ private:
 
     /// @brief Preview overlay and asset-artwork renderer kept out of ShopScreen.
     ShopPreview m_preview;
+#pragma endregion
 };

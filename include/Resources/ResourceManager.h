@@ -14,6 +14,7 @@
 /// @brief Singleton class that manages the loading, storing, and retrieval of game resources.
 class ResourceManager {
 public:
+#pragma region Public
     /// @brief Gets the singleton instance of the ResourceManager.
     /// @return Reference to the singleton ResourceManager instance.
     static ResourceManager& instance();
@@ -41,8 +42,10 @@ public:
 
     /// @brief Loads a standalone font by file path for UI previews.
     sf::Font loadFontFromFile(const std::string& path) const;
+#pragma endregion
 
 private:
+#pragma region Private
     /// @brief Private constructor to enforce the singleton pattern.
     /// @throws std::runtime_error If any resource fails to load.
     ResourceManager();
@@ -71,9 +74,25 @@ private:
                         std::map<Key, Value>& dataMap,
                         std::function<std::string(Key)> pathResolver = nullptr);
 
+    /// @brief Resolves the load path for one resource entry.
+    template<typename Key>
+    static std::string resolveResourcePath(const ResourceInfo<Key>& resource,
+                                           const std::function<std::string(Key)>& pathResolver);
+
+    /// @brief Loads one SFML resource value from a file path.
+    template<typename Value>
+    static void loadResourceValue(Value& value, const std::string& path);
+
+    /// @brief Stores one loaded resource when its key is not a sentinel.
+    template<typename Key, typename Value>
+    static void storeResource(Key type, Value& value, std::map<Key, Value>& dataMap);
+
     /// @brief Stores sound asset paths and verifies they can be opened.
     /// @throws std::runtime_error If any sound file is missing.
     void loadSoundPaths();
+
+    /// @brief Verifies that a sound path can be opened.
+    static void validateSoundPath(const std::string& path);
 
     void setImage(GameObjects image, const std::string& path);
     void setSoundPath(Sounds sound, const std::string& path);
@@ -87,4 +106,5 @@ private:
 
     /// @brief Storage for sound asset paths used by streaming music and effects.
     std::map<Sounds, std::string> m_soundPaths;
+#pragma endregion
 };

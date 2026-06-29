@@ -1,5 +1,6 @@
 #include "Gameplay/Coin.h"
-#include "App/Constants.h"
+#include "App/AssetConstants.h"
+#include "App/ScreenConstants.h"
 #include "Utilities/Utils.h"
 #include <string>
 

@@ -1,40 +1,14 @@
 #pragma once
 
+#include "Enums/ScreenCommand.h"
 #include "Enums/LevelResult.h"
 #include "Screens/Components/OverlayView.h"
+#include "Structs/ScreenEventContext.h"
 
 #include <SFML/Graphics.hpp>
 #include <initializer_list>
 #include <memory>
 #include <string>
-
-/// @brief App-level command requested by a screen.
-///
-/// A command is only a request, not permission to mutate the app. Game reads
-/// this value, checks whether the active screen is allowed to request it, and
-/// only then performs the window or screen transition.
-enum class ScreenCommand {
-    /// @brief No app-level action was requested.
-    None,
-
-    /// @brief Request to leave the start screen and create the gameplay screen.
-    StartGame,
-
-    /// @brief Request to leave the start screen and create the shop screen.
-    OpenShop,
-
-    /// @brief Request to leave gameplay and recreate the start screen.
-    ReturnToStart,
-
-    /// @brief Request to close the app; Game only honors this from StartScreen.
-    Quit
-};
-
-/// @brief Event data derived from the window before dispatching to a screen.
-struct ScreenEventContext {
-    sf::Vector2f mousePosition{};
-    sf::FloatRect viewBounds{};
-};
 
 /// \brief Abstract base class for all game screens.
 class Screen {
