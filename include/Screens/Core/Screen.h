@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Enums/LevelResult.h"
-#include "Screens/OverlayView.h"
+#include "Screens/Components/OverlayView.h"
 
 #include <SFML/Graphics.hpp>
 #include <initializer_list>
@@ -33,6 +33,7 @@ enum class ScreenCommand {
 /// @brief Event data derived from the window before dispatching to a screen.
 struct ScreenEventContext {
     sf::Vector2f mousePosition{};
+    sf::FloatRect viewBounds{};
 };
 
 /// \brief Abstract base class for all game screens.

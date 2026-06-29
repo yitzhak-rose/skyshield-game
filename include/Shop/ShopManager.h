@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>

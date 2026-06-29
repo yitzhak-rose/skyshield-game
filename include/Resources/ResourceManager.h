@@ -8,7 +8,7 @@
 #include "Enums/Fonts.h"
 #include "Enums/GameObjects.h"
 #include "Enums/Sounds.h"
-#include "Gameplay/ShopData.h"
+#include "Shop/ShopData.h"
 #include "Resources.h"
 
 /// @brief Singleton class that manages the loading, storing, and retrieval of game resources.

@@ -2,7 +2,7 @@
 #include "Gameplay/CollisionHandling.h"
 #include "Resources/ResourceManager.h"
 #include "Gameplay/Factory.h"
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <memory>

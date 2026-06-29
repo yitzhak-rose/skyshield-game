@@ -1,6 +1,6 @@
-#include "Screens/Menubar.h"
-#include "Gameplay/Constants.h"
-#include "Gameplay/GameState.h"
+#include "Screens/Components/Menubar.h"
+#include "App/Constants.h"
+#include "App/State/GameState.h"
 #include "Resources/ResourceManager.h"
 #include "Utilities/Utils.h"
 
@@ -191,8 +191,7 @@ void MenuBar::updateBatterySpriteForView(const sf::View& view) const {
     GraphicsUtils::centerOrigin(m_batterySprite);
 
     const float batteryHalfWidth = m_batterySprite.getGlobalBounds().size.x / 2.f;
-    const float rightEdge = view.getCenter().x + view.getSize().x / 2.f;
-    const float pauseLeft = rightEdge - MenuBarConfig::SidePadding - MenuBarConfig::PauseButtonSize;
+    const float pauseLeft = pauseButtonBoundsForView(view).position.x;
     m_batterySprite.setPosition({
         pauseLeft - MenuBarConfig::PauseBatteryGap - batteryHalfWidth,
         m_height / 2.f
@@ -235,20 +234,28 @@ sf::Text MenuBar::makeLevelText() const {
 }
 
 sf::FloatRect MenuBar::pauseButtonBounds() const {
+    return pauseButtonBounds(m_width);
+}
+
+sf::FloatRect MenuBar::pauseButtonBounds(float rightEdge) const {
     return {
-        { m_width - MenuBarConfig::SidePadding - MenuBarConfig::PauseButtonSize,
+        { rightEdge - MenuBarConfig::SidePadding - MenuBarConfig::PauseButtonSize,
           (m_height - MenuBarConfig::PauseButtonSize) / 2.f },
         { MenuBarConfig::PauseButtonSize, MenuBarConfig::PauseButtonSize }
     };
 }
 
 void MenuBar::drawPauseButton(sf::RenderTarget& target, sf::RenderStates states) const {
-    target.draw(makePauseButtonShape(), states);
-    drawPauseIcon(target, states);
+    const sf::FloatRect bounds = pauseButtonBoundsForView(target.getView());
+    target.draw(makePauseButtonShape(bounds), states);
+    drawPauseIcon(target, states, bounds);
 }
 
-sf::RectangleShape MenuBar::makePauseButtonShape() const {
-    const sf::FloatRect bounds = pauseButtonBounds();
+sf::FloatRect MenuBar::pauseButtonBoundsForView(const sf::View& view) const {
+    return pauseButtonBounds(view.getCenter().x + view.getSize().x / 2.f);
+}
+
+sf::RectangleShape MenuBar::makePauseButtonShape(sf::FloatRect bounds) const {
     sf::RectangleShape button(bounds.size);
     button.setPosition(bounds.position);
     button.setFillColor(MenuBarConfig::PauseButtonColor);
@@ -257,8 +264,7 @@ sf::RectangleShape MenuBar::makePauseButtonShape() const {
     return button;
 }
 
-void MenuBar::drawPauseIcon(sf::RenderTarget& target, sf::RenderStates states) const {
-    const sf::FloatRect bounds = pauseButtonBounds();
+void MenuBar::drawPauseIcon(sf::RenderTarget& target, sf::RenderStates states, sf::FloatRect bounds) const {
     const sf::Vector2f center = {
         bounds.position.x + bounds.size.x / 2.f,
         bounds.position.y + bounds.size.y / 2.f

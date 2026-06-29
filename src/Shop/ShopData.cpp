@@ -1,4 +1,4 @@
-#include "Gameplay/ShopData.h"
+#include "Shop/ShopData.h"
 
 std::string shopAssetTypeToKey(ShopAssetType type) {
     switch (type) {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Gameplay/GameState.h"
-#include "Gameplay/ShopManager.h"
-#include "Screens/Screen.h"
+#include "App/State/GameState.h"
+#include "Shop/ShopManager.h"
+#include "Screens/Core/Screen.h"
 
 #include <SFML/Graphics.hpp>
 #include <map>

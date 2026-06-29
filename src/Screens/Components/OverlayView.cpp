@@ -1,7 +1,7 @@
-#include "Screens/OverlayView.h"
-#include "Gameplay/Constants.h"
+#include "Screens/Components/OverlayView.h"
+#include "App/Constants.h"
 #include "Resources/ResourceManager.h"
-#include "Screens/Screen.h"
+#include "Screens/Core/Screen.h"
 #include "Utilities/Utils.h"
 
 #include <algorithm>

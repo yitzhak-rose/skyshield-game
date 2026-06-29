@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gameplay/Coin.h"
-#include "Screens/Screen.h"
+#include "Screens/Core/Screen.h"
 
 #include <SFML/Graphics.hpp>
 #include <functional>

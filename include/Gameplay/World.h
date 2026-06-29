@@ -1,6 +1,6 @@
 #pragma once
 #include "Gameplay/Objects/GameObject.h"
-#include "Gameplay/GameState.h"
+#include "App/State/GameState.h"
 #include "Gameplay/LevelConfig.h"
 #include <vector>
 #include <memory>

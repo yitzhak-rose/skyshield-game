@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gameplay/LevelConfig.h"
-#include "Gameplay/ShopData.h"
+#include "Shop/ShopData.h"
 #include "Utilities/JsonUtils.h"
 
 #include <filesystem>

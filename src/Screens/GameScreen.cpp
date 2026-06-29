@@ -1,6 +1,6 @@
 #include "Screens/GameScreen.h"
 #include "Resources/SoundManager.h"
-#include "Gameplay/Constants.h"
+#include "App/Constants.h"
 #include "Utilities/Utils.h"
 #include <string>
 #include <utility>
@@ -100,9 +100,10 @@ bool GameScreen::handlePauseInput(const sf::Event& event, const ScreenEventConte
 }
 
 bool GameScreen::isPauseClick(const sf::Event& event, const ScreenEventContext& context) const {
+    const float rightEdge = context.viewBounds.position.x + context.viewBounds.size.x;
     return isLeftMousePressed(event) &&
         m_menuBar &&
-        GeometryUtils::contains(m_menuBar->pauseButtonBounds(), context.mousePosition);
+        GeometryUtils::contains(m_menuBar->pauseButtonBounds(rightEdge), context.mousePosition);
 }
 
 std::vector<std::string> GameScreen::makeLevelSummaryLines() const {
