@@ -1,25 +1,24 @@
 #include "Gameplay/World.h"
-#include "Gameplay/Projectiles/Bomb.h"
+//#include "Gameplay/Projectiles/Bomb.h"
 #include "Gameplay/CollisionHandling.h"
 #include "Resources/ResourceManager.h"
+#include "Gameplay/Factory.h" 
 #include "Gameplay/Constants.h"
 #include "Utilities/Utils.h"
 #include <algorithm>
 #include <memory>
-#include "Gameplay/Factory.h" 
-#include <SFML/Window/Keyboard.hpp>
 
 // Builds the level: creates the vehicle and drone (into m_objects), applies the config.
 World::World(const LevelConfig& config, GameState& gameState, int levelNumber)
     : m_config(config)
     , m_gameState(gameState)
     , m_objects()
-    , m_vehicle(Factory::createAndAdd<CommandVehicle>(GameObjects::CommandCar,
-        sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState, m_objects))
-    , m_drone(Factory::createAndAdd<Drone>(GameObjects::Drone,
-        sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState, m_objects))
     , m_enemiesToSpawn(config.enemyCount)
 {
+    m_objects.push_back(Factory::create(GameObjects::CommandCar,
+        sf::Vector2f{ WindowConfig::Width / 2.f, EnemyConfig::SpawnY }, m_gameState));
+    m_objects.push_back(Factory::create(GameObjects::Drone,
+        sf::Vector2f{ WindowConfig::Width / 2.f, DroneConfig::FixedY }, m_gameState));
     m_gameState.startLevel(config, levelNumber);
 }
 
@@ -27,7 +26,6 @@ void World::update(float dt) {
     if (m_gameState.getLevelResult() != LevelResult::Running)
         return;
 
-    handleInput();
     spawnEnemies(dt);
     for (const auto& object : m_objects)
         object->update(dt);
@@ -35,22 +33,6 @@ void World::update(float dt) {
     collectSpawned();
     processDead();
     checkResult();
-}
-
-void World::handleInput() {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-        m_drone.moveLeft();
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-        m_drone.moveRight();
-    else
-        m_drone.stop();
-}
-
-void World::handleEvent(const sf::Event& event) {
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Space)
-            dropBomb();
-    }
 }
 
 void World::spawnEnemies(float dt) {
@@ -66,13 +48,21 @@ void World::spawnEnemies(float dt) {
 }
 
 void World::spawnEnemy() {
+    const GameObject* player = nullptr;
+    const GameObject* target = nullptr;
+    for (const auto& obj : m_objects) {
+        if (!player && obj->isPlayer()) player = obj.get();
+        if (!target && obj->isTarget()) target = obj.get();
+    }
+    if (!player || !target)  return;
+
     bool fromLeft = (Utils::randomFloat(0.f, 1.f) < 0.5f);
     float x = fromLeft ? 0.f : WindowConfig::Width;
     sf::Vector2f position = { x, EnemyConfig::SpawnY };
 
     EnemyType type = (Utils::randomFloat(0.f, 1.f) < m_config.tankChance)
         ? EnemyType::Tank : EnemyType::Fast;
-    m_objects.push_back(Factory::createEnemy(type, position, m_gameState, m_drone, m_vehicle));
+    m_objects.push_back(Factory::createEnemy(type, position, m_gameState, *player, *target));
 }
 
 void World::collectSpawned() {
@@ -127,15 +117,3 @@ void World::draw(sf::RenderWindow& target) const {
         object->draw(target);
 }
 
-void World::dropBomb() {
-    //  Check there's ammo left (and if so, take one bomb off the count)
-    if (!m_drone.consumeAmmo())
-        return;
-
-    //  Build the bomb through the factory and push it straight into the object list
-    m_objects.push_back(Factory::create(
-        GameObjects::Bomb,
-        m_drone.getPosition(),
-        m_gameState
-    ));
-}

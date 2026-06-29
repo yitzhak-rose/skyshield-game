@@ -42,6 +42,12 @@ public:
     /// @brief Stops an active preview and resumes the previous background track if needed.
     void stopPreview();
 
+    /// @brief Lowers the background music volume (used while paused or in menus).
+    void duckBackgroundVolume();
+
+    /// @brief Restores the background music volume to normal.
+    void restoreBackgroundVolume();
+
 private:
     SoundManager();
     ~SoundManager() = default;
@@ -75,6 +81,7 @@ private:
     float m_currentBackgroundVolume = BackgroundVolume;
     float m_targetBackgroundVolume = BackgroundVolume;
     float m_previewElapsed = 0.f;
+    bool m_manuallyDucked = false;
 
     static constexpr float BackgroundVolume = 100.f;
     static constexpr float DuckedBackgroundVolume = BackgroundVolume * 0.25f;

@@ -74,6 +74,9 @@ void SoundManager::update(float deltaTime) {
 }
 
 void SoundManager::restoreBackgroundVolumeIfEffectsFinished() {
+    if (m_manuallyDucked)
+        return;
+
     if (m_backgroundDucked &&
         m_levelFinishedSound.getStatus() == sf::Sound::Status::Stopped &&
         m_missionFailedSound.getStatus() == sf::Sound::Status::Stopped) {
@@ -154,4 +157,14 @@ void SoundManager::stopPreview() {
         m_backgroundMusic.play();
 
     m_resumeBackgroundAfterPreview = false;
+}
+
+void SoundManager::duckBackgroundVolume() {
+    m_manuallyDucked = true;
+    m_targetBackgroundVolume = DuckedBackgroundVolume;
+}
+
+void SoundManager::restoreBackgroundVolume() {
+    m_manuallyDucked = false;
+    m_targetBackgroundVolume = BackgroundVolume;
 }

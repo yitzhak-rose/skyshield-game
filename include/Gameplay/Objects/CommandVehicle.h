@@ -19,6 +19,9 @@ public:
     /// @brief Returns the current armor as a percentage (0 to 100).
     float getArmorPercent() const;
 
+    /// @brief Marks the vehicle as a target enemies should advance on.
+    bool isTarget() const override { return true; }
+
 private:
     /// @brief Picks and shows the right beacon/burning frame for this moment.
     void updateAnimationFrame(float dt);

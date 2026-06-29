@@ -1,11 +1,7 @@
 #pragma once
-
 #include "Gameplay/Objects/GameObject.h"
-#include "Gameplay/Objects/Drone.h"
-#include "Gameplay/Objects/CommandVehicle.h"
 #include "Gameplay/GameState.h"
 #include "Gameplay/LevelConfig.h"
-
 #include <vector>
 #include <memory>
 
@@ -23,12 +19,6 @@ public:
     /// @brief Draws every live object in the world.
     void draw(sf::RenderWindow& target) const;
 
-    /// @brief Drops a bomb from the drone's current position, if ammo remains.
-    void dropBomb();
-
-    /// @brief Handles a single discrete input event (currently: Space to drop a bomb).
-    void handleEvent(const sf::Event& event);
-
     /// @brief Returns whether the level is still running, won, or lost.
     LevelResult getResult() const { return m_gameState.getLevelResult(); }
 
@@ -36,9 +26,6 @@ public:
     int getCoinsEarned() const { return m_gameState.getLevelCoins(); }
 
 private:
-    /// @brief Applies real-time keyboard input to the drone's movement.
-    void handleInput();
-
     /// @brief Spawns a new enemy once the spawn interval has elapsed, while any remain.
     void spawnEnemies(float dt);
 
@@ -61,9 +48,6 @@ private:
     GameState& m_gameState;
 
     std::vector<std::unique_ptr<GameObject>> m_objects;
-
-    CommandVehicle& m_vehicle;
-    Drone& m_drone;
 
     int   m_enemiesToSpawn;
     float m_spawnTimer = 0.f;

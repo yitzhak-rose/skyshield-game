@@ -39,25 +39,22 @@ std::unique_ptr<GameObject> Factory::create(GameObjects type, sf::Vector2f posit
     return it->second(position, gameState);
 }
 
-std::unique_ptr<GameObject> Factory::createEnemy(EnemyType type, sf::Vector2f position, GameState& gameState, Drone& drone, CommandVehicle& vehicle) {
+std::unique_ptr<GameObject> Factory::createEnemy(EnemyType type, sf::Vector2f position, GameState& gameState, const GameObject& player, const GameObject& target) {
     static const std::map<EnemyType, EnemyCreatorFunc> enemyCreators = {
-        { EnemyType::Tank, [](sf::Vector2f pos, GameState& state, Drone& d, CommandVehicle& v) {
-            // Builds a TankEnemy using the GameObjects::Enemy texture
+        { EnemyType::Tank, [](sf::Vector2f pos, GameState& state, const GameObject& player, const GameObject& target) {
             return std::make_unique<TankEnemy>(
-                ResourceManager::instance().getImage(GameObjects::Enemy), pos, state, d, v);
+                ResourceManager::instance().getImage(GameObjects::Enemy), pos, state, player, target);
         }},
-        { EnemyType::Fast, [](sf::Vector2f pos, GameState& state, Drone& d, CommandVehicle& v) {
-            // Builds a FastEnemy using the GameObjects::SmallEnemy texture
+        { EnemyType::Fast, [](sf::Vector2f pos, GameState& state, const GameObject& player, const GameObject& target) {
             return std::make_unique<FastEnemy>(
-                ResourceManager::instance().getImage(GameObjects::SmallEnemy), pos, state, d, v);
+                ResourceManager::instance().getImage(GameObjects::SmallEnemy), pos, state, player, target);
         }}
     };
-
     auto it = enemyCreators.find(type);
     if (it == enemyCreators.end()) {
         throw std::invalid_argument("Factory::createEnemy - Unknown EnemyType!");
     }
-    return it->second(position, gameState, drone, vehicle);
+    return it->second(position, gameState, player, target);
 }
 
 std::unique_ptr<GameObject> Factory::createBullet(sf::Vector2f position, float velocityX, GameState& gameState) {

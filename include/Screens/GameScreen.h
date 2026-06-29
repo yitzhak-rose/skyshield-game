@@ -38,6 +38,9 @@ private:
     /// @brief Shows the level-completed summary and continue action.
     void showLevelCompletedOverlay();
 
+    /// @brief Shows the pause overlay with resume and quit-to-start actions.
+    void showPauseOverlay();
+
     /// @brief Returns summary lines reused by completion overlays.
     std::vector<std::string> makeLevelSummaryLines() const;
 

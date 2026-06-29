@@ -1,16 +1,13 @@
 #pragma once
 #include "Gameplay/Enemies/Enemy.h"
 
-class Drone;
-class CommandVehicle;
-
 /// @brief A fast, fragile enemy: dies from a single bomb hit.
 class FastEnemy : public Enemy {
 public:
 
     /// @brief Constructs a fast enemy with a texture, position, and the live drone/vehicle refs.
     FastEnemy(const sf::Texture& texture, sf::Vector2f position, GameState& gameState,
-        const Drone& drone, const CommandVehicle& vehicle);
+        const GameObject& player, const GameObject& target);
 
     /// @brief Dies immediately when hit.
     void onHit() override;
