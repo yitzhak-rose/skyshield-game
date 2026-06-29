@@ -219,6 +219,6 @@ namespace CoinConfig {
 
 namespace ExplosionConfig {
     inline constexpr int   FrameCount = 8;      // frames in explosion.png
-    inline constexpr float FrameDuration = 0.010f; // seconds per frame (8×0.06 ≈ 0.5s total)
+    inline constexpr float FrameDuration = 0.08f;; // seconds per frame (8×0.06 ≈ 0.5s total)
     inline constexpr float Scale = 1.2f;        // on-screen size multiplier
 }

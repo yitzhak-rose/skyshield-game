@@ -6,6 +6,7 @@ Explosion::Explosion(const sf::Texture& texture, sf::Vector2f position, GameStat
         ExplosionConfig::FrameCount, ExplosionConfig::FrameDuration)
 {
     setupSprite(m_animation.getFrameRect(), ExplosionConfig::Scale);
+    m_animation.applyInitialFrame(m_sprite);
 }
 
 void Explosion::update(float dt) {

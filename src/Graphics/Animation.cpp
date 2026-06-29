@@ -36,6 +36,10 @@ sf::IntRect Animation::frameRect(int index) const {
     return sf::IntRect({ index * m_frameSize.x, 0 }, m_frameSize);
 }
 
+void Animation::applyInitialFrame(sf::Sprite& sprite) const {
+    sprite.setTextureRect(frameRect(0));
+}
+
 void Animation::apply(sf::Sprite& sprite, float dt) {
     update(dt);
     sprite.setTextureRect(getFrameRect());
@@ -46,4 +50,5 @@ void Animation::reset() {
     m_currentFrame = 0;
     m_timer = 0.f;
 }
+
 
