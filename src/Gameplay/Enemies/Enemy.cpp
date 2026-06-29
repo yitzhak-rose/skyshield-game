@@ -156,12 +156,14 @@ std::unique_ptr<GameObject> Enemy::takeSpawn() {
         return Factory::instance().create(GameObjects::Explosion, getPosition(), gameState());
     }
 
-    if (!m_fireRequested)
-        return nullptr;
+    if (m_fireRequested) {
+        m_fireRequested = false;
+        return Factory::instance().createBullet(getMuzzlePosition(), getBulletVelocityX(), gameState());
+    }
 
-    m_fireRequested = false;
-    return Factory::instance().createBullet(getMuzzlePosition(), getBulletVelocityX(), gameState());
+    return nullptr;
 }
+
 // Offsets the muzzle toward the vehicle, so bullets leave the gun, not the body center.
 sf::Vector2f Enemy::getMuzzlePosition() const {
     return getPosition() + sf::Vector2f{ directionToVehicle() * m_muzzleOffset.x, m_muzzleOffset.y };

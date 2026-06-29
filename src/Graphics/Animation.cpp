@@ -20,7 +20,7 @@ void Animation::update(float dt) {
         return;
 
     m_timer -= m_frameDuration;
-    ++m_currentFrame;
+    m_currentFrame++;
 
     if (m_currentFrame >= m_frameCount)
         m_currentFrame = 0;
