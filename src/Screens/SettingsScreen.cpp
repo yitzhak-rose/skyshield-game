@@ -1,8 +1,10 @@
 #include "Screens/SettingsScreen.h"
 
+#include "App/ButtonStyles.h"
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
+#include "Screens/Components/TextButton.h"
 #include "Utilities/Utils.h"
 
 #include <algorithm>
@@ -298,19 +300,18 @@ void SettingsScreen::drawAudioButton(sf::RenderTarget& target,
                                      SettingsControl control,
                                      bool active) const {
     const sf::FloatRect bounds = audioButtonBounds(control);
-    sf::RectangleShape button(bounds.size);
-    button.setPosition(bounds.position);
     const bool hovered = m_hoveredControl == control;
     const sf::Color fill = active
         ? SettingsScreenConfig::ButtonHoverColor
         : (hovered ? SettingsScreenConfig::InactiveAudioButtonHoverColor : SettingsScreenConfig::ButtonColor);
-    styleRectangle(
-        button,
-        fill,
-        SettingsScreenConfig::PanelOutlineColor,
-        active
-            ? SettingsScreenConfig::ActiveButtonOutlineThickness
-            : SettingsScreenConfig::ButtonOutlineThickness);
+
+    TextButton button(m_font, label, bounds);
+    TextButtonMetrics metrics = ButtonStyles::settingsMetrics(SettingsScreenConfig::LabelTextSize, 16);
+    metrics.textOffset = { SettingsScreenConfig::AudioLabelOffsetX, 0.f };
+    button.setMetrics(metrics);
+    button.setColors(ButtonStyles::settingsColors(fill, SettingsScreenConfig::InactiveAudioButtonHoverColor));
+    button.setHovered(hovered && !active);
+    button.setSelected(active);
     target.draw(button);
 
     sf::Sprite iconSprite(ResourceManager::instance().getImage(icon));
@@ -321,13 +322,6 @@ void SettingsScreen::drawAudioButton(sf::RenderTarget& target,
     });
     target.draw(iconSprite);
 
-    target.draw(makeCenteredText(
-        m_font,
-        label,
-        SettingsScreenConfig::LabelTextSize,
-        { bounds.position.x + bounds.size.x / 2.f + SettingsScreenConfig::AudioLabelOffsetX,
-          bounds.position.y + bounds.size.y / 2.f },
-        SettingsScreenConfig::TextColor));
 }
 
 void SettingsScreen::drawSlider(sf::RenderTarget& target) const {
@@ -379,21 +373,15 @@ void SettingsScreen::drawActionButton(sf::RenderTarget& target,
                                       SettingsControl control,
                                       sf::FloatRect bounds,
                                       bool danger) const {
-    sf::RectangleShape button(bounds.size);
-    button.setPosition(bounds.position);
     const bool hovered = m_hoveredControl == control;
     const sf::Color base = danger ? SettingsScreenConfig::DangerColor : SettingsScreenConfig::ButtonColor;
     const sf::Color hover = danger ? SettingsScreenConfig::DangerHoverColor : SettingsScreenConfig::ButtonHoverColor;
-    styleRectangle(
-        button,
-        hovered ? hover : base,
-        SettingsScreenConfig::PanelOutlineColor,
-        SettingsScreenConfig::ButtonOutlineThickness);
+
+    TextButton button(m_font, label, bounds);
+    button.setColors(ButtonStyles::settingsColors(base, hover));
+    button.setMetrics(ButtonStyles::settingsMetrics(SettingsScreenConfig::ButtonTextSize, 18));
+    button.setAvailableBounds({ { SettingsScreenConfig::PanelX, bounds.position.y },
+        { SettingsScreenConfig::PanelWidth, bounds.size.y } });
+    button.setHovered(hovered);
     target.draw(button);
-    target.draw(makeCenteredText(
-        m_font,
-        label,
-        SettingsScreenConfig::ButtonTextSize,
-        centerOf(bounds),
-        SettingsScreenConfig::TextColor));
 }

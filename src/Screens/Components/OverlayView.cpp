@@ -1,7 +1,9 @@
 #include "Screens/Components/OverlayView.h"
+#include "App/ButtonStyles.h"
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
+#include "Screens/Components/TextButton.h"
 #include "Screens/Core/Screen.h"
 #include "Utilities/Utils.h"
 
@@ -153,24 +155,16 @@ void OverlayView::drawText(sf::RenderTarget& target, sf::RenderStates states) co
 void OverlayView::drawButtons(sf::RenderTarget& target, sf::RenderStates states) const {
     for (std::size_t i = 0; i < m_actions.size(); ++i) {
         const sf::FloatRect& bounds = m_buttonBounds[i];
-        sf::RectangleShape button(bounds.size);
-        button.setPosition(bounds.position);
-        const float outlineThickness = i == m_selectedAction
-            ? OverlayViewConfig::SelectedButtonOutlineThickness
-            : OverlayViewConfig::ButtonOutlineThickness;
-        Screen::styleRectangle(button,
-            buttonColor(m_actions[i], i == m_selectedAction),
-            OverlayViewConfig::ButtonOutlineColor,
-            outlineThickness);
+        TextButtonColors colors = ButtonStyles::overlayColors(buttonColor(m_actions[i], i == m_selectedAction));
+        TextButtonMetrics metrics = ButtonStyles::overlayMetrics(OverlayViewConfig::ButtonTextSize, 18);
+        metrics.textOffset = { 0.f, -2.f };
 
+        TextButton button(m_font, m_actions[i].label, bounds);
+        button.setColors(colors);
+        button.setMetrics(metrics);
+        button.setSelected(i == m_selectedAction);
+        button.setEnabled(m_actions[i].enabled);
         target.draw(button, states);
-        target.draw(Screen::makeCenteredText(m_font,
-                                             m_actions[i].label,
-                                             OverlayViewConfig::ButtonTextSize,
-                                             { bounds.position.x + bounds.size.x / 2.f,
-                                               bounds.position.y + bounds.size.y / 2.f - 2.f },
-                                             OverlayViewConfig::ButtonTextColor),
-                    states);
     }
 }
 

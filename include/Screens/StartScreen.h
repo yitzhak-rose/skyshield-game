@@ -2,6 +2,7 @@
 
 #include "Enums/StartScreenButton.h"
 #include "Gameplay/Coin.h"
+#include "Screens/Components/TextButton.h"
 #include "Screens/Core/Screen.h"
 
 #include <SFML/Graphics.hpp>
@@ -43,12 +44,6 @@ private:
     /// @brief Positions and styles the Start Game and Shop buttons.
     void configureMainButtons();
 
-    /// @brief Styles one menu button.
-    void configureMenuButton(sf::RectangleShape& button);
-
-    /// @brief Positions and styles the text labels for the main buttons.
-    void configureButtonText();
-
     /// @brief Handles a left mouse click in screen coordinates.
     void handleClick(sf::Vector2f position);
 
@@ -70,23 +65,14 @@ private:
     /// @brief Positions the quit button against the current render target's top-right corner.
     void updateQuitButtonForTarget(const sf::RenderWindow& target) const;
 
-    /// @brief Draws one text button.
-    void drawTextButton(sf::RenderWindow& target,
-                        sf::RenderStates states,
-                        const sf::RectangleShape& button,
-                        const sf::Text& text,
-                        StartScreenButton buttonType) const;
-
     sf::Sprite m_backgroundSprite;
     sf::RectangleShape m_settingsButton;
     sf::Sprite m_settingsSprite;
     Coin m_coin;
     mutable sf::RectangleShape m_quitButton;
     mutable sf::Sprite m_quitSprite;
-    sf::RectangleShape m_startButton;
-    sf::RectangleShape m_shopButton;
-    sf::Text m_startText;
-    sf::Text m_shopText;
+    TextButton m_startButton;
+    TextButton m_shopButton;
 
     const GameState& m_gameState;
     StartScreenButton m_hoveredButton = StartScreenButton::None;

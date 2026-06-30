@@ -1,8 +1,10 @@
 #include "Screens/Components/ScrollableTextOverlay.h"
 
+#include "App/ButtonStyles.h"
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
+#include "Screens/Components/TextButton.h"
 #include "Screens/Core/Screen.h"
 #include "Utilities/Utils.h"
 
@@ -186,19 +188,11 @@ void ScrollableTextOverlay::draw(sf::RenderTarget& target, sf::RenderStates stat
         target.draw(thumb, states);
     }
 
-    const sf::FloatRect closeBounds = closeButtonBounds();
-    sf::RectangleShape closeButton(closeBounds.size);
-    closeButton.setPosition(closeBounds.position);
-    Screen::styleRectangle(
-        closeButton,
-        m_closeHovered ? OverlayViewConfig::PrimaryButtonColor : OverlayViewConfig::DefaultButtonColor,
-        OverlayViewConfig::ButtonOutlineColor,
-        OverlayViewConfig::ButtonOutlineThickness);
+    TextButton closeButton(m_font, "Close", closeButtonBounds());
+    closeButton.setColors(ButtonStyles::overlayHoverColors(
+        OverlayViewConfig::DefaultButtonColor,
+        OverlayViewConfig::PrimaryButtonColor));
+    closeButton.setMetrics(ButtonStyles::overlayMetrics(ScrollableOverlayConfig::ButtonTextSize, 18));
+    closeButton.setHovered(m_closeHovered);
     target.draw(closeButton, states);
-    target.draw(Screen::makeCenteredText(
-        m_font,
-        "Close",
-        ScrollableOverlayConfig::ButtonTextSize,
-        Screen::centerOf(closeBounds),
-        OverlayViewConfig::ButtonTextColor), states);
 }

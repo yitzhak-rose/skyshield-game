@@ -1,7 +1,9 @@
 #include "Screens/Components/ShopPreview.h"
 
+#include "App/ButtonStyles.h"
 #include "App/AssetConstants.h"
 #include "App/ScreenConstants.h"
+#include "Screens/Components/TextButton.h"
 #include "Utilities/Utils.h"
 
 ShopPreview::ShopPreview(GameState& gameState,
@@ -185,17 +187,13 @@ void ShopPreview::drawPreviewButton(sf::RenderTarget& target,
                                     const std::string& label,
                                     bool enabled,
                                     bool primary) const {
-    sf::RectangleShape button(bounds.size);
-    button.setPosition(bounds.position);
-    Screen::styleRectangle(button,
+    TextButton button(m_fallbackFont, label, bounds);
+    button.setColors(ButtonStyles::disabledOverlayColors(
         previewButtonColor(enabled, primary),
-        OverlayViewConfig::ButtonOutlineColor,
-        OverlayViewConfig::ButtonOutlineThickness);
+        OverlayViewConfig::DisabledButtonColor));
+    button.setMetrics(ButtonStyles::overlayMetrics(OverlayViewConfig::ButtonTextSize, 18));
+    button.setEnabled(enabled);
     target.draw(button);
-
-    sf::Text text = Screen::makeCenteredText(m_fallbackFont, label, OverlayViewConfig::ButtonTextSize,
-        Screen::centerOf(bounds), OverlayViewConfig::ButtonTextColor);
-    target.draw(text);
 }
 
 sf::Color ShopPreview::previewButtonColor(bool enabled, bool primary) {

@@ -1,8 +1,10 @@
 #include "Screens/ShopScreen.h"
 
+#include "App/ButtonStyles.h"
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "Resources/ResourceManager.h"
+#include "Screens/Components/TextButton.h"
 #include "Utilities/Utils.h"
 
 #include <string>
@@ -71,14 +73,10 @@ void ShopScreen::drawHeader(sf::RenderTarget& target) const {
 }
 
 void ShopScreen::drawBackButton(sf::RenderTarget& target) const {
-    sf::RectangleShape back(ShopManager::backButtonBounds().size);
-    back.setPosition(ShopManager::backButtonBounds().position);
-    styleRectangle(back, ShopScreenConfig::PanelColor, ShopScreenConfig::OutlineColor, 2.f);
-    target.draw(back);
-
-    sf::Text backText = makeCenteredText(m_font, "Back", ShopScreenConfig::ButtonTextSize,
-        centerOf(ShopManager::backButtonBounds()), ShopScreenConfig::TextColor);
-    target.draw(backText);
+    TextButton button(m_font, "Back", ShopManager::backButtonBounds());
+    button.setColors(ButtonStyles::shopColors(ShopScreenConfig::PanelColor));
+    button.setMetrics(ButtonStyles::shopMetrics(ShopScreenConfig::ButtonTextSize, 18));
+    target.draw(button);
 }
 
 void ShopScreen::drawHeaderText(sf::RenderTarget& target) const {
@@ -121,21 +119,14 @@ void ShopScreen::drawCategories(sf::RenderTarget& target) const {
 }
 
 void ShopScreen::drawCategoryTab(sf::RenderTarget& target, ShopAssetType type, sf::FloatRect bounds) const {
-    sf::RectangleShape tab(bounds.size);
-    tab.setPosition(bounds.position);
     const sf::Color fill = type == m_shopManager.activeType()
         ? ShopScreenConfig::SelectedColor
         : ShopScreenConfig::PanelColor;
-    styleRectangle(tab, fill, ShopScreenConfig::OutlineColor, 2.f);
-    target.draw(tab);
 
-    drawCenteredFittedText(target,
-        shopAssetTypeToTitle(type),
-        ShopScreenConfig::ButtonTextSize,
-        18,
-        bounds,
-        14.f,
-        ShopScreenConfig::TextColor);
+    TextButton button(m_font, shopAssetTypeToTitle(type), bounds);
+    button.setColors(ButtonStyles::shopColors(fill));
+    button.setMetrics(ButtonStyles::shopMetrics(ShopScreenConfig::ButtonTextSize, 18));
+    target.draw(button);
 }
 
 void ShopScreen::drawTiles(sf::RenderTarget& target) const {
@@ -238,22 +229,4 @@ void ShopScreen::drawFittedText(sf::RenderTarget& target,
     target.draw(text);
 }
 
-void ShopScreen::drawCenteredFittedText(sf::RenderTarget& target,
-                                        const std::string& value,
-                                        unsigned int size,
-                                        unsigned int minSize,
-                                        sf::FloatRect bounds,
-                                        float horizontalPadding,
-                                        sf::Color color) const {
-    sf::Text text(m_font, value, size);
-    text.setFillColor(color);
-
-    const float maxWidth = bounds.size.x - horizontalPadding * 2.f;
-    while (text.getLocalBounds().size.x > maxWidth && text.getCharacterSize() > minSize)
-        text.setCharacterSize(text.getCharacterSize() - 1u);
-
-    GraphicsUtils::centerOrigin(text);
-    text.setPosition(centerOf(bounds));
-    target.draw(text);
-}
 #pragma endregion

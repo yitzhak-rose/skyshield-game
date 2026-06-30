@@ -1,5 +1,6 @@
 #include "Screens/StartScreen.h"
 
+#include "App/ButtonStyles.h"
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
 #include "App/State/GameState.h"
@@ -18,14 +19,8 @@ StartScreen::StartScreen(const GameState& gameState)
         ResourceManager::instance().getFont(Fonts::StencilForce))
     , m_quitButton({ StartScreenConfig::QuitButtonSize, StartScreenConfig::QuitButtonSize })
     , m_quitSprite(ResourceManager::instance().getImage(GameObjects::XSquare))
-    , m_startButton({ StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight })
-    , m_shopButton({ StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight })
-    , m_startText(ResourceManager::instance().getFont(Fonts::StencilForce),
-                  "Start Game",
-                  StartScreenConfig::ButtonTextSize)
-    , m_shopText(ResourceManager::instance().getFont(Fonts::StencilForce),
-                 "Shop",
-                 StartScreenConfig::ButtonTextSize)
+    , m_startButton(ResourceManager::instance().getFont(Fonts::StencilForce), "Start Game")
+    , m_shopButton(ResourceManager::instance().getFont(Fonts::StencilForce), "Shop")
     , m_gameState(gameState) {
     configureLayout();
 }
@@ -36,7 +31,6 @@ void StartScreen::configureLayout() {
     configureCoinCounter();
     configureQuitButtonStyle();
     configureMainButtons();
-    configureButtonText();
 }
 
 void StartScreen::configureBackground() {
@@ -90,34 +84,28 @@ void StartScreen::configureQuitButtonStyle() {
 }
 
 void StartScreen::configureMainButtons() {
-    m_startButton.setPosition({
-        WindowConfig::Width / 2.f - StartScreenConfig::ButtonWidth / 2.f,
-        WindowConfig::Height / 2.f - StartScreenConfig::ButtonHeight -
-            StartScreenConfig::ButtonGap / 2.f
-        });
-    m_shopButton.setPosition({
-        WindowConfig::Width / 2.f - StartScreenConfig::ButtonWidth / 2.f,
-        WindowConfig::Height / 2.f + StartScreenConfig::ButtonGap / 2.f
-        });
+    m_startButton.setBounds({
+        {
+            WindowConfig::Width / 2.f - StartScreenConfig::ButtonWidth / 2.f,
+            WindowConfig::Height / 2.f - StartScreenConfig::ButtonHeight -
+                StartScreenConfig::ButtonGap / 2.f
+        },
+        { StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight }
+    });
+    m_shopButton.setBounds({
+        {
+            WindowConfig::Width / 2.f - StartScreenConfig::ButtonWidth / 2.f,
+            WindowConfig::Height / 2.f + StartScreenConfig::ButtonGap / 2.f
+        },
+        { StartScreenConfig::ButtonWidth, StartScreenConfig::ButtonHeight }
+    });
 
-    configureMenuButton(m_startButton);
-    configureMenuButton(m_shopButton);
-}
-
-void StartScreen::configureMenuButton(sf::RectangleShape& button) {
-    styleRectangle(button,
-        StartScreenConfig::ButtonColor,
-        StartScreenConfig::ButtonOutlineColor,
-        StartScreenConfig::ButtonOutlineThickness);
-}
-
-void StartScreen::configureButtonText() {
-    m_startText.setFillColor(StartScreenConfig::ButtonTextColor);
-    m_shopText.setFillColor(StartScreenConfig::ButtonTextColor);
-    GraphicsUtils::centerOrigin(m_startText);
-    GraphicsUtils::centerOrigin(m_shopText);
-    m_startText.setPosition(centerOf(m_startButton));
-    m_shopText.setPosition(centerOf(m_shopButton));
+    m_startButton.setColors(ButtonStyles::startMenuColors());
+    m_shopButton.setColors(ButtonStyles::startMenuColors());
+    m_startButton.setMetrics(ButtonStyles::startMenuMetrics());
+    m_shopButton.setMetrics(ButtonStyles::startMenuMetrics());
+    m_startButton.setCallback([this]() { requestCommand(ScreenCommand::StartGame); });
+    m_shopButton.setCallback([this]() { requestCommand(ScreenCommand::OpenShop); });
 }
 
 void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
@@ -133,15 +121,17 @@ void StartScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCon
 
 void StartScreen::updateHover(sf::Vector2f position) {
     m_hoveredButton = buttonAt(position);
+    m_startButton.setHovered(m_hoveredButton == StartScreenButton::Start);
+    m_shopButton.setHovered(m_hoveredButton == StartScreenButton::Shop);
 }
 
 void StartScreen::handleClick(sf::Vector2f position) {
+    if (m_startButton.click(position) || m_shopButton.click(position))
+        return;
+
     switch (buttonAt(position)) {
         case StartScreenButton::Start:
-            requestCommand(ScreenCommand::StartGame);
-            break;
         case StartScreenButton::Shop:
-            requestCommand(ScreenCommand::OpenShop);
             break;
         case StartScreenButton::Settings:
             requestCommand(ScreenCommand::OpenSettings);
@@ -161,10 +151,10 @@ StartScreenButton StartScreen::buttonAt(sf::Vector2f position) const {
     if (GeometryUtils::contains(m_quitButton.getGlobalBounds(), position))
         return StartScreenButton::Quit;
 
-    if (GeometryUtils::contains(m_startButton.getGlobalBounds(), position))
+    if (m_startButton.contains(position))
         return StartScreenButton::Start;
 
-    if (GeometryUtils::contains(m_shopButton.getGlobalBounds(), position))
+    if (m_shopButton.contains(position))
         return StartScreenButton::Shop;
 
     return StartScreenButton::None;
@@ -178,25 +168,12 @@ void StartScreen::update(float deltaTime) {
 
 void StartScreen::draw(sf::RenderWindow& target) {
     target.draw(m_backgroundSprite);
-    drawTextButton(target, sf::RenderStates::Default, m_startButton, m_startText, StartScreenButton::Start);
-    drawTextButton(target, sf::RenderStates::Default, m_shopButton, m_shopText, StartScreenButton::Shop);
+    target.draw(m_startButton);
+    target.draw(m_shopButton);
     drawSettingsButton(target);
     drawCoinCounter(target);
     drawQuitButton(target);
     drawOverlay(target);
-}
-
-void StartScreen::drawTextButton(sf::RenderWindow& target,
-                                 sf::RenderStates states,
-                                 const sf::RectangleShape& button,
-                                 const sf::Text& text,
-                                 StartScreenButton buttonType) const {
-    sf::RectangleShape buttonShape = button;
-    if (m_hoveredButton == buttonType)
-        buttonShape.setFillColor(StartScreenConfig::ButtonHoverColor);
-
-    target.draw(buttonShape, states);
-    target.draw(text, states);
 }
 
 void StartScreen::drawSettingsButton(sf::RenderWindow& target) const {
