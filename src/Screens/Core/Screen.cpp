@@ -68,6 +68,11 @@ void Screen::clearDismissedOverlay() {
         m_overlay.reset();
 }
 
+void Screen::requestCommand(ScreenCommand command) {
+    if (m_command == ScreenCommand::None)
+        m_command = command;
+}
+
 void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
     m_overlay = std::move(overlay);
 }

@@ -84,7 +84,7 @@ protected:
     virtual void handleScreenEvent(const sf::Event& /*event*/, const ScreenEventContext& /*context*/) {}
 
     /// @brief Requests an app-level command for Game to execute.
-    void requestCommand(ScreenCommand command) { m_command = command; }
+    void requestCommand(ScreenCommand command);
 
     /// @brief Shows an overlay owned by this screen.
     void showOverlay(std::unique_ptr<OverlayView> overlay);
