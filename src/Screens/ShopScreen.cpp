@@ -129,9 +129,13 @@ void ShopScreen::drawCategoryTab(sf::RenderTarget& target, ShopAssetType type, s
     styleRectangle(tab, fill, ShopScreenConfig::OutlineColor, 2.f);
     target.draw(tab);
 
-    sf::Text text = makeCenteredText(m_font, shopAssetTypeToTitle(type), ShopScreenConfig::ButtonTextSize,
-        centerOf(bounds), ShopScreenConfig::TextColor);
-    target.draw(text);
+    drawCenteredFittedText(target,
+        shopAssetTypeToTitle(type),
+        ShopScreenConfig::ButtonTextSize,
+        18,
+        bounds,
+        14.f,
+        ShopScreenConfig::TextColor);
 }
 
 void ShopScreen::drawTiles(sf::RenderTarget& target) const {
@@ -231,6 +235,25 @@ void ShopScreen::drawFittedText(sf::RenderTarget& target,
     sf::Text text = makeText(m_font, value, size, position, color);
     while (text.getLocalBounds().size.x > maxWidth && text.getCharacterSize() > minSize)
         text.setCharacterSize(text.getCharacterSize() - 1u);
+    target.draw(text);
+}
+
+void ShopScreen::drawCenteredFittedText(sf::RenderTarget& target,
+                                        const std::string& value,
+                                        unsigned int size,
+                                        unsigned int minSize,
+                                        sf::FloatRect bounds,
+                                        float horizontalPadding,
+                                        sf::Color color) const {
+    sf::Text text(m_font, value, size);
+    text.setFillColor(color);
+
+    const float maxWidth = bounds.size.x - horizontalPadding * 2.f;
+    while (text.getLocalBounds().size.x > maxWidth && text.getCharacterSize() > minSize)
+        text.setCharacterSize(text.getCharacterSize() - 1u);
+
+    GraphicsUtils::centerOrigin(text);
+    text.setPosition(centerOf(bounds));
     target.draw(text);
 }
 #pragma endregion

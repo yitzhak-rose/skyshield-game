@@ -91,6 +91,15 @@ private:
                         float maxWidth,
                         sf::Color color) const;
 
+    /// @brief Draws centered text while shrinking it until it fits inside the bounds.
+    void drawCenteredFittedText(sf::RenderTarget& target,
+                                const std::string& value,
+                                unsigned int size,
+                                unsigned int minSize,
+                                sf::FloatRect bounds,
+                                float horizontalPadding,
+                                sf::Color color) const;
+
     /// @brief Player state reference used only for drawing current coins and ownership labels.
     GameState& m_gameState;
 
