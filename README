@@ -1,0 +1,474 @@
+SkyShield - End-of-Semester Project, Object-Oriented Programming & Game Development
+====================================================================================
+
+Student Information
+-------------------
+Full name: [Enter full name as listed in college records]
+ID: [Enter ID number]
+
+(If submitting as a pair, add the partner's details as well.
+Also make sure to set the submitter names in the MY_AUTHORS variable inside
+CMakeLists.txt before zipping the submission. Currently it still reads
+"YOUR-NAME-HERE" and must be updated.)
+
+
+General Project Description
+---------------------------
+SkyShield is a 2D arcade game written in C++20 using the SFML 3.0 graphics
+library. The player controls a drone flying over a battlefield and must
+defend a stationary Command Vehicle in the center of the screen from waves
+of enemies that advance toward it from both edges and fire shells at it.
+The player drops bombs on the enemies from above to destroy them before the
+vehicle is wrecked.
+
+Each level has a number of enemies that must be eliminated; once all of
+them are destroyed - you win. A level ends in a loss if the vehicle is
+destroyed, if the drone's battery runs out, or if all bombs are used up
+and no more bombs are still falling in mid-air.
+
+Each defeated enemy awards Coins that persist between levels and game
+sessions, and can be spent in the Shop on alternative characters,
+backgrounds, background music, and fonts. Some shop vehicles and drones
+also provide numeric bonuses - for example improved armor for the command
+vehicle or larger battery capacity for the drone - so purchases are not
+purely cosmetic.
+
+The game includes a Start screen, Game screen, Shop screen, Help screen,
+and Settings screen with volume and mute controls. All persistent data
+(coins, owned items, selected items, audio settings) is saved to a JSON
+file and reloaded on the next launch.
+
+Note: although SFML supports fullscreen, the game runs in a regular window
+from the start as recommended in the project document, so there are no
+display issues over Zoom.
+
+
+File Structure - List of files we created
+------------------------------------------
+The project is organized in a clearly modular architecture. Each module
+lives in its own folder, with declarations (include/) separated from
+implementation (src/), and a separation between infrastructure/Resources,
+game logic (Gameplay), screens (Screens), and the overall application
+(App).
+
+src/main.cpp
+~~~~~~~~~~~~
+- main.cpp                 - Entry point. Creates a Game object, runs
+                             run(), and catches global exceptions.
+
+App - General application layer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- App/Game.h / Game.cpp        - The game's main class. Manages the SFML
+                                 window, the main game loop (events ->
+                                 commands -> update -> render), screen
+                                 transitions, user data load/save, and
+                                 fatal-mode handling (runtime exceptions).
+- App/State/GameState.h / .cpp - Shared game state across all screens and
+                                 objects: coins, battery, available bombs,
+                                 damage taken by the command vehicle,
+                                 enemies remaining, owned and selected
+                                 shop items, audio settings. Passed by
+                                 reference to anyone who needs to read or
+                                 update it.
+- App/Constants.h              - General constants (window size, base
+                                 speeds, etc.).
+- App/ScreenConstants.h        - Graphical layout constants for screens.
+- App/AssetConstants.h         - Asset names and constants (animations,
+                                 frame sizes).
+
+Gameplay - Game logic
+~~~~~~~~~~~~~~~~~~~~~
+- Gameplay/World.h / World.cpp - The "engine" of a single level. Holds the
+                                 list of all live objects as a vector of
+                                 unique_ptr<GameObject>, drives spawning,
+                                 update, collision and cleanup every
+                                 frame, and checks for win/loss.
+- Gameplay/Factory.h / .cpp    - Singleton Factory for creating game
+                                 objects from an enum. Two lookup tables:
+                                 one for regular objects and one for
+                                 enemies which require additional
+                                 references (drone and vehicle).
+- Gameplay/CollisionHandling.h / .cpp - Multiple-dispatch implementation
+                                 via a std::map<pair<type_index,type_index>,
+                                 function>. Each colliding pair of types
+                                 is registered in the lookup with the
+                                 lambda that handles it. Pairs not in the
+                                 table simply ignore each other - they
+                                 do not collide.
+- Gameplay/Coin.h / Coin.cpp   - HUD widget: a spinning coin icon + the
+                                 coin count with a "pop" animation when
+                                 the number increases.
+
+Gameplay/Objects - Polymorphic object hierarchy
+- GameObject.h / .cpp     - Abstract base for every game object. Inherits
+                            from two interfaces: IDrawable and IUpdatable.
+                            Absorbs all shared API: sprite, position,
+                            collision bounds, alive/dead state, and the
+                            spawning of objects this one wants to give
+                            birth to (takeSpawn).
+- MovingObject.h / .cpp   - Abstract base for moving objects. Adds
+                            velocity on top of the base.
+- CommandVehicle.h / .cpp - The stationary command vehicle the player
+                            protects. Animated (beacon animation in
+                            normal state, burning animation when in
+                            critical state), shakes when hit.
+- Drone.h / .cpp          - The player's drone. Reads keyboard input,
+                            drops bombs, manages ammo state (available
+                            bombs).
+- Explosion.h / .cpp      - One-shot visual effect: plays an animation
+                            and dies. Doesn't collide with anything.
+
+Gameplay/Enemies - Enemies
+- Enemy.h / Enemy.cpp     - Abstract base for all enemies. Contains the
+                            entire shared AI: deciding between Advancing,
+                            Firing, and Panic states, managing the fire
+                            timer, U-turn flee behavior, and firing based
+                            on a muzzle offset. Receives live references
+                            to the drone and the vehicle, so there is no
+                            need to "feed" it their positions every frame.
+- FastEnemy.h / .cpp      - Fast and fragile enemy: dies from a single
+                            bomb hit.
+- TankEnemy.h / .cpp      - Tank enemy: two hits. The first hit only
+                            wounds it (color changes), the second kills.
+                            It also has a unique 5-frame firing animation
+                            synchronized with the telegraph timer.
+
+Gameplay/Projectiles - Projectiles
+- Bomb.h / Bomb.cpp       - A bomb dropped by the drone. Falls straight
+                            down, dies on hit or off-screen. Registers
+                            itself as "in flight" so World can tell
+                            whether the level is still winnable.
+- Bullet.h / Bullet.cpp   - A bullet fired by an enemy at the command
+                            vehicle. Horizontal movement. Dies on hit or
+                            off-screen.
+
+Graphics
+~~~~~~~~
+- Graphics/Animation.h / .cpp - Helper class to slice sprite sheets into
+                                frames and advance cyclic animation.
+
+Interfaces - Abstract interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- IDrawable.h    - Things that can be drawn to the screen.
+- IUpdatable.h   - Things that update in real time based on dt.
+
+Resources - Resource management (Singletons)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- ResourceManager.h / .cpp - Singleton that lazily loads textures and
+                             fonts and stores them in a map. Supports
+                             runtime swapping of assets based on shop
+                             selections.
+- SoundManager.h / .cpp    - Singleton for playing background music and
+                             effects, with volume and mute controls.
+- DataManager.h / .cpp     - Singleton that reads gameData.json (level
+                             config + shop catalog) and saves/loads
+                             userData (user state). Uses nlohmann::json.
+- Resources.h              - Type/alias definitions for resources.
+
+Shop
+~~~~
+- Shop/ShopData.h / .cpp    - Mappings between the shop-item-type enum
+                              and strings appearing in JSON.
+- Shop/ShopManager.h / .cpp - Shop logic: hover, active category, opening
+                              the preview, purchase and selection.
+
+Screens - Application screens (Strategy/State hierarchy)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Screens/Core/Screen.h / .cpp - Abstract base for any screen. Game holds
+                                 a single Screen pointer and swaps the
+                                 object itself on screen transitions.
+                                 Each screen can emit a ScreenCommand
+                                 (Quit, ToShop, etc.) that Game handles.
+- Screens/StartScreen.h / .cpp - Start screen with Play, Shop, Settings,
+                                 Help, Exit buttons.
+- Screens/GameScreen.h / .cpp  - The actual game screen. Holds World,
+                                 manages pause/continue buttons, shows
+                                 HUD (battery, bombs, coins), and shows
+                                 win/loss overlay at level end.
+- Screens/ShopScreen.h / .cpp  - The shop screen. Wraps ShopManager +
+                                 drawing.
+- Screens/HelpScreen.h / .cpp  - Help screen explaining game rules,
+                                 controls, and win/loss conditions
+                                 (explicit project requirement).
+- Screens/SettingsScreen.h / .cpp        - Settings screen.
+- Screens/SettingsScreenManager.h / .cpp - Settings manager invokable as
+                                           an overlay from any screen.
+- Screens/Components/Menubar.h / .cpp           - Shared top menu bar.
+- Screens/Components/OverlayView.h / .cpp       - Generic overlay usable
+                                                  for modal messages.
+- Screens/Components/ScrollableTextOverlay.h / .cpp - Scrollable text
+                                                  overlay.
+- Screens/Components/ShopPreview.h / .cpp       - Preview of a shop item.
+
+Structs - POD data structures also represented in JSON
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- GameData.h              - Everything loaded from gameData.json: list of
+                            levels + shop catalog.
+- LevelConfig.h           - Level parameters: enemy count, tank
+                            percentage, spawn interval, battery drain
+                            rate, starting bomb count.
+- UserData.h              - Persistent user data: coins, owned items,
+                            selected items, mute and volume.
+- ShopAsset.h             - One item in the shop catalog.
+- EnemyTypeConfig.h       - Enemy parameters: speed, reward, sprite,
+                            muzzle offset.
+- AnimatedSpriteConfig.h  - Sprite sheet description (frames, dimensions).
+- MuzzleOffset.h          - Muzzle position relative to the sprite center.
+- ResourceInfo.h          - Metadata for a resource.
+- OverlayAction.h         - An action invokable from an overlay.
+- ScreenEventContext.h    - Event context (mouse position in view, etc.)
+                            a screen receives without window access.
+
+Enums
+~~~~~
+- Enums/GameObjects.h     - Game object types (Background, Vehicle, Drone,
+                            Bomb, Bullet, Explosion, etc.).
+- Enums/EnemyType.h       - Fast / Tank.
+- Enums/EnemyState.h      - Advancing / Firing / Panic.
+- Enums/ActiveScreen.h    - Which screen is currently active.
+- Enums/ScreenCommand.h   - Commands a screen can request from Game
+                            (Quit, ToStart, ToShop, ToGame, etc.).
+- Enums/LevelResult.h     - Running / Won / Lost.
+- Enums/ShopAssetType.h   - Shop categories.
+- Enums/ShopClickResult.h - Result of a click in the shop screen.
+- Enums/PreviewAction.h   - Preview action (Buy/Select/Close).
+- Enums/OverlayActionType.h - Types of overlay buttons.
+- Enums/StartScreenButton.h - Start screen buttons.
+- Enums/Fonts.h           - Font identifiers.
+- Enums/Sounds.h          - Sound identifiers.
+
+Utilities
+~~~~~~~~~
+- Utilities/Utils.h / .cpp       - General helper functions (random, math,
+                                   text formatting).
+- Utilities/AppUtils.h / .cpp    - Application helpers (initial window
+                                   size, etc.).
+
+external
+~~~~~~~~
+- external/json.hpp       - nlohmann::json library (single header). Not
+                            written by us, only integrated.
+
+resources
+~~~~~~~~~
+- data/gameData.json      - Configuration for all levels and the shop.
+                            This file can be edited to add levels, change
+                            difficulty, or add shop items without
+                            recompiling.
+- images/                 - Images (default + shop assets).
+- sounds/                 - Music and sound effects.
+- fonts/                  - Fonts.
+
+
+Main Data Structures and Their Roles
+-------------------------------------
+- std::vector<std::unique_ptr<GameObject>> in the World class
+  The main vector that owns all live objects in a level. A vector of
+  unique_ptr to an abstract base allows uniform polymorphic handling of
+  every object type (vehicle, drone, enemies, bombs, bullets, explosions)
+  - they are all updated in a single for-each loop, threaded together
+  for collision checks, and removed together via std::remove_if. The
+  unique_ptr guarantees there is no memory leak even when an object dies
+  mid-frame: the vector is solely responsible for lifetime.
+
+- std::map<std::pair<std::type_index, std::type_index>, std::function<...>>
+  in the collision mechanism. This is a multiple-dispatch lookup: a pair
+  of dynamic types -> a handler that handles the collision between them.
+  Instead of branching if-else over object types, we look in the table
+  and if something is there, we invoke it. Unregistered pairs (bomb+bomb,
+  bullet+enemy, etc.) simply ignore each other. Extending the code with
+  a new collision type = one new line in the map.
+
+- std::map<GameObjects, CreatorFunc> and std::map<EnemyType, EnemyCreatorFunc>
+  in Factory. Two lookup tables for building objects from an enum, using
+  std::function. Allows World to construct a "generic" object without
+  knowing exactly which one - it requests by enum and Factory handles
+  instantiation, accesses the "right" texture via ResourceManager, etc.
+
+- std::map<ShopAssetType, std::set<int>> in GameState (owned items)
+  and std::map<ShopAssetType, int> (the currently selected item per
+  category, and its numeric extra). The set enables O(log n) membership
+  testing of an owned item, and the per-category map makes the current
+  selection efficient and trivial to serialize.
+
+- std::unique_ptr<Screen> in the Game class
+  A single pointer to an abstract base representing the active screen.
+  Swapping a screen = creating a new unique_ptr and assigning it - the
+  previous screen is destroyed automatically. State/Strategy architecture.
+
+- nlohmann::json
+  Parses and writes gameData.json and userData.json. Chosen because it
+  is header-only, integrated under include/external, and requires no
+  separate installation.
+
+
+Algorithms Worth Mentioning
+----------------------------
+1. Multiple dispatch (double dispatch) for collisions
+   Instead of a double virtual call or a visitor pattern, we used dynamic
+   typeid to produce a std::type_index and looked the handler up in a
+   map. This makes extension very easy: adding a new colliding object
+   requires only one line in the table, with no changes to existing code.
+   For symmetric pairs (e.g. Bomb+FastEnemy and FastEnemy+Bomb), both
+   directions are registered to avoid relying on argument order.
+
+2. Enemy AI: a small state machine + telegraph + bracketing
+   Each enemy is in one of three states: Advancing (moves toward the
+   vehicle), Firing (stops and shoots), Panic (flees when the drone is
+   above it). State transitions are range-based: distance to the vehicle
+   triggers firing, distance to the drone triggers panic. The firing
+   state has a "telegraph" - a time window where the enemy stops and
+   tells the player it is about to fire (TankEnemy plays a 5-frame
+   wind-up animation) before the bullet is actually released, giving the
+   player a chance to react. The decision whether to advance or flee
+   uses calculateWalls, which computes movement bounds (screen edges +
+   vehicle position), and updateUTurnState, which prevents jitter when
+   flight in one direction is blocked.
+
+3. Live asset swapping based on the shop catalog
+   applyShopSelections iterates over the JSON catalog, cross-references
+   with the user's selections in userData, and loads the matching
+   texture/music/font at runtime while swapping the entry in the
+   Resources map. This means changing a drone or vehicle "skin" requires
+   no recompile or restart - it is immediate.
+
+4. Deferred userData saving
+   saveUserDataIfChanged compares the last snapshot of userData written
+   to disk with the current state, and saves only if something changed
+   (coins, selections, mute). Avoids unnecessary disk writes per frame.
+
+5. Safety management for bombs in mid-air
+   World cannot declare a "no bombs left" loss while a bomb is still
+   falling, because that bomb can still kill an enemy. Therefore Bomb
+   registers an activeBombs counter in GameState in its constructor and
+   decrements it in its destructor. The isLossConditionMet check
+   accounts for this.
+
+
+Game Rules, Controls and Detailed Interaction Breakdown
+--------------------------------------------------------
+Controls
+~~~~~~~~
+- Left arrow / Right arrow : Move the drone left / right.
+- Space bar                : Drop a bomb (edge-triggered - one press =
+                             one bomb, must release and re-press to drop
+                             another).
+- Escape                   : Pause / go back in menu screens.
+- Mouse                    : Navigation in every screen that isn't the
+                             game itself, and clicking HUD buttons in
+                             the game (Pause).
+
+What kills what (detailed interaction breakdown)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Bomb -> FastEnemy:
+  The bomb detonates and dies. The fast enemy dies instantly from one
+  hit. An Explosion is spawned at the location, and we receive the
+  reward defined in the EnemyTypeConfig for FastEnemy.
+
+- Bomb -> TankEnemy:
+  The bomb detonates and dies. The tank - on the first hit only
+  "wounded" (m_wounded becomes true and it changes color), but still
+  alive and continuing to move and fire. Only on the second hit does
+  it die, and we receive TankEnemy's full reward.
+
+- Bullet -> CommandVehicle:
+  The bullet detonates and dies. The vehicle takes damage - takeDamage()
+  reduces the armor percentage by the configured damage, but if the
+  player has purchased an "Upgraded Command Vehicle" (or another item
+  with an extra > 0 field), the effective damage taken is reduced
+  accordingly via adjustedVehicleDamage. When armor reaches 0%, the
+  vehicle is destroyed.
+
+- Bomb -> bullet / Bomb -> vehicle / Bomb -> drone / Bullet -> bullet /
+  Bullet -> enemy / any pair not in collisionLookup:
+  No collision at all. Your bomb cannot hurt your vehicle, and an enemy
+  bullet is not stopped by your bomb on the way. This is intentional -
+  it simplifies the logic and keeps the game fair.
+
+- Drone: takes no direct damage from anything. It has only psychological
+  pressure on the enemies (they flee from it), and the only way to lose
+  through the drone is by battery depletion (drains at the level's
+  batteryDrain rate) or by dropping all bombs without killing all enemies.
+
+Win condition
+~~~~~~~~~~~~~
+- All enemies in the level have been destroyed (m_enemiesRemaining == 0).
+
+Loss conditions (any one of them is enough)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- The command vehicle is destroyed (armor = 0).
+- The drone's battery runs out (batteryPercent = 0).
+- Out of bombs (bombsAvailable = 0) AND no bombs in mid-air
+  (activeBombs = 0) AND enemies still remain - the level is no longer
+  winnable.
+
+Coins and shop
+~~~~~~~~~~~~~~
+- Every enemy destroyed = coins based on its getReward() (defined in
+  JSON).
+- Coins accumulate between levels and between sessions (saved in
+  userData.json).
+- The shop has 7 categories: Command Vehicle, Drone, Fast Enemy (skin),
+  Tank Enemy (skin), Background, Background Music, Font.
+- For vehicles and drones, the extra field translates to a numeric bonus
+  (extra armor / larger battery capacity).
+
+
+OOP Techniques Applied in This Project
+---------------------------------------
+- Multi-layered inheritance and polymorphism:
+  GameObject (abstract) -> MovingObject (abstract) -> Drone, Bomb,
+  Bullet, Enemy. Enemy -> FastEnemy, TankEnemy. CommandVehicle, Explosion
+  inherit directly from GameObject.
+- Pure interfaces: IDrawable, IUpdatable with pure virtual functions.
+- Abstraction: getSpeed, onHit, getReward, updateAnimation - virtual
+  functions that FastEnemy and TankEnemy implement differently.
+- RAII and unambiguous ownership: every dynamic allocation through
+  unique_ptr. There is no manual delete in the entire project.
+- Exceptions: thrown on resource-loading failures or malformed JSON;
+  caught in main and also in the run() loop (fatal mode with overlay).
+- Design patterns: Singleton (ResourceManager, SoundManager, DataManager,
+  Factory), Factory, Strategy/State (Screen), Observer (not explicitly
+  registered, but GameState acts as a shared message bus).
+- STL: vector, map, set, unique_ptr, function, optional, pair, algorithm
+  (remove_if, find_if), filesystem, chrono.
+- External libraries: SFML 3.0 (graphics, sound, window), nlohmann::json
+  (for reading configuration and saving state). Both satisfy the "must
+  be compilable and runnable without special installations" requirement
+  - json is header-only inside the project, and SFML is configured via
+  CMake.
+- Genericity and extensibility:
+  * Adding a new level = an additional entry in stages in JSON, zero
+    lines of code.
+  * Adding a new skin for vehicle/drone/enemy = an additional entry in
+    shopAssets in JSON.
+  * Adding a new enemy type = a new class inheriting from Enemy,
+    registration in Factory, and registration of collision pairs in
+    CollisionHandling.
+  * Replacing the graphics engine = only Animation, GameObject::draw,
+    and Screen. The logic isn't aware of SFML.
+
+
+Known Bugs
+----------
+None. No known bugs at the time of submission.
+
+
+Other Notes
+-----------
+- The game runs at 60 FPS (setFramerateLimit). All motion and animation
+  logic is multiplied by dt so it is independent of frame rate.
+- gameData.json is loaded once at startup. To try different levels you
+  can edit the file without recompiling. The structure of a level is
+  simple and documented in LevelConfig.
+- All classes are written in a uniform style with Doxygen-style comments
+  above member functions.
+- Code regions are marked with #pragma region for better readability in
+  Visual Studio.
+- Before creating the ZIP for submission - update MY_AUTHORS in
+  CMakeLists.txt with the submitter names (in the pattern
+  lastname_firstname or, for a pair, separated by a dash) so that
+  Zip.cmake produces a correctly named ZIP automatically.
+- Demo video: [add YouTube link]
+- Representative screenshot: submitted separately in the Moodle
+  submission, as explained in the project document.
