@@ -13,6 +13,7 @@ public:
 
     void handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) override;
     void draw(sf::RenderWindow& target) override;
+    bool isCloseRequested() const { return m_closeRequested; }
 
 private:
     void configureLayout();
@@ -49,4 +50,5 @@ private:
     sf::Sprite m_backSprite;
     const sf::Font& m_font;
     bool m_backHovered = false;
+    bool m_closeRequested = false;
 };

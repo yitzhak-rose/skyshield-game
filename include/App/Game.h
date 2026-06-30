@@ -39,9 +39,6 @@ private:
     /// @brief Writes the current user data to the save file.
     void saveUserData();
 
-    /// @brief Resets persistent user state to defaults, saves it, and reapplies runtime settings.
-    void resetUserData();
-
     /// @brief Applies selected shop assets to the runtime resource maps.
     void syncShopSelections();
 

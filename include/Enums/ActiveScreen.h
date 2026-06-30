@@ -5,6 +5,5 @@ enum class ActiveScreen {
     Start,
     Game,
     Shop,
-    Settings,
-    Help
+    Settings
 };

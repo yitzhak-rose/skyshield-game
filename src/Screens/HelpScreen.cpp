@@ -79,12 +79,12 @@ void HelpScreen::handleScreenEvent(const sf::Event& event, const ScreenEventCont
         handleClick(context.mousePosition);
 
     if (isKeyPressed(event, sf::Keyboard::Key::Escape))
-        requestCommand(ScreenCommand::ReturnToSettings);
+        m_closeRequested = true;
 }
 
 void HelpScreen::handleClick(sf::Vector2f position) {
     if (GeometryUtils::contains(backButtonBounds(), position))
-        requestCommand(ScreenCommand::ReturnToSettings);
+        m_closeRequested = true;
 }
 
 void HelpScreen::updateHover(sf::Vector2f position) {

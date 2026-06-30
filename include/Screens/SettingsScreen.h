@@ -2,6 +2,7 @@
 
 #include "App/State/GameState.h"
 #include "Enums/GameObjects.h"
+#include "Screens/HelpScreen.h"
 #include "Screens/Components/ScrollableTextOverlay.h"
 #include "Screens/Core/Screen.h"
 
@@ -35,6 +36,8 @@ private:
     void updateHover(sf::Vector2f position);
     void updateVolumeFromPosition(float x);
     void syncAudioSettings() const;
+    void resetUserData();
+    void showHelp();
     void showResetConfirmation();
     void showAttribution();
 
@@ -70,5 +73,6 @@ private:
     const sf::Font& m_font;
     Control m_hoveredControl = Control::None;
     bool m_draggingSlider = false;
+    std::unique_ptr<HelpScreen> m_helpScreen;
     std::unique_ptr<ScrollableTextOverlay> m_attributionOverlay;
 };

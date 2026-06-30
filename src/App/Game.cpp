@@ -130,12 +130,6 @@ void Game::syncAudioSettings() {
         m_gameState.getMaxVolume());
 }
 
-void Game::resetUserData() {
-    m_gameState.setUserData(DataManager::instance().defaultUserData());
-    syncShopSelections();
-    syncAudioSettings();
-    saveUserData();
-}
 #pragma endregion
 
 #pragma region Event Handling
@@ -187,16 +181,10 @@ bool Game::isCommandAllowed(ScreenCommand command) const {
             return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::OpenSettings:
             return m_activeScreen == ActiveScreen::Start;
-        case ScreenCommand::OpenHelp:
-            return m_activeScreen == ActiveScreen::Settings;
-        case ScreenCommand::ReturnToSettings:
-            return m_activeScreen == ActiveScreen::Help;
         case ScreenCommand::ReturnToStart:
             return m_activeScreen == ActiveScreen::Game ||
                 m_activeScreen == ActiveScreen::Shop ||
                 m_activeScreen == ActiveScreen::Settings;
-        case ScreenCommand::ResetUserData:
-            return m_activeScreen == ActiveScreen::Settings;
         case ScreenCommand::Quit:
             return m_activeScreen == ActiveScreen::Start;
         case ScreenCommand::None:
@@ -217,20 +205,10 @@ void Game::applyScreenCommand(ScreenCommand command) {
         case ScreenCommand::OpenSettings:
             replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
             break;
-        case ScreenCommand::OpenHelp:
-            replaceScreen(ActiveScreen::Help, m_settingsScreenManager.createHelpScreen());
-            break;
-        case ScreenCommand::ReturnToSettings:
-            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
-            break;
         case ScreenCommand::ReturnToStart:
             syncShopSelections();
             syncAudioSettings();
             showStartScreen();
-            break;
-        case ScreenCommand::ResetUserData:
-            resetUserData();
-            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
             break;
         case ScreenCommand::Quit:
             window.close();

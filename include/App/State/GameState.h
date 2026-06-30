@@ -54,6 +54,7 @@ public:
     void setMuted(bool muted);
     void setMaxVolume(float maxVolume);
     void setUserData(const UserData& userData);
+    void resetUserData(const UserData& defaultUserData);
     UserData getUserData() const;
     bool isMuted() const { return m_muted; }
     float getMaxVolume() const { return m_maxVolume; }

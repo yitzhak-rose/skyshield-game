@@ -77,6 +77,10 @@ void GameState::setUserData(const UserData& userData) {
     m_selectedAssets = userData.selectedAssets;
 }
 
+void GameState::resetUserData(const UserData& defaultUserData) {
+    setUserData(defaultUserData);
+}
+
 UserData GameState::getUserData() const {
     UserData userData;
     userData.coins = m_coins;

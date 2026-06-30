@@ -6,9 +6,6 @@ enum class ScreenCommand {
     StartGame,
     OpenShop,
     OpenSettings,
-    OpenHelp,
-    ReturnToSettings,
     ReturnToStart,
-    ResetUserData,
     Quit
 };

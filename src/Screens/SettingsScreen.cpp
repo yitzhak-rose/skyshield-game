@@ -2,6 +2,7 @@
 
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
+#include "Resources/DataManager.h"
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
 #include "Utilities/Utils.h"
@@ -51,6 +52,13 @@ void SettingsScreen::configureLayout() {
 }
 
 void SettingsScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
+    if (m_helpScreen) {
+        m_helpScreen->handleEvent(event, context);
+        if (m_helpScreen->isCloseRequested())
+            m_helpScreen.reset();
+        return;
+    }
+
     if (m_attributionOverlay) {
         m_attributionOverlay->handleEvent(event, context);
         if (m_attributionOverlay->isDismissed())
@@ -98,7 +106,7 @@ void SettingsScreen::handleClick(sf::Vector2f position) {
             }
             break;
         case Control::Help:
-            requestCommand(ScreenCommand::OpenHelp);
+            showHelp();
             break;
         case Control::Attribution:
             showAttribution();
@@ -133,6 +141,20 @@ void SettingsScreen::syncAudioSettings() const {
     SoundManager::instance().applyUserSettings(m_gameState.isMuted(), m_gameState.getMaxVolume());
 }
 
+void SettingsScreen::resetUserData() {
+    m_gameState.resetUserData(DataManager::instance().defaultUserData());
+    const auto& catalog = DataManager::instance().getGameData().shopAssets;
+    ResourceManager::instance().applyShopSelections(catalog, m_gameState.getUserData());
+    m_gameState.setSelectedAssetExtras(catalog);
+    syncAudioSettings();
+    DataManager::instance().updateUserData(m_gameState.getUserData());
+    DataManager::instance().saveUserData();
+}
+
+void SettingsScreen::showHelp() {
+    m_helpScreen = std::make_unique<HelpScreen>();
+}
+
 void SettingsScreen::showResetConfirmation() {
     showOverlay(std::make_unique<OverlayView>(
         "Reset User Data",
@@ -142,7 +164,7 @@ void SettingsScreen::showResetConfirmation() {
         },
         std::vector<OverlayAction>{
             { "Cancel", OverlayActionType::Default, []() {} },
-            { "Reset", OverlayActionType::Danger, [this]() { requestCommand(ScreenCommand::ResetUserData); } }
+            { "Reset", OverlayActionType::Danger, [this]() { resetUserData(); } }
         }));
 }
 
@@ -236,6 +258,11 @@ sf::Vector2f SettingsScreen::sliderKnobPosition() const {
 }
 
 void SettingsScreen::draw(sf::RenderWindow& target) {
+    if (m_helpScreen) {
+        m_helpScreen->draw(target);
+        return;
+    }
+
     target.draw(m_background);
     drawPanel(target);
     drawBackButton(target);
