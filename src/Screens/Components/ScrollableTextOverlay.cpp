@@ -55,7 +55,7 @@ ScrollableTextOverlay::ScrollableTextOverlay(std::string title, std::string body
 
 void ScrollableTextOverlay::configureLayout() {
     m_backgroundDim.setFillColor(OverlayViewConfig::backgroundDimColor);
-    Screen::styleRectangle(
+    GraphicsUtils::styleRectangle(
         m_dialogPanel,
         OverlayViewConfig::PanelColor,
         OverlayViewConfig::PanelOutlineColor,
@@ -130,7 +130,7 @@ void ScrollableTextOverlay::draw(sf::RenderTarget& target, sf::RenderStates stat
     target.draw(m_backgroundDim, states);
     target.draw(m_dialogPanel, states);
 
-    target.draw(Screen::makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         m_title,
         ScrollableOverlayConfig::TitleTextSize,
@@ -158,7 +158,7 @@ void ScrollableTextOverlay::draw(sf::RenderTarget& target, sf::RenderStates stat
             ? OverlayViewConfig::TitleColor
             : (subheading ? HelpScreenConfig::AccentColor : OverlayViewConfig::BodyColor);
 
-        target.draw(Screen::makeCenteredText(
+        target.draw(TextUtils::makeCenteredText(
             m_font,
             m_lines[i],
             size,

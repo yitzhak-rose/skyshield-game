@@ -1,6 +1,8 @@
 #include "Utilities/Utils.h"
-#include <sstream>
+
+#include <algorithm>
 #include <random>
+#include <sstream>
 
 float Utils::randomFloat(float min, float max) {
 
@@ -21,6 +23,17 @@ bool GeometryUtils::contains(sf::FloatRect bounds, sf::Vector2f position) {
         position.y <= bounds.position.y + bounds.size.y;
 }
 
+sf::Vector2f GeometryUtils::centerOf(sf::FloatRect bounds) {
+    return {
+        bounds.position.x + bounds.size.x / 2.f,
+        bounds.position.y + bounds.size.y / 2.f
+    };
+}
+
+sf::Vector2f GeometryUtils::centerOf(const sf::RectangleShape& shape) {
+    return centerOf(shape.getGlobalBounds());
+}
+
 void GraphicsUtils::centerOrigin(sf::Sprite& sprite) {
     const sf::FloatRect bounds = sprite.getLocalBounds();
     sprite.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
@@ -31,6 +44,47 @@ void GraphicsUtils::centerOrigin(sf::Text& text) {
     const sf::FloatRect bounds = text.getLocalBounds();
     text.setOrigin({ bounds.position.x + bounds.size.x / 2.f,
                      bounds.position.y + bounds.size.y / 2.f });
+}
+
+void GraphicsUtils::fitSpriteTo(sf::Sprite& sprite, sf::FloatRect bounds) {
+    const sf::IntRect textureRect = sprite.getTextureRect();
+    const sf::Vector2i size = textureRect.size;
+    const float scale = std::min(
+        bounds.size.x / static_cast<float>(size.x),
+        bounds.size.y / static_cast<float>(size.y));
+    sprite.setScale({ scale, scale });
+    centerOrigin(sprite);
+    sprite.setPosition(GeometryUtils::centerOf(bounds));
+}
+
+void GraphicsUtils::styleRectangle(sf::RectangleShape& shape,
+                                   sf::Color fill,
+                                   sf::Color outline,
+                                   float outlineThickness) {
+    shape.setFillColor(fill);
+    shape.setOutlineColor(outline);
+    shape.setOutlineThickness(outlineThickness);
+}
+
+sf::Text TextUtils::makeText(const sf::Font& font,
+                             const std::string& value,
+                             unsigned int size,
+                             sf::Vector2f position,
+                             sf::Color color) {
+    sf::Text text(font, value, size);
+    text.setFillColor(color);
+    text.setPosition(position);
+    return text;
+}
+
+sf::Text TextUtils::makeCenteredText(const sf::Font& font,
+                                     const std::string& value,
+                                     unsigned int size,
+                                     sf::Vector2f position,
+                                     sf::Color color) {
+    sf::Text text = makeText(font, value, size, position, color);
+    GraphicsUtils::centerOrigin(text);
+    return text;
 }
 
 std::vector<std::string> TextUtils::wrapTextLines(const sf::Font& font,

@@ -60,21 +60,13 @@ void TextButton::setEnabled(bool enabled) {
     m_enabled = enabled;
 }
 
-bool TextButton::contains(sf::Vector2f position) const {
-    const sf::FloatRect buttonBounds = fittedBounds();
-    return position.x >= buttonBounds.position.x &&
-        position.x <= buttonBounds.position.x + buttonBounds.size.x &&
-        position.y >= buttonBounds.position.y &&
-        position.y <= buttonBounds.position.y + buttonBounds.size.y;
-}
-
 bool TextButton::updateHover(sf::Vector2f position) {
-    m_hovered = contains(position);
+    m_hovered = GeometryUtils::contains(fittedBounds(), position);
     return m_hovered;
 }
 
 bool TextButton::click(sf::Vector2f position) const {
-    if (!m_enabled || !contains(position))
+    if (!m_enabled || !GeometryUtils::contains(fittedBounds(), position))
         return false;
 
     activate();
@@ -149,7 +141,7 @@ sf::Text TextButton::fittedText(sf::FloatRect bounds) const {
     }
 
     GraphicsUtils::centerOrigin(text);
-    text.setPosition(centerOf(bounds) + m_metrics.textOffset);
+    text.setPosition(GeometryUtils::centerOf(bounds) + m_metrics.textOffset);
     return text;
 }
 
@@ -166,11 +158,4 @@ sf::Color TextButton::fillColor() const {
 float TextButton::preferredTextWidth() const {
     sf::Text text(m_font, m_label, m_metrics.textSize);
     return text.getLocalBounds().size.x;
-}
-
-sf::Vector2f TextButton::centerOf(sf::FloatRect bounds) {
-    return {
-        bounds.position.x + bounds.size.x / 2.f,
-        bounds.position.y + bounds.size.y / 2.f
-    };
 }

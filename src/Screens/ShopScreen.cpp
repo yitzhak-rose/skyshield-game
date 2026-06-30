@@ -80,12 +80,12 @@ void ShopScreen::drawBackButton(sf::RenderTarget& target) const {
 }
 
 void ShopScreen::drawHeaderText(sf::RenderTarget& target) const {
-    sf::Text title = makeCenteredText(m_font, "Shop", ShopScreenConfig::TitleTextSize,
+    sf::Text title = TextUtils::makeCenteredText(m_font, "Shop", ShopScreenConfig::TitleTextSize,
         { WindowConfig::Width / 2.f, ShopScreenConfig::TopPadding + 20.f },
         ShopScreenConfig::TextColor);
     target.draw(title);
 
-    sf::Text coins = makeText(m_font, "Coins: " + std::to_string(m_gameState.getCoins()),
+    sf::Text coins = TextUtils::makeText(m_font, "Coins: " + std::to_string(m_gameState.getCoins()),
         ShopScreenConfig::ButtonTextSize,
         { WindowConfig::Width - ShopScreenConfig::SidePadding - 280.f, ShopScreenConfig::TopPadding + 15.f },
         ShopScreenConfig::TextColor);
@@ -165,7 +165,7 @@ void ShopScreen::drawTilePanel(sf::RenderTarget& target,
     tile.setPosition(bounds.position);
     const sf::Color fill = selected ? ShopScreenConfig::SelectedColor :
         (hovered ? ShopScreenConfig::PanelHoverColor : ShopScreenConfig::PanelColor);
-    styleRectangle(tile, fill, ShopScreenConfig::OutlineColor, selected ? 4.f : 2.f);
+    GraphicsUtils::styleRectangle(tile, fill, ShopScreenConfig::OutlineColor, selected ? 4.f : 2.f);
     target.draw(tile);
 }
 
@@ -175,7 +175,7 @@ void ShopScreen::drawLockIcon(sf::RenderTarget& target, sf::FloatRect tileBounds
         { tileBounds.position.x + tileBounds.size.x / 2.f - ShopScreenConfig::LockSize / 2.f,
           tileBounds.position.y + 95.f },
         { ShopScreenConfig::LockSize, ShopScreenConfig::LockSize });
-    fitSpriteTo(lock, lockBounds);
+    GraphicsUtils::fitSpriteTo(lock, lockBounds);
     target.draw(lock);
 }
 
@@ -206,7 +206,7 @@ void ShopScreen::drawWrappedTileName(sf::RenderTarget& target,
         2);
 
     for (std::size_t index = 0; index < lines.size(); ++index) {
-        sf::Text line = makeText(m_font, lines[index],
+        sf::Text line = TextUtils::makeText(m_font, lines[index],
             ShopScreenConfig::TileNameSize,
             { position.x, position.y + static_cast<float>(index) * 29.f },
             ShopScreenConfig::TextColor);
@@ -223,7 +223,7 @@ void ShopScreen::drawFittedText(sf::RenderTarget& target,
                                 sf::Vector2f position,
                                 float maxWidth,
                                 sf::Color color) const {
-    sf::Text text = makeText(m_font, value, size, position, color);
+    sf::Text text = TextUtils::makeText(m_font, value, size, position, color);
     while (text.getLocalBounds().size.x > maxWidth && text.getCharacterSize() > minSize)
         text.setCharacterSize(text.getCharacterSize() - 1u);
     target.draw(text);

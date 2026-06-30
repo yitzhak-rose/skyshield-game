@@ -25,7 +25,6 @@ public:
     void setSelected(bool selected);
     void setEnabled(bool enabled);
 
-    bool contains(sf::Vector2f position) const;
     bool updateHover(sf::Vector2f position);
     bool click(sf::Vector2f position) const;
     void activate() const;
@@ -38,7 +37,6 @@ private:
     sf::Text fittedText(sf::FloatRect bounds) const;
     sf::Color fillColor() const;
     float preferredTextWidth() const;
-    static sf::Vector2f centerOf(sf::FloatRect bounds);
 
     const sf::Font& m_font;
     std::string m_label;

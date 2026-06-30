@@ -51,12 +51,12 @@ void HelpScreen::configureLayout() {
     configureBackground();
     m_dim.setFillColor(HelpScreenConfig::DimColor);
     m_panel.setPosition({ HelpScreenConfig::TextPanelX, HelpScreenConfig::TextPanelY });
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         m_panel,
         HelpScreenConfig::PanelColor,
         HelpScreenConfig::PanelOutlineColor,
         HelpScreenConfig::PanelOutlineThickness);
-    fitSpriteTo(m_backSprite, backButtonBounds());
+    GraphicsUtils::fitSpriteTo(m_backSprite, backButtonBounds());
 }
 
 void HelpScreen::configureBackground() {
@@ -113,7 +113,7 @@ void HelpScreen::drawBackground(sf::RenderTarget& target) const {
 void HelpScreen::drawBackButton(sf::RenderTarget& target) const {
     sf::RectangleShape button(backButtonBounds().size);
     button.setPosition(backButtonBounds().position);
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         button,
         m_backHovered ? SettingsScreenConfig::ButtonHoverColor : SettingsScreenConfig::ButtonColor,
         HelpScreenConfig::PanelOutlineColor,
@@ -127,14 +127,14 @@ void HelpScreen::drawPanel(sf::RenderTarget& target) const {
 }
 
 void HelpScreen::drawInstructions(sf::RenderTarget& target) const {
-    target.draw(makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         "How to Play",
         HelpScreenConfig::TitleTextSize,
         { WindowConfig::Width / 2.f, HelpScreenConfig::TitleY },
         HelpScreenConfig::TitleColor));
 
-    target.draw(makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         "Goal: protect the command vehicle from the enemies.",
         HelpScreenConfig::SectionTextSize,
@@ -209,7 +209,7 @@ void HelpScreen::drawIconRow(sf::RenderTarget& target,
                              float iconSize) const {
     sf::Sprite sprite(ResourceManager::instance().getImage(icon));
     showFirstFrame(sprite, icon);
-    fitSpriteTo(sprite, {
+    GraphicsUtils::fitSpriteTo(sprite, {
         { position.x + (HelpScreenConfig::LeftIconSlotWidth - iconSize) / 2.f, position.y },
         { iconSize, iconSize }
     });
@@ -231,8 +231,8 @@ void HelpScreen::drawIconRow(sf::RenderTarget& target,
 void HelpScreen::drawMovementRow(sf::RenderTarget& target, sf::Vector2f position) const {
     sf::Sprite left(ResourceManager::instance().getImage(GameObjects::ArrowLeft));
     sf::Sprite right(ResourceManager::instance().getImage(GameObjects::ArrowRight));
-    fitSpriteTo(left, { position, { HelpScreenConfig::IconSize, HelpScreenConfig::IconSize } });
-    fitSpriteTo(right, {
+    GraphicsUtils::fitSpriteTo(left, { position, { HelpScreenConfig::IconSize, HelpScreenConfig::IconSize } });
+    GraphicsUtils::fitSpriteTo(right, {
         { position.x + HelpScreenConfig::IconSize + HelpScreenConfig::IconGap, position.y },
         { HelpScreenConfig::IconSize, HelpScreenConfig::IconSize }
     });
@@ -254,7 +254,7 @@ void HelpScreen::drawMovementRow(sf::RenderTarget& target, sf::Vector2f position
 
 void HelpScreen::drawSpacebarRow(sf::RenderTarget& target, sf::Vector2f position) const {
     sf::Sprite space(ResourceManager::instance().getImage(GameObjects::Spacebar));
-    fitSpriteTo(space, {
+    GraphicsUtils::fitSpriteTo(space, {
         position,
         { HelpScreenConfig::IconSize * 2.f + HelpScreenConfig::SpacebarExtraWidth,
           HelpScreenConfig::IconSize }
@@ -278,7 +278,7 @@ void HelpScreen::drawSectionHeading(sf::RenderTarget& target,
                                     const std::string& title,
                                     sf::Vector2f position,
                                     sf::Color color) const {
-    target.draw(makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         title,
         HelpScreenConfig::SectionTextSize,
@@ -293,14 +293,14 @@ void HelpScreen::drawOutcomeCard(sf::RenderTarget& target,
                                  sf::Color titleColor) const {
     sf::RectangleShape card(bounds.size);
     card.setPosition(bounds.position);
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         card,
         HelpScreenConfig::OutcomeCardColor,
         HelpScreenConfig::PanelOutlineColor,
         HelpScreenConfig::CardOutlineThickness);
     target.draw(card);
 
-    target.draw(makeText(
+    target.draw(TextUtils::makeText(
         m_font,
         title,
         HelpScreenConfig::BodyTextSize,
@@ -321,14 +321,14 @@ void HelpScreen::drawOutcomeCard(sf::RenderTarget& target,
 void HelpScreen::drawLoseConditions(sf::RenderTarget& target, sf::FloatRect bounds) const {
     sf::RectangleShape card(bounds.size);
     card.setPosition(bounds.position);
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         card,
         HelpScreenConfig::LoseCardColor,
         HelpScreenConfig::PanelOutlineColor,
         HelpScreenConfig::CardOutlineThickness);
     target.draw(card);
 
-    target.draw(makeText(
+    target.draw(TextUtils::makeText(
         m_font,
         "Lose Conditions",
         HelpScreenConfig::BodyTextSize,
@@ -343,7 +343,7 @@ void HelpScreen::drawLoseConditions(sf::RenderTarget& target, sf::FloatRect boun
     };
 
     for (std::size_t i = 0; i < conditions.size(); ++i) {
-        target.draw(makeText(
+        target.draw(TextUtils::makeText(
             m_font,
             conditions[i],
             HelpScreenConfig::LoseConditionTextSize,

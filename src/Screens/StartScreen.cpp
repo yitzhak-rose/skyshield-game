@@ -46,7 +46,7 @@ void StartScreen::configureSettingsButton() {
         StartScreenConfig::SettingsPadding,
         StartScreenConfig::SettingsPadding
         });
-    styleRectangle(m_settingsButton,
+    GraphicsUtils::styleRectangle(m_settingsButton,
         StartScreenConfig::SettingsButtonColor,
         StartScreenConfig::ButtonOutlineColor,
         StartScreenConfig::ButtonOutlineThickness);
@@ -56,7 +56,7 @@ void StartScreen::configureSettingsButton() {
         static_cast<float>(std::max(settingsSize.x, settingsSize.y));
     m_settingsSprite.setScale({ settingsScale, settingsScale });
     GraphicsUtils::centerOrigin(m_settingsSprite);
-    m_settingsSprite.setPosition(centerOf(m_settingsButton));
+    m_settingsSprite.setPosition(GeometryUtils::centerOf(m_settingsButton));
 }
 
 void StartScreen::configureCoinCounter() {
@@ -70,7 +70,7 @@ void StartScreen::configureCoinCounter() {
 }
 
 void StartScreen::configureQuitButtonStyle() {
-    styleRectangle(m_quitButton,
+    GraphicsUtils::styleRectangle(m_quitButton,
         StartScreenConfig::QuitButtonColor,
         StartScreenConfig::ButtonOutlineColor,
         StartScreenConfig::ButtonOutlineThickness);
@@ -151,10 +151,10 @@ StartScreenButton StartScreen::buttonAt(sf::Vector2f position) const {
     if (GeometryUtils::contains(m_quitButton.getGlobalBounds(), position))
         return StartScreenButton::Quit;
 
-    if (m_startButton.contains(position))
+    if (GeometryUtils::contains(m_startButton.bounds(), position))
         return StartScreenButton::Start;
 
-    if (m_shopButton.contains(position))
+    if (GeometryUtils::contains(m_shopButton.bounds(), position))
         return StartScreenButton::Shop;
 
     return StartScreenButton::None;
@@ -215,5 +215,5 @@ void StartScreen::updateQuitButtonForTarget(const sf::RenderWindow& target) cons
         rightEdge - StartScreenConfig::SettingsPadding - StartScreenConfig::QuitButtonSize,
         topEdge + StartScreenConfig::SettingsPadding
         });
-    m_quitSprite.setPosition(centerOf(m_quitButton));
+    m_quitSprite.setPosition(GeometryUtils::centerOf(m_quitButton));
 }

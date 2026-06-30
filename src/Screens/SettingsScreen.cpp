@@ -27,21 +27,21 @@ SettingsScreen::SettingsScreen(const GameState& gameState)
 void SettingsScreen::configureLayout() {
     m_background.setFillColor(SettingsScreenConfig::BackgroundColor);
     m_panel.setPosition({ SettingsScreenConfig::PanelX, SettingsScreenConfig::PanelY });
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         m_panel,
         SettingsScreenConfig::PanelColor,
         SettingsScreenConfig::PanelOutlineColor,
         SettingsScreenConfig::ButtonOutlineThickness);
 
-    fitSpriteTo(m_backSprite, backButtonBounds());
-    fitSpriteTo(m_volumeLowSprite, {
+    GraphicsUtils::fitSpriteTo(m_backSprite, backButtonBounds());
+    GraphicsUtils::fitSpriteTo(m_volumeLowSprite, {
         { SettingsScreenConfig::SliderX -
               SettingsScreenConfig::VolumeIconSize -
               SettingsScreenConfig::VolumeIconGap,
           SettingsScreenConfig::SliderY - SettingsScreenConfig::VolumeIconSize / 2.f },
         { SettingsScreenConfig::VolumeIconSize, SettingsScreenConfig::VolumeIconSize }
     });
-    fitSpriteTo(m_volumeHighSprite, {
+    GraphicsUtils::fitSpriteTo(m_volumeHighSprite, {
         { SettingsScreenConfig::SliderX +
               SettingsScreenConfig::SliderWidth +
               SettingsScreenConfig::VolumeIconGap,
@@ -267,7 +267,7 @@ void SettingsScreen::draw(sf::RenderWindow& target) {
 void SettingsScreen::drawBackButton(sf::RenderTarget& target) const {
     sf::RectangleShape button(backButtonBounds().size);
     button.setPosition(backButtonBounds().position);
-    styleRectangle(
+    GraphicsUtils::styleRectangle(
         button,
         m_hoveredControl == SettingsControl::Back ? SettingsScreenConfig::ButtonHoverColor : SettingsScreenConfig::ButtonColor,
         SettingsScreenConfig::PanelOutlineColor,
@@ -277,7 +277,7 @@ void SettingsScreen::drawBackButton(sf::RenderTarget& target) const {
 }
 
 void SettingsScreen::drawTitle(sf::RenderTarget& target) const {
-    target.draw(makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         "Settings",
         SettingsScreenConfig::TitleTextSize,
@@ -315,7 +315,7 @@ void SettingsScreen::drawAudioButton(sf::RenderTarget& target,
     target.draw(button);
 
     sf::Sprite iconSprite(ResourceManager::instance().getImage(icon));
-    fitSpriteTo(iconSprite, {
+    GraphicsUtils::fitSpriteTo(iconSprite, {
         { bounds.position.x + SettingsScreenConfig::AudioIconOffsetX,
           bounds.position.y + SettingsScreenConfig::AudioIconOffsetY },
         { SettingsScreenConfig::AudioIconSize, SettingsScreenConfig::AudioIconSize }
@@ -359,7 +359,7 @@ void SettingsScreen::drawSlider(sf::RenderTarget& target) const {
     knob.setOutlineThickness(SettingsScreenConfig::ButtonOutlineThickness);
     target.draw(knob);
 
-    target.draw(makeCenteredText(
+    target.draw(TextUtils::makeCenteredText(
         m_font,
         std::to_string(static_cast<int>(std::round(m_gameState.getMaxVolume()))) + "%",
         SettingsScreenConfig::VolumeTextSize,

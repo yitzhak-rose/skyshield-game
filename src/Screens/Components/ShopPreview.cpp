@@ -39,7 +39,7 @@ void ShopPreview::drawArtworkBox(sf::RenderTarget& target, sf::FloatRect bounds,
     sf::RectangleShape box(bounds.size);
     box.setPosition(bounds.position);
     const sf::Color fill = owned ? sf::Color(30, 45, 55, 230) : sf::Color(30, 45, 55, 115);
-    Screen::styleRectangle(box, fill, ShopScreenConfig::OutlineColor, 2.f);
+    GraphicsUtils::styleRectangle(box, fill, ShopScreenConfig::OutlineColor, 2.f);
     target.draw(box);
 }
 
@@ -53,7 +53,7 @@ void ShopPreview::drawImageArtwork(sf::RenderTarget& target,
 
     sf::Sprite sprite(texture->second);
     cropFirstShopFrame(sprite, asset.type);
-    Screen::fitSpriteTo(sprite, bounds);
+    GraphicsUtils::fitSpriteTo(sprite, bounds);
 
     if (!owned)
         sprite.setColor(ShopScreenConfig::LockedColor);
@@ -71,7 +71,7 @@ void ShopPreview::drawFontArtwork(sf::RenderTarget& target,
     sample.setFillColor(ShopScreenConfig::TextColor);
     fitFontSample(sample, bounds);
     GraphicsUtils::centerOrigin(sample);
-    sample.setPosition(Screen::centerOf(bounds));
+    sample.setPosition(GeometryUtils::centerOf(bounds));
     target.draw(sample);
 }
 
@@ -84,9 +84,9 @@ void ShopPreview::fitFontSample(sf::Text& sample, sf::FloatRect bounds) {
 }
 
 void ShopPreview::drawMusicArtwork(sf::RenderTarget& target, sf::FloatRect bounds, bool large) const {
-    sf::Text music = Screen::makeCenteredText(m_fallbackFont, large ? "Music Preview" : "Music",
+    sf::Text music = TextUtils::makeCenteredText(m_fallbackFont, large ? "Music Preview" : "Music",
         large ? OverlayViewConfig::BodyTextSize : ShopScreenConfig::ButtonTextSize,
-        Screen::centerOf(bounds),
+        GeometryUtils::centerOf(bounds),
         ShopScreenConfig::TextColor);
     target.draw(music);
 }
@@ -114,7 +114,7 @@ sf::FloatRect ShopPreview::drawPreviewPanel(sf::RenderTarget& target) const {
         { 860.f, 580.f });
     sf::RectangleShape panel(panelBounds.size);
     panel.setPosition(panelBounds.position);
-    Screen::styleRectangle(panel,
+    GraphicsUtils::styleRectangle(panel,
         OverlayViewConfig::PanelColor,
         OverlayViewConfig::PanelOutlineColor,
         OverlayViewConfig::PanelOutlineThickness);
@@ -125,7 +125,7 @@ sf::FloatRect ShopPreview::drawPreviewPanel(sf::RenderTarget& target) const {
 void ShopPreview::drawPreviewTitle(sf::RenderTarget& target,
                                    const ShopAsset& asset,
                                    sf::FloatRect panelBounds) const {
-    sf::Text title = Screen::makeCenteredText(m_fallbackFont, asset.title, OverlayViewConfig::TitleTextSize,
+    sf::Text title = TextUtils::makeCenteredText(m_fallbackFont, asset.title, OverlayViewConfig::TitleTextSize,
         { WindowConfig::Width / 2.f, panelBounds.position.y + 56.f },
         OverlayViewConfig::TitleColor);
     target.draw(title);
@@ -151,7 +151,7 @@ void ShopPreview::drawPreviewPrice(sf::RenderTarget& target,
     const std::string price = m_gameState.ownsAsset(asset)
         ? "Owned"
         : "Price: " + std::to_string(asset.price) + " coins";
-    sf::Text priceText = Screen::makeCenteredText(m_fallbackFont, price, OverlayViewConfig::BodyTextSize,
+    sf::Text priceText = TextUtils::makeCenteredText(m_fallbackFont, price, OverlayViewConfig::BodyTextSize,
         { WindowConfig::Width / 2.f, panelBounds.position.y + 405.f },
         ShopScreenConfig::TextColor);
     target.draw(priceText);
@@ -163,7 +163,7 @@ void ShopPreview::drawAffordabilityWarning(sf::RenderTarget& target,
     if (m_gameState.ownsAsset(asset) || m_gameState.canAfford(asset))
         return;
 
-    sf::Text warning = Screen::makeCenteredText(m_fallbackFont, "Not enough coins", 24,
+    sf::Text warning = TextUtils::makeCenteredText(m_fallbackFont, "Not enough coins", 24,
         { WindowConfig::Width / 2.f, panelBounds.position.y + 442.f },
         ShopScreenConfig::WarningColor);
     target.draw(warning);

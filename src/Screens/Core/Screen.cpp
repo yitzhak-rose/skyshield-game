@@ -1,7 +1,5 @@
 #include "Screens/Core/Screen.h"
 
-#include "Utilities/Utils.h"
-
 #include <algorithm>
 #include <utility>
 
@@ -75,56 +73,4 @@ void Screen::requestCommand(ScreenCommand command) {
 
 void Screen::showOverlay(std::unique_ptr<OverlayView> overlay) {
     m_overlay = std::move(overlay);
-}
-
-sf::Vector2f Screen::centerOf(sf::FloatRect bounds) {
-    return {
-        bounds.position.x + bounds.size.x / 2.f,
-        bounds.position.y + bounds.size.y / 2.f
-    };
-}
-
-sf::Vector2f Screen::centerOf(const sf::RectangleShape& shape) {
-    return centerOf(shape.getGlobalBounds());
-}
-
-void Screen::fitSpriteTo(sf::Sprite& sprite, sf::FloatRect bounds) {
-    const sf::IntRect textureRect = sprite.getTextureRect();
-    const sf::Vector2i size = textureRect.size;
-    const float scale = std::min(
-        bounds.size.x / static_cast<float>(size.x),
-        bounds.size.y / static_cast<float>(size.y));
-    sprite.setScale({ scale, scale });
-    GraphicsUtils::centerOrigin(sprite);
-    sprite.setPosition(centerOf(bounds));
-}
-
-void Screen::styleRectangle(sf::RectangleShape& shape,
-                            sf::Color fill,
-                            sf::Color outline,
-                            float outlineThickness) {
-    shape.setFillColor(fill);
-    shape.setOutlineColor(outline);
-    shape.setOutlineThickness(outlineThickness);
-}
-
-sf::Text Screen::makeText(const sf::Font& font,
-                          const std::string& value,
-                          unsigned int size,
-                          sf::Vector2f position,
-                          sf::Color color) {
-    sf::Text text(font, value, size);
-    text.setFillColor(color);
-    text.setPosition(position);
-    return text;
-}
-
-sf::Text Screen::makeCenteredText(const sf::Font& font,
-                                  const std::string& value,
-                                  unsigned int size,
-                                  sf::Vector2f position,
-                                  sf::Color color) {
-    sf::Text text = makeText(font, value, size, position, color);
-    GraphicsUtils::centerOrigin(text);
-    return text;
 }

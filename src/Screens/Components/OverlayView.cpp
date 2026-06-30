@@ -36,7 +36,7 @@ void OverlayView::validateActions() const {
 void OverlayView::configureLayout() {
     m_backgroundDim.setFillColor(OverlayViewConfig::backgroundDimColor);
 
-    Screen::styleRectangle(m_dialogPanel,
+    GraphicsUtils::styleRectangle(m_dialogPanel,
         OverlayViewConfig::PanelColor,
         OverlayViewConfig::PanelOutlineColor,
         OverlayViewConfig::PanelOutlineThickness);
@@ -133,7 +133,7 @@ void OverlayView::draw(sf::RenderTarget& target, sf::RenderStates states) const 
 void OverlayView::drawText(sf::RenderTarget& target, sf::RenderStates states) const {
     const sf::Vector2f center{ WindowConfig::Width / 2.f, WindowConfig::Height / 2.f };
 
-    target.draw(Screen::makeCenteredText(m_font,
+    target.draw(TextUtils::makeCenteredText(m_font,
                                          m_title,
                                          OverlayViewConfig::TitleTextSize,
                                          { center.x, center.y + OverlayViewConfig::TitleTopOffset },
@@ -142,7 +142,7 @@ void OverlayView::drawText(sf::RenderTarget& target, sf::RenderStates states) co
 
     float bodyY = center.y + OverlayViewConfig::BodyTopOffset;
     for (const auto& line : m_bodyLines) {
-        target.draw(Screen::makeCenteredText(m_font,
+        target.draw(TextUtils::makeCenteredText(m_font,
                                              line,
                                              OverlayViewConfig::BodyTextSize,
                                              { center.x, bodyY },
