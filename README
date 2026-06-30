@@ -17,21 +17,21 @@ General Project Description
 SkyShield is a 2D arcade game written in C++20 using the SFML 3.0 graphics
 library. The player controls a drone flying over a battlefield and must
 defend a stationary Command Vehicle in the center of the screen from waves
-of enemies that advance toward it from both edges and fire shells at it.
+of enemies that advance toward it from left and right, and fire shells at it.
 The player drops bombs on the enemies from above to destroy them before the
 vehicle is wrecked.
 
 Each level has a number of enemies that must be eliminated; once all of
-them are destroyed - you win. A level ends in a loss if the vehicle is
+them are destroyed, you win. A level ends in a loss if the vehicle is
 destroyed, if the drone's battery runs out, or if all bombs are used up
-and no more bombs are still falling in mid-air.
+and no more bombs are still falling in mid-air while enemies remain.
 
-Each defeated enemy awards Coins that persist between levels and game
-sessions, and can be spent in the Shop on alternative characters,
-backgrounds, background music, and fonts. Some shop vehicles and drones
-also provide numeric bonuses - for example improved armor for the command
-vehicle or larger battery capacity for the drone - so purchases are not
-purely cosmetic.
+Each defeated enemy awards Coins that, if the level has been completed,
+persist between levels and game sessions, and can be spent in the Shop
+on alternative characters, backgrounds, background music, and fonts.
+Some shop vehicles and drones also provide numeric bonuses - for example
+improved armor for the command vehicle or larger battery capacity for the
+drone - so purchases are not purely cosmetic.
 
 The game includes a Start screen, Game screen, Shop screen, Help screen,
 and Settings screen with volume and mute controls. All persistent data
@@ -461,14 +461,7 @@ Other Notes
 - gameData.json is loaded once at startup. To try different levels you
   can edit the file without recompiling. The structure of a level is
   simple and documented in LevelConfig.
-- All classes are written in a uniform style with Doxygen-style comments
+- Classes and public facing functions are written in a uniform style with Doxygen-style comments
   above member functions.
-- Code regions are marked with #pragma region for better readability in
-  Visual Studio.
-- Before creating the ZIP for submission - update MY_AUTHORS in
-  CMakeLists.txt with the submitter names (in the pattern
-  lastname_firstname or, for a pair, separated by a dash) so that
-  Zip.cmake produces a correctly named ZIP automatically.
+- Code regions are marked with #pragma region for better readability.
 - Demo video: [add YouTube link]
-- Representative screenshot: submitted separately in the Moodle
-  submission, as explained in the project document.
