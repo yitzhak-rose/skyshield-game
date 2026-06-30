@@ -53,13 +53,13 @@ namespace EnemyConfig {
 
 namespace FastEnemyConfig {
     inline constexpr EnemyTypeConfig Stats{
-        120.f, 10, { 4, 0.12f, DefaultConfig::SpriteScale }, { 12.f, -38.f }
+        120.f, 10, { 4, 0.12f, DefaultConfig::SpriteScale }, { 12.f, -73.f }
     };
 }
 
 namespace TankEnemyConfig {
     inline constexpr EnemyTypeConfig Stats{
-        80.f, 20, { 5, 0.3f, 0.6f }, { 101.f, -17.f }
+        80.f, 20, { 5, 0.3f, 0.6f }, { 101.f, -65.f }
     };
 }
 

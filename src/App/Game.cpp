@@ -146,13 +146,6 @@ void Game::handleEvents() {
             break;
         }
 
-        if (const auto* resized = event->getIf<sf::Event::Resized>()) {
-            const sf::FloatRect visibleArea(
-                { 0.f, 0.f },
-                { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
-            window.setView(sf::View(visibleArea));
-        }
-
         m_screen->handleEvent(*event, makeEventContext(*event));
     }
 }

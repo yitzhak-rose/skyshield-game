@@ -1,200 +1,200 @@
 {
-  "stages": [
-    {
-      "enemyCount": 10,
-      "tankChance": 0.3,
-      "spawnInterval": 2.5,
-      "batteryDrain": 1.5,
-      "startAmmo": 20
-    },
-    {
-      "enemyCount": 8,
-      "tankChance": 0.25,
-      "spawnInterval": 2.0,
-      "batteryDrain": 1.4,
-      "startAmmo": 16
-    },
-    {
-      "enemyCount": 12,
-      "tankChance": 0.4,
-      "spawnInterval": 1.6,
-      "batteryDrain": 1.6,
-      "startAmmo": 22
-    },
-    {
-      "enemyCount": 16,
-      "tankChance": 0.55,
-      "spawnInterval": 1.3,
-      "batteryDrain": 1.8,
-      "startAmmo": 28
+    "stages": [
+        {
+            "enemyCount": 10,
+            "tankChance": 0.3,
+            "spawnInterval": 2.0,
+            "batteryDrain": 1.5,
+            "startAmmo": 12
+        },
+        {
+            "enemyCount": 12,
+            "tankChance": 0.35,
+            "spawnInterval": 1.8,
+            "batteryDrain": 1.5,
+            "startAmmo": 14
+        },
+        {
+            "enemyCount": 15,
+            "tankChance": 0.5,
+            "spawnInterval": 1.5,
+            "batteryDrain": 1.7,
+            "startAmmo": 17
+        },
+        {
+            "enemyCount": 20,
+            "tankChance": 0.6,
+            "spawnInterval": 1.2,
+            "batteryDrain": 1.9,
+            "startAmmo": 22
+        }
+    ],
+    "shopAssets": {
+        "command_vehicle": [
+            {
+                "id": 1,
+                "title": "Default Command Vehicle",
+                "price": 0,
+                "file": "images/default/commandCar.png",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 5,
+                "title": "Upgraded Command Vehicle",
+                "price": 60,
+                "file": "images/shop/UpgradedCommandCar.png",
+                "extra": 25,
+                "default": false
+            },
+            {
+                "id": 13,
+                "title": "Command Runner",
+                "price": 75,
+                "file": "images/shop/NewCommandCar.png",
+                "extra": 30,
+                "default": false
+            },
+            {
+                "id": 14,
+                "title": "Command Interceptor",
+                "price": 95,
+                "file": "images/shop/NewCommandCar2.png",
+                "extra": 40,
+                "default": false
+            }
+        ],
+        "drone": [
+            {
+                "id": 2,
+                "title": "Default Drone",
+                "price": 0,
+                "file": "images/default/drone.png",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 6,
+                "title": "Drone Helicopter",
+                "price": 70,
+                "file": "images/shop/DroneHelicopter.png",
+                "extra": 50,
+                "default": false
+            },
+            {
+                "id": 9,
+                "title": "Drone Scorpion",
+                "price": 90,
+                "file": "images/shop/DroneScorpion.png",
+                "extra": 75,
+                "default": false
+            },
+            {
+                "id": 15,
+                "title": "Recon Drone",
+                "price": 85,
+                "file": "images/shop/NewDrone.png",
+                "extra": 65,
+                "default": false
+            }
+        ],
+        "fast_enemy": [
+            {
+                "id": 16,
+                "title": "Default Fast Enemy",
+                "price": 0,
+                "file": "images/game/smallEnemy.png",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 17,
+                "title": "Raider Fast Enemy",
+                "price": 55,
+                "file": "images/shop/NewSmallEnemy.png",
+                "extra": 0,
+                "default": false
+            }
+        ],
+        "tank_enemy": [
+            {
+                "id": 18,
+                "title": "Default Tank Enemy",
+                "price": 0,
+                "file": "images/game/enemy.png",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 19,
+                "title": "Heavy Tank Enemy",
+                "price": 65,
+                "file": "images/shop/NewTankEnemy.png",
+                "extra": 0,
+                "default": false
+            }
+        ],
+        "background": [
+            {
+                "id": 3,
+                "title": "Default Background",
+                "price": 0,
+                "file": "images/default/background.png",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 10,
+                "title": "Canyon Outpost",
+                "price": 35,
+                "file": "images/shop/background2.png",
+                "extra": 0,
+                "default": false
+            },
+            {
+                "id": 11,
+                "title": "Frozen Ruins",
+                "price": 35,
+                "file": "images/shop/background3.png",
+                "extra": 0,
+                "default": false
+            },
+            {
+                "id": 12,
+                "title": "Dustfall City",
+                "price": 35,
+                "file": "images/shop/background5.png",
+                "extra": 0,
+                "default": false
+            }
+        ],
+        "background_music": [
+            {
+                "id": 4,
+                "title": "Default Music",
+                "price": 0,
+                "file": "sounds/default/background-sound.mp3",
+                "extra": 0,
+                "default": true
+            }
+        ],
+        "font": [
+            {
+                "id": 7,
+                "title": "Stencil Force",
+                "price": 0,
+                "file": "fonts/StencilForce.otf",
+                "extra": 0,
+                "default": true
+            },
+            {
+                "id": 8,
+                "title": "Battle Grid",
+                "price": 30,
+                "file": "fonts/BattleGridFree.ttf",
+                "extra": 0,
+                "default": false
+            }
+        ]
     }
-  ],
-  "shopAssets": {
-    "command_vehicle": [
-      {
-        "id": 1,
-        "title": "Default Command Vehicle",
-        "price": 0,
-        "file": "images/default/commandCar.png",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 5,
-        "title": "Upgraded Command Vehicle",
-        "price": 60,
-        "file": "images/shop/UpgradedCommandCar.png",
-        "extra": 25,
-        "default": false
-      },
-      {
-        "id": 13,
-        "title": "Command Runner",
-        "price": 75,
-        "file": "images/shop/NewCommandCar.png",
-        "extra": 30,
-        "default": false
-      },
-      {
-        "id": 14,
-        "title": "Command Interceptor",
-        "price": 95,
-        "file": "images/shop/NewCommandCar2.png",
-        "extra": 40,
-        "default": false
-      }
-    ],
-    "drone": [
-      {
-        "id": 2,
-        "title": "Default Drone",
-        "price": 0,
-        "file": "images/default/drone.png",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 6,
-        "title": "Drone Helicopter",
-        "price": 70,
-        "file": "images/shop/DroneHelicopter.png",
-        "extra": 50,
-        "default": false
-      },
-      {
-        "id": 9,
-        "title": "Drone Scorpion",
-        "price": 90,
-        "file": "images/shop/DroneScorpion.png",
-        "extra": 75,
-        "default": false
-      },
-      {
-        "id": 15,
-        "title": "Recon Drone",
-        "price": 85,
-        "file": "images/shop/NewDrone.png",
-        "extra": 65,
-        "default": false
-      }
-    ],
-    "fast_enemy": [
-      {
-        "id": 16,
-        "title": "Default Fast Enemy",
-        "price": 0,
-        "file": "images/game/smallEnemy.png",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 17,
-        "title": "Raider Fast Enemy",
-        "price": 55,
-        "file": "images/shop/NewSmallEnemy.png",
-        "extra": 0,
-        "default": false
-      }
-    ],
-    "tank_enemy": [
-      {
-        "id": 18,
-        "title": "Default Tank Enemy",
-        "price": 0,
-        "file": "images/game/enemy.png",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 19,
-        "title": "Heavy Tank Enemy",
-        "price": 65,
-        "file": "images/shop/NewTankEnemy.png",
-        "extra": 0,
-        "default": false
-      }
-    ],
-    "background": [
-      {
-        "id": 3,
-        "title": "Default Background",
-        "price": 0,
-        "file": "images/default/background.png",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 10,
-        "title": "Canyon Outpost",
-        "price": 35,
-        "file": "images/shop/background2.png",
-        "extra": 0,
-        "default": false
-      },
-      {
-        "id": 11,
-        "title": "Frozen Ruins",
-        "price": 35,
-        "file": "images/shop/background3.png",
-        "extra": 0,
-        "default": false
-      },
-      {
-        "id": 12,
-        "title": "Dustfall City",
-        "price": 35,
-        "file": "images/shop/background5.png",
-        "extra": 0,
-        "default": false
-      }
-    ],
-    "background_music": [
-      {
-        "id": 4,
-        "title": "Default Music",
-        "price": 0,
-        "file": "sounds/default/background-sound.mp3",
-        "extra": 0,
-        "default": true
-      }
-    ],
-    "font": [
-      {
-        "id": 7,
-        "title": "Stencil Force",
-        "price": 0,
-        "file": "fonts/StencilForce.otf",
-        "extra": 0,
-        "default": true
-      },
-      {
-        "id": 8,
-        "title": "Battle Grid",
-        "price": 30,
-        "file": "fonts/BattleGridFree.ttf",
-        "extra": 0,
-        "default": false
-      }
-    ]
-  }
 }
