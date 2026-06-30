@@ -1,4 +1,5 @@
 #include "Screens/GameScreen.h"
+#include "Resources/DataManager.h"
 #include "Resources/SoundManager.h"
 #include "App/ScreenConstants.h"
 #include "Utilities/Utils.h"
@@ -31,11 +32,17 @@ void GameScreen::handleLevelResult() {
         showGameOverOverlay();
 
     if (m_world->getResult() == LevelResult::Won && !m_completionOverlayShown) {
+        saveUserData();
         if (isFinalStage())
             showGameCompletedOverlay();
         else
             showLevelCompletedOverlay();
     }
+}
+
+void GameScreen::saveUserData() const {
+    DataManager::instance().updateUserData(m_gameState.getUserData());
+    DataManager::instance().saveUserData();
 }
 
 void GameScreen::showGameOverOverlay() {

@@ -1,4 +1,6 @@
 #include "Resources/ResourceManager.h"
+#include "App/State/GameState.h"
+#include "Resources/DataManager.h"
 #include "Utilities/AppUtils.h"
 
 #include <fstream>
@@ -66,6 +68,12 @@ void ResourceManager::applyShopSelections(const std::vector<ShopAsset>& catalog,
                 break;
         }
     }
+}
+
+void ResourceManager::applyUserDataSelections(GameState& gameState) {
+    const auto& catalog = DataManager::instance().getGameData().shopAssets;
+    applyShopSelections(catalog, gameState.getUserData());
+    gameState.setSelectedAssetExtras(catalog);
 }
 
 sf::Texture ResourceManager::loadTextureFromFile(const std::string& path) const {

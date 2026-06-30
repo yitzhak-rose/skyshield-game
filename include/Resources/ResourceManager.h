@@ -11,6 +11,8 @@
 #include "Shop/ShopData.h"
 #include "Resources.h"
 
+class GameState;
+
 /// @brief Singleton class that manages the loading, storing, and retrieval of game resources.
 class ResourceManager {
 public:
@@ -34,8 +36,8 @@ public:
     /// @return Path to the requested sound asset.
     const std::string& getSoundPath(Sounds sound) const;
 
-    /// @brief Applies the selected shop assets to the runtime texture and sound maps.
-    void applyShopSelections(const std::vector<ShopAsset>& catalog, const UserData& userData);
+    /// @brief Applies currently selected user assets and gameplay extras.
+    void applyUserDataSelections(GameState& gameState);
 
     /// @brief Loads a standalone texture by file path for UI previews.
     sf::Texture loadTextureFromFile(const std::string& path) const;
@@ -93,6 +95,9 @@ private:
 
     /// @brief Verifies that a sound path can be opened.
     static void validateSoundPath(const std::string& path);
+
+    /// @brief Applies the selected shop assets to the runtime texture and sound maps.
+    void applyShopSelections(const std::vector<ShopAsset>& catalog, const UserData& userData);
 
     void setImage(GameObjects image, const std::string& path);
     void setSoundPath(Sounds sound, const std::string& path);

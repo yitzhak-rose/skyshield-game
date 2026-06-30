@@ -2,9 +2,7 @@
 
 #include "App/Constants.h"
 #include "App/ScreenConstants.h"
-#include "Resources/DataManager.h"
 #include "Resources/ResourceManager.h"
-#include "Resources/SoundManager.h"
 #include "Utilities/Utils.h"
 
 #include <algorithm>
@@ -13,7 +11,7 @@
 #include <string>
 #include <vector>
 
-SettingsScreen::SettingsScreen(GameState& gameState)
+SettingsScreen::SettingsScreen(const GameState& gameState)
     : m_gameState(gameState)
     , m_background({ WindowConfig::Width, WindowConfig::Height })
     , m_panel({ SettingsScreenConfig::PanelWidth, SettingsScreenConfig::PanelHeight })
@@ -22,7 +20,6 @@ SettingsScreen::SettingsScreen(GameState& gameState)
     , m_volumeHighSprite(ResourceManager::instance().getImage(GameObjects::VolumeHigh))
     , m_font(ResourceManager::instance().getFont(Fonts::StencilForce)) {
     configureLayout();
-    syncAudioSettings();
 }
 
 void SettingsScreen::configureLayout() {
@@ -52,13 +49,6 @@ void SettingsScreen::configureLayout() {
 }
 
 void SettingsScreen::handleScreenEvent(const sf::Event& event, const ScreenEventContext& context) {
-    if (m_helpScreen) {
-        m_helpScreen->handleEvent(event, context);
-        if (m_helpScreen->isCloseRequested())
-            m_helpScreen.reset();
-        return;
-    }
-
     if (m_attributionOverlay) {
         m_attributionOverlay->handleEvent(event, context);
         if (m_attributionOverlay->isDismissed())
@@ -78,7 +68,7 @@ void SettingsScreen::handleScreenEvent(const sf::Event& event, const ScreenEvent
         m_draggingSlider = false;
 
     if (isKeyPressed(event, sf::Keyboard::Key::Escape))
-        requestCommand(ScreenCommand::ReturnToStart);
+        requestAction(SettingsAction::ReturnToStart);
 }
 
 void SettingsScreen::update(float deltaTime) {
@@ -87,34 +77,32 @@ void SettingsScreen::update(float deltaTime) {
 
 void SettingsScreen::handleClick(sf::Vector2f position) {
     switch (controlAt(position)) {
-        case Control::Back:
-            requestCommand(ScreenCommand::ReturnToStart);
+        case SettingsControl::Back:
+            requestAction(SettingsAction::ReturnToStart);
             break;
-        case Control::Mute:
-            m_gameState.setMuted(true);
+        case SettingsControl::Mute:
             m_draggingSlider = false;
-            syncAudioSettings();
+            requestAction(SettingsAction::Mute);
             break;
-        case Control::Unmute:
-            m_gameState.setMuted(false);
-            syncAudioSettings();
+        case SettingsControl::Unmute:
+            requestAction(SettingsAction::Unmute);
             break;
-        case Control::Slider:
+        case SettingsControl::Slider:
             if (!m_gameState.isMuted()) {
                 m_draggingSlider = true;
                 updateVolumeFromPosition(position.x);
             }
             break;
-        case Control::Help:
-            showHelp();
+        case SettingsControl::Help:
+            requestAction(SettingsAction::OpenHelp);
             break;
-        case Control::Attribution:
+        case SettingsControl::Attribution:
             showAttribution();
             break;
-        case Control::Reset:
+        case SettingsControl::Reset:
             showResetConfirmation();
             break;
-        case Control::None:
+        case SettingsControl::None:
             break;
     }
 }
@@ -133,26 +121,8 @@ void SettingsScreen::updateHover(sf::Vector2f position) {
 void SettingsScreen::updateVolumeFromPosition(float x) {
     const sf::FloatRect track = sliderTrackBounds();
     const float ratio = std::clamp((x - track.position.x) / track.size.x, 0.f, 1.f);
-    m_gameState.setMaxVolume(ratio * SettingsScreenConfig::MaxVolume);
-    syncAudioSettings();
-}
-
-void SettingsScreen::syncAudioSettings() const {
-    SoundManager::instance().applyUserSettings(m_gameState.isMuted(), m_gameState.getMaxVolume());
-}
-
-void SettingsScreen::resetUserData() {
-    m_gameState.resetUserData(DataManager::instance().defaultUserData());
-    const auto& catalog = DataManager::instance().getGameData().shopAssets;
-    ResourceManager::instance().applyShopSelections(catalog, m_gameState.getUserData());
-    m_gameState.setSelectedAssetExtras(catalog);
-    syncAudioSettings();
-    DataManager::instance().updateUserData(m_gameState.getUserData());
-    DataManager::instance().saveUserData();
-}
-
-void SettingsScreen::showHelp() {
-    m_helpScreen = std::make_unique<HelpScreen>();
+    m_requestedVolume = ratio * SettingsScreenConfig::MaxVolume;
+    m_hasVolumeChange = true;
 }
 
 void SettingsScreen::showResetConfirmation() {
@@ -164,7 +134,7 @@ void SettingsScreen::showResetConfirmation() {
         },
         std::vector<OverlayAction>{
             { "Cancel", OverlayActionType::Default, []() {} },
-            { "Reset", OverlayActionType::Danger, [this]() { resetUserData(); } }
+            { "Reset", OverlayActionType::Danger, [this]() { requestAction(SettingsAction::ResetUserData); } }
         }));
 }
 
@@ -174,13 +144,33 @@ void SettingsScreen::showAttribution() {
         SettingsScreenConfig::AttributionText);
 }
 
-SettingsScreen::Control SettingsScreen::controlAt(sf::Vector2f position) const {
+void SettingsScreen::requestAction(SettingsAction action) {
+    if (m_requestedAction == SettingsAction::None)
+        m_requestedAction = action;
+}
+
+SettingsAction SettingsScreen::consumeAction() {
+    const SettingsAction action = m_requestedAction;
+    m_requestedAction = SettingsAction::None;
+    return action;
+}
+
+bool SettingsScreen::consumeVolumeChange(float& volume) {
+    if (!m_hasVolumeChange)
+        return false;
+
+    volume = m_requestedVolume;
+    m_hasVolumeChange = false;
+    return true;
+}
+
+SettingsControl SettingsScreen::controlAt(sf::Vector2f position) const {
     if (GeometryUtils::contains(backButtonBounds(), position))
-        return Control::Back;
-    if (GeometryUtils::contains(audioButtonBounds(Control::Mute), position))
-        return Control::Mute;
-    if (GeometryUtils::contains(audioButtonBounds(Control::Unmute), position))
-        return Control::Unmute;
+        return SettingsControl::Back;
+    if (GeometryUtils::contains(audioButtonBounds(SettingsControl::Mute), position))
+        return SettingsControl::Mute;
+    if (GeometryUtils::contains(audioButtonBounds(SettingsControl::Unmute), position))
+        return SettingsControl::Unmute;
     if (!m_gameState.isMuted()) {
         const sf::FloatRect track = sliderTrackBounds();
         const sf::Vector2f knob = sliderKnobPosition();
@@ -190,15 +180,15 @@ SettingsScreen::Control SettingsScreen::controlAt(sf::Vector2f position) const {
             { SettingsScreenConfig::SliderKnobRadius * 2.f,
               SettingsScreenConfig::SliderKnobRadius * 2.f });
         if (GeometryUtils::contains(track, position) || GeometryUtils::contains(knobBounds, position))
-            return Control::Slider;
+            return SettingsControl::Slider;
     }
     if (GeometryUtils::contains(buttonBounds(0), position))
-        return Control::Attribution;
+        return SettingsControl::Attribution;
     if (GeometryUtils::contains(buttonBounds(1), position))
-        return Control::Help;
+        return SettingsControl::Help;
     if (GeometryUtils::contains(buttonBounds(2), position))
-        return Control::Reset;
-    return Control::None;
+        return SettingsControl::Reset;
+    return SettingsControl::None;
 }
 
 sf::FloatRect SettingsScreen::backButtonBounds() const {
@@ -208,11 +198,11 @@ sf::FloatRect SettingsScreen::backButtonBounds() const {
     };
 }
 
-sf::FloatRect SettingsScreen::audioButtonBounds(Control control) const {
+sf::FloatRect SettingsScreen::audioButtonBounds(SettingsControl control) const {
     const float totalWidth = SettingsScreenConfig::AudioButtonWidth * 2.f +
         SettingsScreenConfig::ButtonGap;
     const float startX = WindowConfig::Width / 2.f - totalWidth / 2.f;
-    const float x = control == Control::Unmute
+    const float x = control == SettingsControl::Unmute
         ? startX + SettingsScreenConfig::AudioButtonWidth + SettingsScreenConfig::ButtonGap
         : startX;
     return {
@@ -258,20 +248,15 @@ sf::Vector2f SettingsScreen::sliderKnobPosition() const {
 }
 
 void SettingsScreen::draw(sf::RenderWindow& target) {
-    if (m_helpScreen) {
-        m_helpScreen->draw(target);
-        return;
-    }
-
     target.draw(m_background);
     drawPanel(target);
     drawBackButton(target);
     drawTitle(target);
     drawAudioControls(target);
     drawSlider(target);
-    drawActionButton(target, "Attribution", Control::Attribution, buttonBounds(0));
-    drawActionButton(target, "Help", Control::Help, buttonBounds(1));
-    drawActionButton(target, "Reset User Data", Control::Reset, buttonBounds(2), true);
+    drawActionButton(target, "Attribution", SettingsControl::Attribution, buttonBounds(0));
+    drawActionButton(target, "Help", SettingsControl::Help, buttonBounds(1));
+    drawActionButton(target, "Reset User Data", SettingsControl::Reset, buttonBounds(2), true);
     drawOverlay(target);
     if (m_attributionOverlay)
         target.draw(*m_attributionOverlay);
@@ -282,7 +267,7 @@ void SettingsScreen::drawBackButton(sf::RenderTarget& target) const {
     button.setPosition(backButtonBounds().position);
     styleRectangle(
         button,
-        m_hoveredControl == Control::Back ? SettingsScreenConfig::ButtonHoverColor : SettingsScreenConfig::ButtonColor,
+        m_hoveredControl == SettingsControl::Back ? SettingsScreenConfig::ButtonHoverColor : SettingsScreenConfig::ButtonColor,
         SettingsScreenConfig::PanelOutlineColor,
         SettingsScreenConfig::ButtonOutlineThickness);
     target.draw(button);
@@ -303,14 +288,14 @@ void SettingsScreen::drawPanel(sf::RenderTarget& target) const {
 }
 
 void SettingsScreen::drawAudioControls(sf::RenderTarget& target) const {
-    drawAudioButton(target, "Mute", GameObjects::Mute, Control::Mute, m_gameState.isMuted());
-    drawAudioButton(target, "Sound On", GameObjects::VolumeHigh, Control::Unmute, !m_gameState.isMuted());
+    drawAudioButton(target, "Mute", GameObjects::Mute, SettingsControl::Mute, m_gameState.isMuted());
+    drawAudioButton(target, "Sound On", GameObjects::VolumeHigh, SettingsControl::Unmute, !m_gameState.isMuted());
 }
 
 void SettingsScreen::drawAudioButton(sf::RenderTarget& target,
                                      const std::string& label,
                                      GameObjects icon,
-                                     Control control,
+                                     SettingsControl control,
                                      bool active) const {
     const sf::FloatRect bounds = audioButtonBounds(control);
     sf::RectangleShape button(bounds.size);
@@ -391,7 +376,7 @@ void SettingsScreen::drawSlider(sf::RenderTarget& target) const {
 
 void SettingsScreen::drawActionButton(sf::RenderTarget& target,
                                       const std::string& label,
-                                      Control control,
+                                      SettingsControl control,
                                       sf::FloatRect bounds,
                                       bool danger) const {
     sf::RectangleShape button(bounds.size);

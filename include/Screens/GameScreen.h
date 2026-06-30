@@ -47,6 +47,9 @@ private:
     /// @brief Shows the appropriate completion overlay when the world finishes.
     void handleLevelResult();
 
+    /// @brief Persists user data changed by level completion.
+    void saveUserData() const;
+
     /// @brief Handles keyboard and mouse pause requests.
     bool handlePauseInput(const sf::Event& event, const ScreenEventContext& context);
 

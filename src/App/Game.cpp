@@ -5,6 +5,7 @@
 #include "Resources/ResourceManager.h"
 #include "Resources/SoundManager.h"
 #include "Screens/GameScreen.h"
+#include "Screens/SettingsScreenManager.h"
 #include "Screens/ShopScreen.h"
 #include "Screens/StartScreen.h"
 #include "Utilities/AppUtils.h"
@@ -17,18 +18,14 @@
 #pragma region Public
 Game::Game()
     : window(sf::VideoMode(AppUtils::initialWindowSize()), "SkyShield")
-    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background))
-    , m_settingsScreenManager(m_gameState) {
+    , m_backgroundSprite(ResourceManager::instance().getImage(GameObjects::Background)) {
     window.setFramerateLimit(60);
     initBackground();
     loadSavedData();
     showStartScreen();
 }
 
-Game::~Game() {
-    if (!m_fatalMode)
-        saveUserData();
-}
+Game::~Game() = default;
 
 void Game::run() {
     m_clock.restart();
@@ -68,6 +65,7 @@ void Game::run() {
 #pragma region Resource Loading
 void Game::initBackground() {
     const sf::Texture& texture = ResourceManager::instance().getImage(GameObjects::Background);
+    m_backgroundSprite.setTexture(texture, true);
     const sf::Vector2u textureSize = texture.getSize();
     m_backgroundSprite.setScale({
         WindowConfig::Width / static_cast<float>(textureSize.x),
@@ -78,20 +76,19 @@ void Game::initBackground() {
 void Game::loadSavedData() {
     DataManager::instance().load();
     m_gameState.setUserData(DataManager::instance().getUserData());
-    syncShopSelections();
-    syncAudioSettings();
-    m_lastSavedUserData = m_gameState.getUserData();
-    DataManager::instance().updateUserData(m_lastSavedUserData);
-    DataManager::instance().saveUserData();
+    ResourceManager::instance().applyUserDataSelections(m_gameState);
+    SoundManager::instance().applyUserSettings(m_gameState.isMuted(), m_gameState.getMaxVolume());
+    initBackground();
 }
 
 void Game::showStartScreen() {
+    initBackground();
     SoundManager::instance().startStartBackground();
     replaceScreen(ActiveScreen::Start, std::make_unique<StartScreen>(m_gameState));
 }
 
 void Game::showGameScreen() {
-    syncShopSelections();
+    initBackground();
     SoundManager::instance().startBackground();
     replaceScreen(
         ActiveScreen::Game,
@@ -106,28 +103,6 @@ void Game::showShopScreen() {
 void Game::replaceScreen(ActiveScreen activeScreen, std::unique_ptr<Screen> screen) {
     m_activeScreen = activeScreen;
     m_screen = std::move(screen);
-}
-
-void Game::saveUserData() {
-    DataManager::instance().updateUserData(m_gameState.getUserData());
-    DataManager::instance().saveUserData();
-    m_lastSavedUserData = m_gameState.getUserData();
-}
-
-void Game::syncShopSelections() {
-    const auto& catalog = DataManager::instance().getGameData().shopAssets;
-    ResourceManager::instance().applyShopSelections(
-        catalog,
-        m_gameState.getUserData());
-    m_gameState.setSelectedAssetExtras(catalog);
-    m_backgroundSprite.setTexture(ResourceManager::instance().getImage(GameObjects::Background), true);
-    initBackground();
-}
-
-void Game::syncAudioSettings() {
-    SoundManager::instance().applyUserSettings(
-        m_gameState.isMuted(),
-        m_gameState.getMaxVolume());
 }
 
 #pragma endregion
@@ -203,11 +178,9 @@ void Game::applyScreenCommand(ScreenCommand command) {
             showShopScreen();
             break;
         case ScreenCommand::OpenSettings:
-            replaceScreen(ActiveScreen::Settings, m_settingsScreenManager.createSettingsScreen());
+            replaceScreen(ActiveScreen::Settings, std::make_unique<SettingsScreenManager>(m_gameState));
             break;
         case ScreenCommand::ReturnToStart:
-            syncShopSelections();
-            syncAudioSettings();
             showStartScreen();
             break;
         case ScreenCommand::Quit:
@@ -255,17 +228,8 @@ void Game::handleFatalEvents() {
 #pragma region Updating
 void Game::update(float dt) {
     m_screen->update(dt);
-    saveUserDataIfChanged();
     SoundManager::instance().update(dt);
     handleScreenCommand();
-}
-
-void Game::saveUserDataIfChanged() {
-    if (AppUtils::sameUserData(m_lastSavedUserData, m_gameState.getUserData()))
-        return;
-
-    syncAudioSettings();
-    saveUserData();
 }
 #pragma endregion
 
