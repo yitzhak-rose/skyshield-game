@@ -1,16 +1,10 @@
-SkyShield - End-of-Semester Project, Object-Oriented Programming & Game Development
+SkyShield - End-of-Semester Project: Object-Oriented Programming & Game Development 2
 ====================================================================================
 
 Student Information
 -------------------
 Full name: [Enter full name as listed in college records]
 ID: [Enter ID number]
-
-(If submitting as a pair, add the partner's details as well.
-Also make sure to set the submitter names in the MY_AUTHORS variable inside
-CMakeLists.txt before zipping the submission. Currently it still reads
-"YOUR-NAME-HERE" and must be updated.)
-
 
 General Project Description
 ---------------------------
@@ -61,20 +55,23 @@ App - General application layer
 - App/Game.h / Game.cpp        - The game's main class. Manages the SFML
                                  window, the main game loop (events ->
                                  commands -> update -> render), screen
-                                 transitions, user data load/save, and
+                                 transitions, loading saved data, and
                                  fatal-mode handling (runtime exceptions).
 - App/State/GameState.h / .cpp - Shared game state across all screens and
                                  objects: coins, battery, available bombs,
                                  damage taken by the command vehicle,
-                                 enemies remaining, owned and selected
-                                 shop items, audio settings. Passed by
-                                 reference to anyone who needs to read or
-                                 update it.
+                                 enemies remaining, level coins, owned
+                                 and selected shop items, audio settings.
+                                 It is passed by reference to anyone who
+                                 needs to read or update it.
 - App/Constants.h              - General constants (window size, base
                                  speeds, etc.).
 - App/ScreenConstants.h        - Graphical layout constants for screens.
 - App/AssetConstants.h         - Asset names and constants (animations,
                                  frame sizes).
+- App/ButtonStyles.h / .cpp    - Shared TextButton color and metric
+                                 presets used by start, shop, settings,
+                                 and overlay screens.
 
 Gameplay - Game logic
 ~~~~~~~~~~~~~~~~~~~~~
@@ -190,15 +187,23 @@ Screens - Application screens (Strategy/State hierarchy)
 - Screens/HelpScreen.h / .cpp  - Help screen explaining game rules,
                                  controls, and win/loss conditions
                                  (explicit project requirement).
-- Screens/SettingsScreen.h / .cpp        - Settings screen.
-- Screens/SettingsScreenManager.h / .cpp - Settings manager invokable as
-                                           an overlay from any screen.
+- Screens/SettingsScreen.h / .cpp        - Settings screen UI. Emits
+                                           settings actions and volume
+                                           changes without saving directly.
+- Screens/SettingsScreenManager.h / .cpp - Wraps SettingsScreen, applies
+                                           settings actions, saves user
+                                           data, and opens/closes the Help
+                                           screen from Settings.
 - Screens/Components/Menubar.h / .cpp           - Shared top menu bar.
 - Screens/Components/OverlayView.h / .cpp       - Generic overlay usable
                                                   for modal messages.
 - Screens/Components/ScrollableTextOverlay.h / .cpp - Scrollable text
                                                   overlay.
 - Screens/Components/ShopPreview.h / .cpp       - Preview of a shop item.
+- Screens/Components/TextButton.h / .cpp        - Reusable button component
+                                                  with hover, selected,
+                                                  disabled, callback, and
+                                                  text-fitting behavior.
 
 Structs - POD data structures also represented in JSON
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -218,6 +223,9 @@ Structs - POD data structures also represented in JSON
 - OverlayAction.h         - An action invokable from an overlay.
 - ScreenEventContext.h    - Event context (mouse position in view, etc.)
                             a screen receives without window access.
+- TextButtonColors.h      - Color set for the reusable TextButton states.
+- TextButtonMetrics.h     - Sizing, padding, outline, and fitting settings
+                            for TextButton.
 
 Enums
 ~~~~~
@@ -227,27 +235,38 @@ Enums
 - Enums/EnemyState.h      - Advancing / Firing / Panic.
 - Enums/ActiveScreen.h    - Which screen is currently active.
 - Enums/ScreenCommand.h   - Commands a screen can request from Game
-                            (Quit, ToStart, ToShop, ToGame, etc.).
+                            (Quit, ReturnToStart, OpenShop, StartGame,
+                            etc.).
 - Enums/LevelResult.h     - Running / Won / Lost.
 - Enums/ShopAssetType.h   - Shop categories.
 - Enums/ShopClickResult.h - Result of a click in the shop screen.
 - Enums/PreviewAction.h   - Preview action (Buy/Select/Close).
 - Enums/OverlayActionType.h - Types of overlay buttons.
 - Enums/StartScreenButton.h - Start screen buttons.
+- Enums/SettingsAction.h  - Actions requested by the settings screen.
+- Enums/SettingsControl.h - Clickable controls in the settings screen.
 - Enums/Fonts.h           - Font identifiers.
 - Enums/Sounds.h          - Sound identifiers.
 
 Utilities
 ~~~~~~~~~
-- Utilities/Utils.h / .cpp       - General helper functions (random, math,
-                                   text formatting).
+- Utilities/Utils.h / .cpp       - General helper namespaces for random
+                                   numbers, geometry checks, drawing setup,
+                                   and text formatting.
 - Utilities/AppUtils.h / .cpp    - Application helpers (initial window
-                                   size, etc.).
+                                   size and matching start-screen
+                                   backgrounds).
 
 external
 ~~~~~~~~
 - external/json.hpp       - nlohmann::json library (single header). Not
                             written by us, only integrated.
+
+Packages
+~~~~~~~~
+- SFML 3.0                - Window, graphics, audio, and input package.
+- nlohmann::json          - Header-only package used only for reading and
+                            writing JSON files.
 
 resources
 ~~~~~~~~~
@@ -296,11 +315,6 @@ Main Data Structures and Their Roles
   Swapping a screen = creating a new unique_ptr and assigning it - the
   previous screen is destroyed automatically. State/Strategy architecture.
 
-- nlohmann::json
-  Parses and writes gameData.json and userData.json. Chosen because it
-  is header-only, integrated under include/external, and requires no
-  separate installation.
-
 
 Algorithms Worth Mentioning
 ----------------------------
@@ -325,19 +339,27 @@ Algorithms Worth Mentioning
    vehicle position), and updateUTurnState, which prevents jitter when
    flight in one direction is blocked.
 
-3. Live asset swapping based on the shop catalog
-   applyShopSelections iterates over the JSON catalog, cross-references
+3. Level coin staging and commit-on-win
+   Enemy rewards are first accumulated in GameState as levelCoins. They
+   are displayed in the HUD and level summary, but are added to the saved
+   coin balance only by commitLevelCoins after a level is won. This keeps
+   failed attempts from permanently granting coins, and the commit flag
+   prevents the same level reward from being added twice.
+
+4. Live asset swapping based on the shop catalog
+   applyUserDataSelections iterates over the JSON catalog, cross-references
    with the user's selections in userData, and loads the matching
    texture/music/font at runtime while swapping the entry in the
    Resources map. This means changing a drone or vehicle "skin" requires
    no recompile or restart - it is immediate.
 
-4. Deferred userData saving
-   saveUserDataIfChanged compares the last snapshot of userData written
-   to disk with the current state, and saves only if something changed
-   (coins, selections, mute). Avoids unnecessary disk writes per frame.
+5. Targeted userData saving
+   User data is saved only in flows that actually change persistent
+   state: after winning a level, changing settings, resetting user data,
+   or buying/selecting shop items. Game only loads the saved data at
+   startup and applies the current selections.
 
-5. Safety management for bombs in mid-air
+6. Safety management for bombs in mid-air
    World cannot declare a "no bombs left" loss while a bomb is still
    falling, because that bomb can still kill an enemy. Therefore Bomb
    registers an activeBombs counter in GameState in its constructor and
@@ -404,10 +426,11 @@ Loss conditions (any one of them is enough)
 
 Coins and shop
 ~~~~~~~~~~~~~~
-- Every enemy destroyed = coins based on its getReward() (defined in
-  JSON).
-- Coins accumulate between levels and between sessions (saved in
-  userData.json).
+- Every enemy destroyed = level coins based on its getReward() (defined
+  in JSON).
+- Level coins are committed to the saved coin balance only after winning
+  the level. Coins accumulate between completed levels and between
+  sessions (saved in userData.json).
 - The shop has 7 categories: Command Vehicle, Drone, Fast Enemy (skin),
   Tank Enemy (skin), Background, Background Music, Font.
 - For vehicles and drones, the extra field translates to a numeric bonus
@@ -432,11 +455,8 @@ OOP Techniques Applied in This Project
   registered, but GameState acts as a shared message bus).
 - STL: vector, map, set, unique_ptr, function, optional, pair, algorithm
   (remove_if, find_if), filesystem, chrono.
-- External libraries: SFML 3.0 (graphics, sound, window), nlohmann::json
-  (for reading configuration and saving state). Both satisfy the "must
-  be compilable and runnable without special installations" requirement
-  - json is header-only inside the project, and SFML is configured via
-  CMake.
+- Packages: SFML 3.0 for graphics, sound, window, and input;
+  nlohmann::json for reading configuration and saving state.
 - Genericity and extensibility:
   * Adding a new level = an additional entry in stages in JSON, zero
     lines of code.
