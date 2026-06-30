@@ -104,8 +104,10 @@ void World::checkResult() {
         return;
     }
 
-    if (isWinConditionMet())
+    if (isWinConditionMet()) {
+        m_gameState.commitLevelCoins();
         m_gameState.setLevelResult(LevelResult::Won);
+    }
 }
 
 bool World::isLossConditionMet() const {

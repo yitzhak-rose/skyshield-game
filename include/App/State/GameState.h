@@ -24,8 +24,11 @@ public:
     /// @brief Applies damage to the command vehicle.
     void damageVehicle(float amount);
 
-    /// @brief Records a defeated enemy and awards its coins.
+    /// @brief Records a defeated enemy and tracks its coins for the current level.
     void recordEnemyDefeated(int coinReward);
+
+    /// @brief Adds current level coins to the saved balance once.
+    void commitLevelCoins();
 
     /// @brief Tracks a bomb that is currently falling (used to detect an unwinnable state).
     void addActiveBomb() { m_activeBombs++; }
@@ -68,6 +71,7 @@ private:
     int m_levelNumber = 1;
     int m_coins = 0;
     int m_levelCoins = 0;
+    bool m_levelCoinsCommitted = false;
     int m_bombsAvailable = 0;
     int m_activeBombs = 0;
     float m_batteryPercent = 0.f;

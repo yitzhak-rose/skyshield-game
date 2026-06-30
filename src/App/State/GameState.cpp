@@ -8,6 +8,7 @@
 void GameState::startLevel(const LevelConfig& config, int levelNumber) {
     m_levelNumber = std::max(1, levelNumber);
     m_levelCoins = 0;
+    m_levelCoinsCommitted = false;
     m_bombsAvailable = std::max(0, config.startAmmo);
     m_activeBombs = 0;
     const float batteryMultiplier = 1.f + static_cast<float>(
@@ -43,10 +44,17 @@ void GameState::damageVehicle(float amount) {
 
 void GameState::recordEnemyDefeated(int coinReward) {
     const int reward = std::max(0, coinReward);
-    m_coins += reward;
     m_levelCoins += reward;
     ++m_enemiesDefeated;
     m_enemiesRemaining = std::max(0, m_enemiesRemaining - 1);
+}
+
+void GameState::commitLevelCoins() {
+    if (m_levelCoinsCommitted)
+        return;
+
+    m_coins += m_levelCoins;
+    m_levelCoinsCommitted = true;
 }
 
 void GameState::setCoins(int coins) {

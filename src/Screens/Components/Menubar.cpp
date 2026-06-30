@@ -28,7 +28,7 @@ MenuBar::MenuBar(float height, GameState& gameState)
 
 void MenuBar::update(float dt) {
     m_coin.update(dt);
-    m_coin.setCount(m_state.getCoins());
+    m_coin.setCount(m_state.getLevelCoins());
 }
 
 void MenuBar::configureBackground() {
