@@ -338,8 +338,8 @@ void HelpScreen::drawLoseConditions(sf::RenderTarget& target, sf::FloatRect boun
 
     const std::array<std::string, 3> conditions = {
         "- vehicle destroyed",
-        "- no bombs + enemies",
-        "- battery dead"
+        "- no bombs, but enemies remain",
+        "- Battery died"
     };
 
     for (std::size_t i = 0; i < conditions.size(); ++i) {

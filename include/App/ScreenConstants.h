@@ -160,6 +160,11 @@ namespace SettingsScreenConfig {
         "Pixabay\n"
         "HitsLab sounds, Tuomas_Data, floraphonic\n"
         "\n"
+        "Libraries\n"
+        "nlohmann/json\n"
+        "JSON for Modern C++ by Niels Lohmann\n"
+        "MIT License\n"
+        "\n"
         "Assets\n"
         "Gemini, ChatGPT, Claude";
 }

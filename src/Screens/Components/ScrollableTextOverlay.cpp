@@ -32,6 +32,7 @@ float textTop() {
 bool isHeadingLine(const std::string& line) {
     return line == "Game Credits" ||
         line == "Sounds" ||
+        line == "Libraries" ||
         line == "Assets";
 }
 
