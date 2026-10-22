@@ -3,12 +3,12 @@ SkyShield - End-of-Semester Project: Object-Oriented Programming & Game Developm
 
 Student Information
 -------------------
-Full name: [Enter full name as listed in college records]
-ID: [Enter ID number]
+Student 1: Benji(Binyamin) Mandel
+Student 2: Yitzhak Rose
 
 General Project Description
 ---------------------------
-SkyShield is a 2D arcade game written in C++20 using the SFML 3.0 graphics
+SkyShield is a 2D  game written in C++20 using the SFML 3.0 graphics
 library. The player controls a drone flying over a battlefield and must
 defend a stationary Command Vehicle in the center of the screen from waves
 of enemies that advance toward it from left and right, and fire shells at it.
@@ -28,9 +28,10 @@ improved armor for the command vehicle or larger battery capacity for the
 drone - so purchases are not purely cosmetic.
 
 The game includes a Start screen, Game screen, Shop screen, Help screen,
-and Settings screen with volume and mute controls. All persistent data
-(coins, owned items, selected items, audio settings) is saved to a JSON
-file and reloaded on the next launch.
+and Settings screen with volume and mute controls. The Game screen also
+has a Pause overlay that ducks the background music while the game is
+paused. All persistent data (coins, owned items, selected items, audio
+settings) is saved to a JSON file and reloaded on the next launch.
 
 Note: although SFML supports fullscreen, the game runs in a regular window
 from the start as recommended in the project document, so there are no
@@ -79,14 +80,19 @@ Gameplay - Game logic
                                  list of all live objects as a vector of
                                  unique_ptr<GameObject>, drives spawning,
                                  update, collision and cleanup every
-                                 frame, and checks for win/loss.
+                                 frame, and checks for win/loss. World
+                                 stays decoupled from concrete subclasses
+                                 and queries objects via role predicates
+                                 (isPlayer(), isTarget()) on the base
+                                 instead of typed references.
 - Gameplay/Factory.h / .cpp    - Singleton Factory for creating game
                                  objects from an enum. Two lookup tables:
                                  one for regular objects and one for
                                  enemies which require additional
                                  references (drone and vehicle).
-- Gameplay/CollisionHandling.h / .cpp - Multiple-dispatch implementation
-                                 via a std::map<pair<type_index,type_index>,
+- Gameplay/CollisionHandling.h / .cpp - Multimethod (multiple dispatch)
+                                 implementation via a
+                                 std::map<pair<type_index,type_index>,
                                  function>. Each colliding pair of types
                                  is registered in the lookup with the
                                  lambda that handles it. Pairs not in the
@@ -100,18 +106,22 @@ Gameplay/Objects - Polymorphic object hierarchy
 - GameObject.h / .cpp     - Abstract base for every game object. Inherits
                             from two interfaces: IDrawable and IUpdatable.
                             Absorbs all shared API: sprite, position,
-                            collision bounds, alive/dead state, and the
+                            collision bounds, alive/dead state, the
                             spawning of objects this one wants to give
-                            birth to (takeSpawn).
+                            birth to (takeSpawn), and role predicates
+                            (isPlayer/isTarget) that subclasses override
+                            so World can reason about roles without
+                            knowing concrete types.
 - MovingObject.h / .cpp   - Abstract base for moving objects. Adds
                             velocity on top of the base.
 - CommandVehicle.h / .cpp - The stationary command vehicle the player
-                            protects. Animated (beacon animation in
-                            normal state, burning animation when in
-                            critical state), shakes when hit.
-- Drone.h / .cpp          - The player's drone. Reads keyboard input,
-                            drops bombs, manages ammo state (available
-                            bombs).
+                            protects. Overrides isTarget(). Animated
+                            (beacon animation in normal state, burning
+                            animation when in critical state), shakes
+                            when hit.
+- Drone.h / .cpp          - The player's drone. Overrides isPlayer().
+                            Reads keyboard input, drops bombs, manages
+                            ammo state (available bombs).
 - Explosion.h / .cpp      - One-shot visual effect: plays an animation
                             and dies. Doesn't collide with anything.
 
@@ -156,7 +166,8 @@ Resources - Resource management (Singletons)
                              runtime swapping of assets based on shop
                              selections.
 - SoundManager.h / .cpp    - Singleton for playing background music and
-                             effects, with volume and mute controls.
+                             effects, with volume and mute controls and
+                             ducking for the pause overlay.
 - DataManager.h / .cpp     - Singleton that reads gameData.json (level
                              config + shop catalog) and saves/loads
                              userData (user state). Uses nlohmann::json.
@@ -167,7 +178,8 @@ Shop
 - Shop/ShopData.h / .cpp    - Mappings between the shop-item-type enum
                               and strings appearing in JSON.
 - Shop/ShopManager.h / .cpp - Shop logic: hover, active category, opening
-                              the preview, purchase and selection.
+                              the preview, purchase and selection, plus
+                              the purchase-flash effect.
 
 Screens - Application screens (Strategy/State hierarchy)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -180,10 +192,12 @@ Screens - Application screens (Strategy/State hierarchy)
                                  Help, Exit buttons.
 - Screens/GameScreen.h / .cpp  - The actual game screen. Holds World,
                                  manages pause/continue buttons, shows
-                                 HUD (battery, bombs, coins), and shows
-                                 win/loss overlay at level end.
+                                 HUD (battery, bombs, coins), shows the
+                                 pause overlay with music ducking, and
+                                 shows the win/loss overlay at level end.
 - Screens/ShopScreen.h / .cpp  - The shop screen. Wraps ShopManager +
-                                 drawing.
+                                 drawing, with animated category icons
+                                 and hover highlighting.
 - Screens/HelpScreen.h / .cpp  - Help screen explaining game rules,
                                  controls, and win/loss conditions
                                  (explicit project requirement).
@@ -288,15 +302,17 @@ Main Data Structures and Their Roles
   - they are all updated in a single for-each loop, threaded together
   for collision checks, and removed together via std::remove_if. The
   unique_ptr guarantees there is no memory leak even when an object dies
-  mid-frame: the vector is solely responsible for lifetime.
+  mid-frame: the vector is solely responsible for lifetime. Role
+  predicates (isPlayer / isTarget) on the base class let World find the
+  drone or the vehicle without holding typed references to them.
 
 - std::map<std::pair<std::type_index, std::type_index>, std::function<...>>
-  in the collision mechanism. This is a multiple-dispatch lookup: a pair
-  of dynamic types -> a handler that handles the collision between them.
-  Instead of branching if-else over object types, we look in the table
-  and if something is there, we invoke it. Unregistered pairs (bomb+bomb,
-  bullet+enemy, etc.) simply ignore each other. Extending the code with
-  a new collision type = one new line in the map.
+  in the collision mechanism. This is a multimethod (multiple-dispatch)
+  lookup: a pair of dynamic types -> a handler that handles the collision
+  between them. Instead of branching if-else over object types, we look
+  in the table and if something is there, we invoke it. Unregistered
+  pairs (bomb+bomb, bullet+enemy, etc.) simply ignore each other.
+  Extending the code with a new collision type = one new line in the map.
 
 - std::map<GameObjects, CreatorFunc> and std::map<EnemyType, EnemyCreatorFunc>
   in Factory. Two lookup tables for building objects from an enum, using
@@ -318,15 +334,27 @@ Main Data Structures and Their Roles
 
 Algorithms Worth Mentioning
 ----------------------------
-1. Multiple dispatch (double dispatch) for collisions
-   Instead of a double virtual call or a visitor pattern, we used dynamic
-   typeid to produce a std::type_index and looked the handler up in a
-   map. This makes extension very easy: adding a new colliding object
-   requires only one line in the table, with no changes to existing code.
-   For symmetric pairs (e.g. Bomb+FastEnemy and FastEnemy+Bomb), both
-   directions are registered to avoid relying on argument order.
+1. Multimethod (multiple dispatch) for collisions
+   Instead of a visitor pattern or chained virtual calls, we used dynamic
+   typeid to produce a std::type_index per object and looked the handler
+   up in a map keyed by the type pair. This is true multiple dispatch in
+   user space (not C++ double dispatch with two virtual calls). It makes
+   extension very easy: adding a new colliding pair requires only one
+   line in the table, with no changes to existing code. For symmetric
+   pairs (e.g. Bomb+FastEnemy and FastEnemy+Bomb), both directions are
+   registered to avoid relying on argument order.
 
-2. Enemy AI: a small state machine + telegraph + bracketing
+2. Role-based object lookup in World
+   World does not hold typed pointers to the drone or to the command
+   vehicle. Instead, the base class exposes virtual predicates isPlayer()
+   and isTarget(), and concrete subclasses override them. When World
+   needs the player or the protected target (to spawn enemies that home
+   in on it, or to check level result), it scans the vector with
+   std::find_if on the predicate. This keeps World fully decoupled from
+   concrete subclasses and matches the same open-for-extension spirit as
+   the collision table.
+
+3. Enemy AI: a small state machine + telegraph + bracketing
    Each enemy is in one of three states: Advancing (moves toward the
    vehicle), Firing (stops and shoots), Panic (flees when the drone is
    above it). State transitions are range-based: distance to the vehicle
@@ -339,31 +367,33 @@ Algorithms Worth Mentioning
    vehicle position), and updateUTurnState, which prevents jitter when
    flight in one direction is blocked.
 
-3. Level coin staging and commit-on-win
+4. Level coin staging and commit-on-win
    Enemy rewards are first accumulated in GameState as levelCoins. They
    are displayed in the HUD and level summary, but are added to the saved
    coin balance only by commitLevelCoins after a level is won. This keeps
    failed attempts from permanently granting coins, and the commit flag
    prevents the same level reward from being added twice.
 
-4. Live asset swapping based on the shop catalog
+5. Live asset swapping based on the shop catalog
    applyUserDataSelections iterates over the JSON catalog, cross-references
    with the user's selections in userData, and loads the matching
    texture/music/font at runtime while swapping the entry in the
-   Resources map. This means changing a drone or vehicle "skin" requires
-   no recompile or restart - it is immediate.
+   Resources map. The ResourceManager itself uses lazy loading - assets
+   are loaded the first time they are requested and cached - so the
+   startup cost is minimal and replacing a "skin" does not require any
+   recompile or restart.
 
-5. Targeted userData saving
+6. Targeted userData saving
    User data is saved only in flows that actually change persistent
    state: after winning a level, changing settings, resetting user data,
    or buying/selecting shop items. Game only loads the saved data at
    startup and applies the current selections.
 
-6. Safety management for bombs in mid-air
+7. Safety management for bombs in mid-air
    World cannot declare a "no bombs left" loss while a bomb is still
    falling, because that bomb can still kill an enemy. Therefore Bomb
    registers an activeBombs counter in GameState in its constructor and
-   decrements it in its destructor. The isLossConditionMet check
+   decrements it in its destructor (RAII). The isLossConditionMet check
    accounts for this.
 
 
@@ -444,15 +474,17 @@ OOP Techniques Applied in This Project
   Bullet, Enemy. Enemy -> FastEnemy, TankEnemy. CommandVehicle, Explosion
   inherit directly from GameObject.
 - Pure interfaces: IDrawable, IUpdatable with pure virtual functions.
+- Role-based polymorphism: virtual predicates (isPlayer, isTarget) let
+  World query objects by role without ever naming a concrete subclass.
 - Abstraction: getSpeed, onHit, getReward, updateAnimation - virtual
   functions that FastEnemy and TankEnemy implement differently.
 - RAII and unambiguous ownership: every dynamic allocation through
-  unique_ptr. There is no manual delete in the entire project.
+  unique_ptr. There is no manual delete in the entire project. Bomb's
+  activeBombs counter is also managed via RAII (constructor/destructor).
 - Exceptions: thrown on resource-loading failures or malformed JSON;
   caught in main and also in the run() loop (fatal mode with overlay).
 - Design patterns: Singleton (ResourceManager, SoundManager, DataManager,
-  Factory), Factory, Strategy/State (Screen), Observer (not explicitly
-  registered, but GameState acts as a shared message bus).
+  Factory), Factory, Strategy/State (Screen).
 - STL: vector, map, set, unique_ptr, function, optional, pair, algorithm
   (remove_if, find_if), filesystem, chrono.
 - Packages: SFML 3.0 for graphics, sound, window, and input;
@@ -481,7 +513,6 @@ Other Notes
 - gameData.json is loaded once at startup. To try different levels you
   can edit the file without recompiling. The structure of a level is
   simple and documented in LevelConfig.
-- Classes and public facing functions are written in a uniform style with Doxygen-style comments
-  above member functions.
+- Classes and public-facing functions are written in a uniform style
+  with Doxygen-style comments above member functions.
 - Code regions are marked with #pragma region for better readability.
-- Demo video: [add YouTube link]
